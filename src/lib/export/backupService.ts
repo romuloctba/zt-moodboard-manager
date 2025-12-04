@@ -303,6 +303,9 @@ export async function restoreFromBackup(
   // Initialize file storage
   await fileStorage.initialize();
 
+  // Track the new storage paths for updating the database later
+  const pathMapping: Map<string, string> = new Map();
+
   // Phase 4: Restore OPFS files
   const imagesFolder = zip.folder('files/images');
   const thumbnailsFolder = zip.folder('files/thumbnails');
@@ -323,7 +326,9 @@ export async function restoreFromBackup(
           const arrayBuffer = await zipFile.async('arraybuffer');
           const filename = path.split('/').pop()!;
           const blob = new Blob([arrayBuffer]);
-          await fileStorage.saveImage(filename, blob);
+          const newPath = await fileStorage.saveImage(filename, blob);
+          // Track the path mapping (original opfs:// path -> new path which could be idb://)
+          pathMapping.set(`opfs://images/${filename}`, newPath);
         } catch (error) {
           console.warn(`Failed to restore image ${path}:`, error);
         }
@@ -352,7 +357,9 @@ export async function restoreFromBackup(
           const arrayBuffer = await zipFile.async('arraybuffer');
           const filename = path.split('/').pop()!;
           const blob = new Blob([arrayBuffer]);
-          await fileStorage.saveThumbnail(filename, blob);
+          const newPath = await fileStorage.saveThumbnail(filename, blob);
+          // Track the path mapping (original opfs:// path -> new path which could be idb://)
+          pathMapping.set(`opfs://thumbnails/${filename}`, newPath);
         } catch (error) {
           console.warn(`Failed to restore thumbnail ${path}:`, error);
         }
@@ -400,6 +407,37 @@ export async function restoreFromBackup(
       return true;
     },
   });
+
+  // Update image paths if storage backend changed (e.g., backup from OPFS restored on IndexedDB-only device)
+  if (pathMapping.size > 0) {
+    const images = await db.images.toArray();
+    const updates: { id: string; storagePath: string; thumbnailPath: string }[] = [];
+
+    for (const image of images) {
+      const newStoragePath = pathMapping.get(image.storagePath);
+      const newThumbnailPath = pathMapping.get(image.thumbnailPath);
+
+      if (newStoragePath || newThumbnailPath) {
+        updates.push({
+          id: image.id,
+          storagePath: newStoragePath || image.storagePath,
+          thumbnailPath: newThumbnailPath || image.thumbnailPath,
+        });
+      }
+    }
+
+    // Apply path updates
+    for (const update of updates) {
+      await db.images.update(update.id, {
+        storagePath: update.storagePath,
+        thumbnailPath: update.thumbnailPath,
+      });
+    }
+
+    if (updates.length > 0) {
+      console.log(`[BackupService] Updated ${updates.length} image paths for new storage backend`);
+    }
+  }
 
   onProgress?.({
     phase: 'done',

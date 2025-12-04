@@ -5,10 +5,33 @@
  * Falls back to IndexedDB blob storage if OPFS is not available.
  */
 
+import Dexie, { type EntityTable } from 'dexie';
+
+// IndexedDB fallback database for storing blobs
+interface StoredFile {
+  id: string;
+  blob: Blob;
+  type: 'image' | 'thumbnail';
+  mimeType: string;
+  createdAt: Date;
+}
+
+class FileStorageDatabase extends Dexie {
+  files!: EntityTable<StoredFile, 'id'>;
+
+  constructor() {
+    super('FileStorageFallback');
+    this.version(1).stores({
+      files: 'id, type, createdAt',
+    });
+  }
+}
+
 export class FileStorage {
   private root: FileSystemDirectoryHandle | null = null;
   private initialized = false;
   private useOPFS = true;
+  private fallbackDb: FileStorageDatabase | null = null;
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -21,11 +44,13 @@ export class FileStorage {
         console.log('[FileStorage] Using OPFS');
       } else {
         this.useOPFS = false;
-        console.log('[FileStorage] OPFS not available, using fallback');
+        this.fallbackDb = new FileStorageDatabase();
+        console.log('[FileStorage] OPFS not available, using IndexedDB fallback');
       }
     } catch (error) {
       console.warn('[FileStorage] Failed to initialize OPFS:', error);
       this.useOPFS = false;
+      this.fallbackDb = new FileStorageDatabase();
     }
 
     this.initialized = true;
@@ -50,7 +75,18 @@ export class FileStorage {
     await this.ensureInitialized();
 
     if (!this.useOPFS || !this.root) {
-      // Fallback: return a blob URL (not persistent, but works)
+      // Fallback: Store in IndexedDB
+      if (this.fallbackDb) {
+        await this.fallbackDb.files.put({
+          id,
+          blob: file,
+          type: 'image',
+          mimeType: file.type || 'application/octet-stream',
+          createdAt: new Date(),
+        });
+        return `idb://images/${id}`;
+      }
+      // Last resort: return a blob URL (not persistent)
       return URL.createObjectURL(file);
     }
 
@@ -77,6 +113,17 @@ export class FileStorage {
     await this.ensureInitialized();
 
     if (!this.useOPFS || !this.root) {
+      // Fallback: Store in IndexedDB
+      if (this.fallbackDb) {
+        await this.fallbackDb.files.put({
+          id,
+          blob,
+          type: 'thumbnail',
+          mimeType: blob.type || 'image/jpeg',
+          createdAt: new Date(),
+        });
+        return `idb://thumbnails/${id}`;
+      }
       return URL.createObjectURL(blob);
     }
 
@@ -100,6 +147,19 @@ export class FileStorage {
    */
   async getImage(path: string): Promise<File | null> {
     await this.ensureInitialized();
+
+    // Handle IndexedDB fallback paths
+    if (path.startsWith('idb://')) {
+      if (this.fallbackDb) {
+        const cleanPath = path.replace('idb://', '');
+        const [, id] = cleanPath.split('/');
+        const stored = await this.fallbackDb.files.get(id);
+        if (stored) {
+          return new File([stored.blob], id, { type: stored.mimeType });
+        }
+      }
+      return null;
+    }
 
     if (!this.useOPFS || !this.root) {
       return null;
@@ -141,6 +201,17 @@ export class FileStorage {
   async deleteImage(path: string): Promise<void> {
     await this.ensureInitialized();
 
+    // Handle IndexedDB fallback paths
+    if (path.startsWith('idb://')) {
+      if (this.fallbackDb) {
+        const cleanPath = path.replace('idb://', '');
+        const [, id] = cleanPath.split('/');
+        await this.fallbackDb.files.delete(id);
+        console.log(`[FileStorage] Deleted from IndexedDB: ${path}`);
+      }
+      return;
+    }
+
     if (!this.useOPFS || !this.root) return;
 
     try {
@@ -164,6 +235,14 @@ export class FileStorage {
    * Delete a thumbnail from OPFS
    */
   async deleteThumbnail(id: string): Promise<void> {
+    await this.ensureInitialized();
+
+    // Check if using fallback
+    if (!this.useOPFS && this.fallbackDb) {
+      await this.fallbackDb.files.delete(id);
+      return;
+    }
+
     await this.deleteImage(`thumbnails/${id}`);
   }
 
@@ -236,13 +315,43 @@ export class FileStorage {
   }
 
   /**
+   * Clear all files from IndexedDB fallback
+   */
+  private async clearFallbackDb(): Promise<{ imagesDeleted: number; thumbnailsDeleted: number }> {
+    if (!this.fallbackDb) {
+      return { imagesDeleted: 0, thumbnailsDeleted: 0 };
+    }
+
+    try {
+      const images = await this.fallbackDb.files.where('type').equals('image').count();
+      const thumbnails = await this.fallbackDb.files.where('type').equals('thumbnail').count();
+
+      await this.fallbackDb.files.clear();
+
+      return { imagesDeleted: images, thumbnailsDeleted: thumbnails };
+    } catch (error) {
+      console.warn('[FileStorage] Failed to clear IndexedDB fallback:', error);
+      return { imagesDeleted: 0, thumbnailsDeleted: 0 };
+    }
+  }
+
+  /**
    * Clear all files from OPFS (images, thumbnails, exports, backups)
    * Returns the total number of files deleted
    */
   async clearAllFiles(): Promise<{ imagesDeleted: number; thumbnailsDeleted: number; totalDeleted: number }> {
     await this.ensureInitialized();
 
-    if (!this.useOPFS || !this.root) {
+    // Handle IndexedDB fallback
+    if (!this.useOPFS) {
+      const result = await this.clearFallbackDb();
+      return {
+        ...result,
+        totalDeleted: result.imagesDeleted + result.thumbnailsDeleted
+      };
+    }
+
+    if (!this.root) {
       return { imagesDeleted: 0, thumbnailsDeleted: 0, totalDeleted: 0 };
     }
 
@@ -267,7 +376,14 @@ export class FileStorage {
   async clearAllAndReset(): Promise<void> {
     await this.ensureInitialized();
 
-    if (!this.useOPFS || !this.root) return;
+    // Handle IndexedDB fallback
+    if (!this.useOPFS) {
+      await this.clearFallbackDb();
+      console.log('[FileStorage] Complete IndexedDB fallback reset done');
+      return;
+    }
+
+    if (!this.root) return;
 
     const directories = ['images', 'thumbnails', 'exports', 'backups'];
 
@@ -283,6 +399,15 @@ export class FileStorage {
     }
 
     console.log('[FileStorage] Complete OPFS reset done');
+  }
+
+  /**
+   * Get the storage backend being used
+   */
+  getStorageBackend(): 'opfs' | 'indexeddb' | 'memory' {
+    if (this.useOPFS) return 'opfs';
+    if (this.fallbackDb) return 'indexeddb';
+    return 'memory';
   }
 }
 
