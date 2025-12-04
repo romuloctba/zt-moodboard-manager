@@ -1,5 +1,18 @@
 import type { NextConfig } from "next";
+import { execSync } from "child_process";
 import withPWAInit from "next-pwa";
+
+// Get git commit hash for versioning
+function getGitHash(): string {
+  try {
+    return execSync('git rev-parse --short=4 HEAD').toString().trim();
+  } catch {
+    return 'dev';
+  }
+}
+
+const gitHash = getGitHash();
+const appVersion = `0.1.0-${gitHash}`;
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -39,6 +52,10 @@ const nextConfig: NextConfig = {
   // Use webpack for builds (required for next-pwa)
   // Turbopack doesn't support next-pwa yet
   turbopack: {},
+  // Inject version at build time
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+  },
 };
 
 export default withPWA(nextConfig);
