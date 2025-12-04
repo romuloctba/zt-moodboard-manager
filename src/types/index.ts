@@ -178,6 +178,7 @@ export interface Tag {
 export interface AppSettings {
   id: string;
   theme: 'dark' | 'light' | 'system';
+  locale: 'en' | 'pt-BR';
   defaultView: 'grid' | 'canvas';
   gridColumns: number;
   autoBackup: boolean;
@@ -195,6 +196,7 @@ export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
 export const DEFAULT_APP_SETTINGS: AppSettings = {
   id: 'user-settings',
   theme: 'dark',
+  locale: 'en',
   defaultView: 'grid',
   gridColumns: 4,
   autoBackup: true,

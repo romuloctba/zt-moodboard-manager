@@ -1,0 +1,130 @@
+{
+  "header": {
+    "newCharacter": "New Character"
+  },
+  "emptyState": {
+    "title": "No characters yet",
+    "description": "Create your first character to start building your moodboard.",
+    "action": "Create Your First Character"
+  },
+  "createDialog": {
+    "title": "Create New Character",
+    "description": "Add a new character to organize your visual references.",
+    "nameLabel": "Character Name",
+    "namePlaceholder": "e.g., Hero, Villain, Supporting Cast...",
+    "submit": "Create Character"
+  },
+  "renameDialog": {
+    "title": "Rename Character"
+  },
+  "card": {
+    "created": "Created {date}",
+    "images": "{count, plural, =0 {No images} one {# image} other {# images}}",
+    "tags": "{count} tags"
+  },
+  "menu": {
+    "rename": "Rename",
+    "delete": "Delete"
+  },
+  "confirmDelete": "Are you sure you want to delete this character? This cannot be undone.",
+  "validation": {
+    "nameRequired": "Please enter a character name"
+  },
+  "toast": {
+    "created": "Character created successfully",
+    "renamed": "Character renamed",
+    "deleted": "Character deleted",
+    "createFailed": "Failed to create character",
+    "noProject": "No project selected",
+    "exportSuccess": "Images exported successfully",
+    "noImagesToExport": "No images to export",
+    "exportFailed": "Failed to export images"
+  },
+  "viewMode": {
+    "grid": "Grid",
+    "canvas": "Canvas",
+    "profile": "Profile"
+  },
+  "export": {
+    "all": "Export All"
+  },
+  "canvas": {
+    "sidebar": {
+      "title": "Images",
+      "hint": "Click to add",
+      "onCanvas": "On Canvas",
+      "noImages": "No images uploaded yet"
+    },
+    "controls": {
+      "rotateLeft": "Rotate -15°",
+      "rotateRight": "Rotate +15°",
+      "resetRotation": "Reset rotation",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "remove": "Remove from canvas"
+    },
+    "empty": {
+      "title": "Click images to add to canvas",
+      "hint": "Drag to pan • Scroll to zoom"
+    },
+    "toast": {
+      "loadFailed": "Failed to load images",
+      "imageAlreadyOnCanvas": "Image already on canvas"
+    }
+  },
+  "profile": {
+    "title": "Character Profile",
+    "saveChanges": "Save Changes",
+    "saved": "Character saved",
+    "saveFailed": "Failed to save character",
+    "basicInfo": {
+      "title": "Basic Information",
+      "description": "Essential details about your character",
+      "name": "Name",
+      "nameRequired": "Name *",
+      "namePlaceholder": "Character name",
+      "age": "Age",
+      "agePlaceholder": "e.g., 25, Unknown, Immortal",
+      "role": "Role / Occupation",
+      "rolePlaceholder": "e.g., Protagonist, Villain, Side Character",
+      "shortDescription": "Short Description",
+      "shortDescriptionPlaceholder": "A brief overview of the character...",
+      "archetype": "Archetype",
+      "archetypePlaceholder": "e.g., The Hero, The Mentor, The Trickster"
+    },
+    "personality": {
+      "title": "Personality Traits",
+      "description": "Key personality characteristics",
+      "empty": "No traits added yet",
+      "addPlaceholder": "Add a trait..."
+    },
+    "abilities": {
+      "title": "Abilities & Skills",
+      "description": "Powers, skills, or special abilities",
+      "empty": "No abilities added yet",
+      "addPlaceholder": "Add an ability..."
+    },
+    "backstory": {
+      "title": "Backstory",
+      "description": "Character history and background",
+      "placeholder": "Write the character's backstory, history, and important life events..."
+    },
+    "inspirations": {
+      "title": "Inspirations",
+      "description": "Characters, people, or concepts that inspired this character",
+      "empty": "No inspirations added yet",
+      "addPlaceholder": "Add an inspiration..."
+    },
+    "customFields": {
+      "title": "Custom Fields",
+      "description": "Add your own custom attributes",
+      "addTitle": "Add Custom Field",
+      "fieldName": "Field name",
+      "value": "Value"
+    },
+    "colorPalette": {
+      "title": "Color Palette",
+      "description": "Extracted from reference images"
+    }
+  }
+}

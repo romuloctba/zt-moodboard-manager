@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Upload, ImagePlus, Clipboard, Loader2, X, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { imageRepository } from '@/lib/db/repositories';
@@ -20,6 +21,8 @@ interface UploadingFile {
 }
 
 export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderProps) {
+  const t = useTranslations('media.uploader');
+  const tCommon = useTranslations('common');
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,12 +34,12 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
     );
 
     if (validFiles.length === 0) {
-      toast.error('No valid images found. Supported: JPG, PNG, GIF, WebP (max 50MB)');
+      toast.error(t('toast.noValidImages'));
       return;
     }
 
     if (validFiles.length < files.length) {
-      toast.warning(`${files.length - validFiles.length} file(s) skipped (invalid type or too large)`);
+      toast.warning(t('toast.filesSkipped', { count: files.length - validFiles.length }));
     }
 
     // Add files to uploading state
@@ -81,7 +84,7 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
     }
 
     if (successCount > 0) {
-      toast.success(`${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully`);
+      toast.success(t('toast.success', { count: successCount }));
       onUploadComplete?.();
     }
 
@@ -89,7 +92,7 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
     setTimeout(() => {
       setUploadingFiles(prev => prev.filter(f => f.progress === 'error'));
     }, 2000);
-  }, [characterId, onUploadComplete]);
+  }, [characterId, onUploadComplete, t]);
 
   // Handle drag events
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -146,13 +149,13 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
       if (files.length > 0) {
         processFiles(files);
       } else {
-        toast.error('No images found in clipboard');
+        toast.error(t('toast.noClipboardImages'));
       }
     } catch {
       // Clipboard API might not be available or permission denied
-      toast.error('Could not access clipboard. Try using Ctrl+V while focused on the drop zone.');
+      toast.error(t('toast.clipboardError'));
     }
-  }, [processFiles]);
+  }, [processFiles, t]);
 
   // Global paste listener
   useEffect(() => {
@@ -208,17 +211,17 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
         
         <div className="text-center">
           <p className="text-sm font-medium">
-            Drop images here, or{' '}
+            {t('dropzone.title')}{' '}
             <button
               onClick={() => fileInputRef.current?.click()}
               className="text-primary hover:underline"
               disabled={isUploading}
             >
-              browse
+              {tCommon('actions.browse')}
             </button>
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Supports JPG, PNG, GIF, WebP up to 50MB
+            {t('dropzone.formats')}
           </p>
         </div>
 
@@ -230,7 +233,7 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
             disabled={isUploading}
           >
             <ImagePlus className="h-4 w-4 mr-2" />
-            Select Files
+            {t('buttons.selectFiles')}
           </Button>
           <Button
             variant="outline"
@@ -239,7 +242,7 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
             disabled={isUploading}
           >
             <Clipboard className="h-4 w-4 mr-2" />
-            Paste from Clipboard
+            {t('buttons.pasteClipboard')}
           </Button>
         </div>
 
@@ -275,10 +278,10 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">{file.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {file.progress === 'processing' && 'Processing image...'}
-                  {file.progress === 'saving' && 'Saving to storage...'}
-                  {file.progress === 'complete' && 'Upload complete'}
-                  {file.progress === 'error' && (file.error || 'Upload failed')}
+                  {file.progress === 'processing' && t('progress.processing')}
+                  {file.progress === 'saving' && t('progress.saving')}
+                  {file.progress === 'complete' && t('progress.complete')}
+                  {file.progress === 'error' && (file.error || t('progress.error'))}
                 </p>
               </div>
 

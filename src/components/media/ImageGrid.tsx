@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, Trash2, Expand, ImageOff, CheckCircle2, X, Download, Tag, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,9 @@ interface ImageWithUrl extends MoodboardImage {
 }
 
 export function ImageGrid({ characterId, className }: ImageGridProps) {
+  const t = useTranslations('media.grid');
+  const tPreview = useTranslations('media.preview');
+  const tCommon = useTranslations('common');
   const [images, setImages] = useState<ImageWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<ImageWithUrl | null>(null);
@@ -77,7 +81,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       setAllTags(Array.from(tags).sort());
     } catch (error) {
       console.error('Failed to load images:', error);
-      toast.error('Failed to load images');
+      toast.error(t('toast.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -121,7 +125,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
     if (selectedIds.size === 0) return;
     
     const count = selectedIds.size;
-    if (!confirm(`Delete ${count} selected image${count > 1 ? 's' : ''}? This cannot be undone.`)) {
+    if (!confirm(t('confirmBulkDelete', { count }))) {
       return;
     }
 
@@ -129,12 +133,12 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       setBulkDeleting(true);
       await imageRepository.deleteMany(Array.from(selectedIds));
       setImages(prev => prev.filter(img => !selectedIds.has(img.id)));
-      toast.success(`${count} image${count > 1 ? 's' : ''} deleted`);
+      toast.success(t('toast.deleted', { count }));
       setSelectedIds(new Set());
       setSelectionMode(false);
     } catch (error) {
       console.error('Failed to delete images:', error);
-      toast.error('Failed to delete some images');
+      toast.error(t('toast.deleteFailed'));
     } finally {
       setBulkDeleting(false);
     }
@@ -150,14 +154,14 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       setDeletingId(imageId);
       await imageRepository.delete(imageId);
       setImages(prev => prev.filter(img => img.id !== imageId));
-      toast.success('Image deleted');
+      toast.success(t('toast.deleted', { count: 1 }));
       
       if (selectedImage?.id === imageId) {
         setSelectedImage(null);
       }
     } catch (error) {
       console.error('Failed to delete image:', error);
-      toast.error('Failed to delete image');
+      toast.error(t('toast.deleteFailed'));
     } finally {
       setDeletingId(null);
     }
@@ -205,7 +209,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       setAllTags(Array.from(allTagsSet).sort());
     } catch (error) {
       console.error('Failed to update tags:', error);
-      toast.error('Failed to update tags');
+      toast.error(t('toast.deleteFailed'));
     }
   };
 
@@ -218,10 +222,10 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
     try {
       setExporting(true);
       await exportSelectedImages(selectedImages, 'selected-images');
-      toast.success(`Exported ${selectedImages.length} images`);
+      toast.success(t('toast.exported', { count: selectedImages.length }));
     } catch (error) {
       console.error('Export failed:', error);
-      toast.error('Failed to export images');
+      toast.error(t('toast.exportFailed'));
     } finally {
       setExporting(false);
     }
@@ -246,9 +250,9 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
         <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
           <ImageOff className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h3 className="font-medium text-lg mb-1">No images yet</h3>
+        <h3 className="font-medium text-lg mb-1">{t('empty.title')}</h3>
         <p className="text-sm text-muted-foreground">
-          Upload some reference images to get started
+          {t('empty.description')}
         </p>
       </div>
     );
@@ -260,12 +264,12 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {filteredImages.length} image{filteredImages.length !== 1 ? 's' : ''}
-            {filterTag && ` with tag "${filterTag}"`}
+            {t('imageCount', { count: filteredImages.length })}
+            {filterTag && ` ${t('withTag', { tag: filterTag })}`}
           </span>
           {selectionMode && selectedIds.size > 0 && (
             <span className="text-sm font-medium text-primary">
-              • {selectedIds.size} selected
+              • {t('selected', { count: selectedIds.size })}
             </span>
           )}
         </div>
@@ -276,14 +280,14 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
                   <Filter className="h-4 w-4 mr-2" />
-                  {filterTag || 'Filter'}
+                  {filterTag || tCommon('actions.filter')}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {filterTag && (
                   <>
                     <DropdownMenuItem onClick={() => setFilterTag(null)}>
-                      Clear filter
+                      {tCommon('actions.clearFilter')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                   </>
@@ -305,10 +309,10 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
           {selectionMode ? (
             <>
               <Button variant="ghost" size="sm" onClick={selectAll}>
-                Select All
+                {t('toolbar.selectAll')}
               </Button>
               <Button variant="ghost" size="sm" onClick={clearSelection}>
-                Clear
+                {tCommon('actions.clear')}
               </Button>
               <Button
                 variant="outline"
@@ -321,7 +325,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
                 ) : (
                   <Download className="h-4 w-4 mr-2" />
                 )}
-                Export ({selectedIds.size})
+                {t('toolbar.export', { count: selectedIds.size })}
               </Button>
               <Button
                 variant="destructive"
@@ -334,17 +338,17 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
                 ) : (
                   <Trash2 className="h-4 w-4 mr-2" />
                 )}
-                Delete ({selectedIds.size})
+                {t('toolbar.delete', { count: selectedIds.size })}
               </Button>
               <Button variant="outline" size="sm" onClick={toggleSelectionMode}>
                 <X className="h-4 w-4 mr-2" />
-                Cancel
+                {t('toolbar.cancel')}
               </Button>
             </>
           ) : (
             <Button variant="outline" size="sm" onClick={toggleSelectionMode}>
               <CheckCircle2 className="h-4 w-4 mr-2" />
-              Select
+              {t('toolbar.select')}
             </Button>
           )}
         </div>
@@ -506,19 +510,19 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
 
               {/* Tags */}
               <div className="mt-4">
-                <p className="text-sm font-medium mb-2">Tags</p>
+                <p className="text-sm font-medium mb-2">{tPreview('tags')}</p>
                 <TagInput
                   tags={selectedImage.tags}
                   onTagsChange={handleTagsUpdate}
                   suggestions={allTags}
-                  placeholder="Add tags..."
+                  placeholder={tPreview('tagsPlaceholder')}
                 />
               </div>
 
               {/* Color palette */}
               {selectedImage.palette && selectedImage.palette.colors.length > 0 && (
                 <div className="mt-4 pb-2">
-                  <p className="text-sm font-medium mb-2">Color Palette</p>
+                  <p className="text-sm font-medium mb-2">{tPreview('colorPalette')}</p>
                   <div className="flex gap-2 flex-wrap">
                     {selectedImage.palette.colors.map((color, i) => (
                       <button
@@ -527,7 +531,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
                         style={{ backgroundColor: color }}
                         onClick={() => {
                           navigator.clipboard.writeText(color);
-                          toast.success(`Copied ${color} to clipboard`);
+                          toast.success(tCommon('actions.copyToClipboard', { value: color }));
                         }}
                       >
                         <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/50 rounded-lg text-[10px] text-white font-mono">

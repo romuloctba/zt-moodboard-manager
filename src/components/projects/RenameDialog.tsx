@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ export function RenameDialog({
   currentName,
   onRename,
 }: RenameDialogProps) {
+  const tCommon = useTranslations('common');
   const [name, setName] = useState(currentName);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -72,10 +74,10 @@ export function RenameDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading || !name.trim()}>
-              {isLoading ? 'Saving...' : 'Save'}
+              {isLoading ? tCommon('actions.saving') : tCommon('actions.save')}
             </Button>
           </DialogFooter>
         </form>

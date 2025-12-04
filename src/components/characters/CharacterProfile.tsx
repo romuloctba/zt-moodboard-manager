@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { 
   User, 
   Sparkles, 
@@ -27,6 +28,7 @@ interface CharacterProfileProps {
 }
 
 export function CharacterProfile({ character, onUpdate }: CharacterProfileProps) {
+  const t = useTranslations('characters.profile');
   const [saving, setSaving] = useState(false);
   
   // Form state
@@ -52,7 +54,7 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) {
-      toast.error('Name is required');
+      toast.error(t('basicInfo.nameRequired'));
       return;
     }
 
@@ -83,11 +85,11 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
       const updated = await characterRepository.getById(character.id);
       if (updated) {
         onUpdate(updated);
-        toast.success('Character saved');
+        toast.success(t('saved'));
       }
     } catch (error) {
       console.error('Failed to save character:', error);
-      toast.error('Failed to save character');
+      toast.error(t('saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -149,14 +151,14 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Character Profile</h2>
+        <h2 className="text-2xl font-bold">{t('title')}</h2>
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
           ) : (
             <Save className="h-4 w-4 mr-2" />
           )}
-          Save Changes
+          {t('saveChanges')}
         </Button>
       </div>
 
@@ -166,59 +168,59 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <User className="h-5 w-5" />
-              Basic Information
+              {t('basicInfo.title')}
             </CardTitle>
             <CardDescription>
-              Essential details about your character
+              {t('basicInfo.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name *</Label>
+                <Label htmlFor="name">{t('basicInfo.nameRequired')}</Label>
                 <Input
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Character name"
+                  placeholder={t('basicInfo.namePlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
+                <Label htmlFor="age">{t('basicInfo.age')}</Label>
                 <Input
                   id="age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
-                  placeholder="e.g., 25, Unknown, Immortal"
+                  placeholder={t('basicInfo.agePlaceholder')}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Role / Occupation</Label>
+              <Label htmlFor="role">{t('basicInfo.role')}</Label>
               <Input
                 id="role"
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                placeholder="e.g., Protagonist, Villain, Side Character"
+                placeholder={t('basicInfo.rolePlaceholder')}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Short Description</Label>
+              <Label htmlFor="description">{t('basicInfo.shortDescription')}</Label>
               <textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="A brief overview of the character..."
-                className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                placeholder={t('basicInfo.shortDescriptionPlaceholder')}
+                className="w-full min-h-20 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="archetype">Archetype</Label>
+              <Label htmlFor="archetype">{t('basicInfo.archetype')}</Label>
               <Input
                 id="archetype"
                 value={archetype}
                 onChange={(e) => setArchetype(e.target.value)}
-                placeholder="e.g., The Hero, The Mentor, The Trickster"
+                placeholder={t('basicInfo.archetypePlaceholder')}
               />
             </div>
           </CardContent>
@@ -229,10 +231,10 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              Personality Traits
+              {t('personality.title')}
             </CardTitle>
             <CardDescription>
-              Key personality characteristics
+              {t('personality.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -249,14 +251,14 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
                 </Badge>
               ))}
               {personality.length === 0 && (
-                <span className="text-sm text-muted-foreground">No traits added yet</span>
+                <span className="text-sm text-muted-foreground">{t('personality.empty')}</span>
               )}
             </div>
             <div className="flex gap-2">
               <Input
                 value={newPersonality}
                 onChange={(e) => setNewPersonality(e.target.value)}
-                placeholder="Add a trait..."
+                placeholder={t('personality.addPlaceholder')}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addPersonality())}
               />
               <Button variant="outline" size="icon" onClick={addPersonality}>
@@ -271,10 +273,10 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              Abilities & Skills
+              {t('abilities.title')}
             </CardTitle>
             <CardDescription>
-              Powers, skills, or special abilities
+              {t('abilities.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -291,14 +293,14 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
                 </Badge>
               ))}
               {abilities.length === 0 && (
-                <span className="text-sm text-muted-foreground">No abilities added yet</span>
+                <span className="text-sm text-muted-foreground">{t('abilities.empty')}</span>
               )}
             </div>
             <div className="flex gap-2">
               <Input
                 value={newAbility}
                 onChange={(e) => setNewAbility(e.target.value)}
-                placeholder="Add an ability..."
+                placeholder={t('abilities.addPlaceholder')}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addAbility())}
               />
               <Button variant="outline" size="icon" onClick={addAbility}>
@@ -313,17 +315,17 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BookOpen className="h-5 w-5" />
-              Backstory
+              {t('backstory.title')}
             </CardTitle>
             <CardDescription>
-              Character history and background
+              {t('backstory.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <textarea
               value={backstory}
               onChange={(e) => setBackstory(e.target.value)}
-              placeholder="Write the character's backstory, history, and important life events..."
+              placeholder={t('backstory.placeholder')}
               className="w-full min-h-[200px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </CardContent>
@@ -334,10 +336,10 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Palette className="h-5 w-5" />
-              Inspirations
+              {t('inspirations.title')}
             </CardTitle>
             <CardDescription>
-              Characters, people, or concepts that inspired this character
+              {t('inspirations.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -354,14 +356,14 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
                 </Badge>
               ))}
               {inspirations.length === 0 && (
-                <span className="text-sm text-muted-foreground">No inspirations added yet</span>
+                <span className="text-sm text-muted-foreground">{t('inspirations.empty')}</span>
               )}
             </div>
             <div className="flex gap-2">
               <Input
                 value={newInspiration}
                 onChange={(e) => setNewInspiration(e.target.value)}
-                placeholder="Add an inspiration..."
+                placeholder={t('inspirations.addPlaceholder')}
                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addInspiration())}
               />
               <Button variant="outline" size="icon" onClick={addInspiration}>
@@ -376,10 +378,10 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5" />
-              Custom Fields
+              {t('customFields.title')}
             </CardTitle>
             <CardDescription>
-              Add your own custom attributes
+              {t('customFields.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -407,18 +409,18 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
             <Separator />
             
             <div className="space-y-2">
-              <Label>Add Custom Field</Label>
+              <Label>{t('customFields.addTitle')}</Label>
               <div className="flex gap-2">
                 <Input
                   value={newFieldKey}
                   onChange={(e) => setNewFieldKey(e.target.value)}
-                  placeholder="Field name"
+                  placeholder={t('customFields.fieldName')}
                   className="flex-1"
                 />
                 <Input
                   value={newFieldValue}
                   onChange={(e) => setNewFieldValue(e.target.value)}
-                  placeholder="Value"
+                  placeholder={t('customFields.value')}
                   className="flex-1"
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomField())}
                 />
@@ -436,10 +438,10 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5" />
-                Color Palette
+                {t('colorPalette.title')}
               </CardTitle>
               <CardDescription>
-                Extracted from reference images
+                {t('colorPalette.description')}
               </CardDescription>
             </CardHeader>
             <CardContent>

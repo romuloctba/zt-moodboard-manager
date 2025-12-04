@@ -1,0 +1,79 @@
+{
+  "title": "Settings",
+  "storage": {
+    "title": "Storage",
+    "description": "Your data is stored locally on this device",
+    "projects": "Projects",
+    "characters": "Characters",
+    "images": "Images",
+    "storageUsed": "Storage used",
+    "storageFormat": "{used} / {quota}"
+  },
+  "backup": {
+    "title": "Backup & Restore",
+    "description": "Export your data to transfer to another device or create a backup",
+    "create": {
+      "title": "Create Backup",
+      "description": "Download all projects, characters, and images",
+      "button": "Backup",
+      "inProgress": "Backing up..."
+    },
+    "restore": {
+      "title": "Restore from Backup",
+      "description": "Import a previously exported backup file",
+      "button": "Restore",
+      "inProgress": "Restoring..."
+    },
+    "warning": {
+      "title": "Important",
+      "description": "Restoring a backup will replace all current data. Make sure to create a backup first if you want to keep your current work."
+    },
+    "confirmRestore": {
+      "title": "Confirm Restore",
+      "description": "This will replace all your current data with the backup contents.",
+      "details": "Backup Details:",
+      "created": "Created:",
+      "projects": "Projects:",
+      "characters": "Characters:",
+      "images": "Images:",
+      "warning": "Your current {projects} projects, {characters} characters, and {images} images will be deleted.",
+      "confirm": "Restore Backup"
+    },
+    "toast": {
+      "created": "Backup created successfully!",
+      "createFailed": "Failed to create backup",
+      "restored": "Restore complete! Refreshing...",
+      "restoreFailed": "Failed to restore backup",
+      "invalidFile": "Invalid backup file"
+    }
+  },
+  "dangerZone": {
+    "title": "Danger Zone",
+    "description": "Permanently delete all data including files from storage",
+    "clearAll": {
+      "title": "Clear All Data",
+      "description": "Delete all projects, characters, images, and free up storage",
+      "button": "Clear All",
+      "inProgress": "Clearing..."
+    },
+    "confirmClear": {
+      "title": "Clear All Data?",
+      "description": "This action cannot be undone. All your data will be permanently deleted.",
+      "warning": "This will permanently delete:",
+      "projects": "{count} projects",
+      "characters": "{count} characters",
+      "images": "{count} images",
+      "files": "All files in OPFS storage",
+      "confirm": "Yes, Delete Everything"
+    },
+    "toast": {
+      "cleared": "Cleared {count} files. Storage freed!",
+      "clearFailed": "Failed to clear data"
+    }
+  },
+  "language": {
+    "title": "Language",
+    "description": "Choose your preferred language",
+    "select": "Select language"
+  }
+}

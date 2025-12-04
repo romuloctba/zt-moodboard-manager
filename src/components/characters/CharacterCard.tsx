@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import type { Character } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,24 +24,26 @@ interface CharacterCardProps {
 }
 
 export function CharacterCard({ character, imageCount = 0, onClick }: CharacterCardProps) {
+  const t = useTranslations('characters');
+  const locale = useLocale();
   const [showRename, setShowRename] = useState(false);
   const { deleteCharacter, renameCharacter } = useProjectStore();
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this character? This cannot be undone.')) {
+    if (confirm(t('confirmDelete'))) {
       await deleteCharacter(character.id);
-      toast.success('Character deleted');
+      toast.success(t('toast.deleted'));
     }
   };
 
   const handleRename = async (newName: string) => {
     await renameCharacter(character.id, newName);
-    toast.success('Character renamed');
+    toast.success(t('toast.renamed'));
     setShowRename(false);
   };
 
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
+  const formattedDate = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
   }).format(new Date(character.createdAt));
@@ -72,7 +75,7 @@ export function CharacterCard({ character, imageCount = 0, onClick }: CharacterC
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowRename(true); }}>
                   <Pencil className="w-4 h-4 mr-2" />
-                  Rename
+                  {t('menu.rename')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -80,7 +83,7 @@ export function CharacterCard({ character, imageCount = 0, onClick }: CharacterC
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
+                  {t('menu.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -93,16 +96,16 @@ export function CharacterCard({ character, imageCount = 0, onClick }: CharacterC
             </CardDescription>
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Created {formattedDate}</span>
+            <span>{t('card.created', { date: formattedDate })}</span>
             <span>•</span>
             <span className="flex items-center gap-1">
               <ImageIcon className="w-3 h-3" />
-              {imageCount} {imageCount === 1 ? 'image' : 'images'}
+              {t('card.images', { count: imageCount })}
             </span>
             {character.tags.length > 0 && (
               <>
                 <span>•</span>
-                <span>{character.tags.length} tags</span>
+                <span>{t('card.tags', { count: character.tags.length })}</span>
               </>
             )}
           </div>
@@ -112,7 +115,7 @@ export function CharacterCard({ character, imageCount = 0, onClick }: CharacterC
       <RenameDialog
         open={showRename}
         onOpenChange={setShowRename}
-        title="Rename Character"
+        title={t('renameDialog.title')}
         currentName={character.name}
         onRename={handleRename}
       />

@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "Gerenciador de Moodboard",
+    "newProject": "Novo Projeto"
+  },
+  "emptyState": {
+    "title": "Nenhum projeto ainda",
+    "description": "Crie seu primeiro projeto para começar a organizar referências visuais para seus personagens.",
+    "action": "Criar Seu Primeiro Projeto"
+  },
+  "createDialog": {
+    "title": "Criar Novo Projeto",
+    "description": "Crie um novo projeto para organizar suas referências de personagens.",
+    "nameLabel": "Nome do Projeto",
+    "namePlaceholder": "ex.: História Cyberpunk, RPG de Fantasia...",
+    "descriptionLabel": "Descrição (opcional)",
+    "descriptionPlaceholder": "Breve descrição do seu projeto",
+    "submit": "Criar Projeto"
+  },
+  "renameDialog": {
+    "title": "Renomear Projeto"
+  },
+  "card": {
+    "created": "Criado em {date}",
+    "tags": "{count} tags"
+  },
+  "menu": {
+    "rename": "Renomear",
+    "archive": "Arquivar",
+    "delete": "Excluir"
+  },
+  "confirmDelete": "Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.",
+  "validation": {
+    "nameRequired": "Por favor, insira um nome para o projeto"
+  },
+  "toast": {
+    "created": "Projeto criado com sucesso",
+    "renamed": "Projeto renomeado",
+    "archived": "Projeto arquivado",
+    "deleted": "Projeto excluído",
+    "createFailed": "Falha ao criar projeto"
+  }
+}

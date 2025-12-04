@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "Moodboard Manager",
+    "newProject": "New Project"
+  },
+  "emptyState": {
+    "title": "No projects yet",
+    "description": "Create your first project to start organizing visual references for your characters.",
+    "action": "Create Your First Project"
+  },
+  "createDialog": {
+    "title": "Create New Project",
+    "description": "Create a new project to organize your character references.",
+    "nameLabel": "Project Name",
+    "namePlaceholder": "e.g., Cyberpunk Story, Fantasy RPG...",
+    "descriptionLabel": "Description (optional)",
+    "descriptionPlaceholder": "Brief description of your project",
+    "submit": "Create Project"
+  },
+  "renameDialog": {
+    "title": "Rename Project"
+  },
+  "card": {
+    "created": "Created {date}",
+    "tags": "{count} tags"
+  },
+  "menu": {
+    "rename": "Rename",
+    "archive": "Archive",
+    "delete": "Delete"
+  },
+  "confirmDelete": "Are you sure you want to delete this project? This cannot be undone.",
+  "validation": {
+    "nameRequired": "Please enter a project name"
+  },
+  "toast": {
+    "created": "Project created successfully",
+    "renamed": "Project renamed",
+    "archived": "Project archived",
+    "deleted": "Project deleted",
+    "createFailed": "Failed to create project"
+  }
+}

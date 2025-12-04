@@ -1,15 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
-import { characterRepository, projectRepository } from '@/lib/db/repositories';
+import { characterRepository } from '@/lib/db/repositories';
 import { exportCharacterImages } from '@/lib/export/exportService';
-import { useNotFound } from '@/hooks/use-not-found';
 import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
@@ -19,13 +17,13 @@ import type { Character, CanvasState } from '@/types';
 
 type ViewMode = 'grid' | 'canvas' | 'profile';
 
-function CharacterViewContent() {
+export default function CharacterDetailPage() {
+  const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const projectId = searchParams.get('projectId');
-  const characterId = searchParams.get('characterId');
   const t = useTranslations('characters');
   const tMedia = useTranslations('media');
+  const projectId = params.projectId as string;
+  const characterId = params.characterId as string;
 
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,46 +31,25 @@ function CharacterViewContent() {
   const [exporting, setExporting] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
-  const { triggerNotFound: triggerProjectNotFound } = useNotFound({
-    entity: 'Project',
-  });
-
-  const { triggerNotFound: triggerCharacterNotFound } = useNotFound({
-    entity: 'Character',
-    redirectTo: projectId ? `/projects/view?projectId=${projectId}` : undefined,
-  });
-
   useEffect(() => {
     async function loadCharacter() {
-      if (!characterId || !projectId) {
-        router.push('/');
-        return;
-      }
-
       try {
-        // First verify the project exists
-        const project = await projectRepository.getById(projectId);
-        if (!project) {
-          triggerProjectNotFound();
-          return;
-        }
-
         const char = await characterRepository.getById(characterId);
         if (char && char.projectId === projectId) {
           setCharacter(char);
         } else {
-          triggerCharacterNotFound();
+          router.replace(`/projects/${projectId}`);
         }
       } catch (error) {
         console.error('Failed to load character:', error);
-        triggerCharacterNotFound();
+        router.replace(`/projects/${projectId}`);
       } finally {
         setLoading(false);
       }
     }
 
     loadCharacter();
-  }, [characterId, projectId, router, triggerProjectNotFound, triggerCharacterNotFound]);
+  }, [characterId, projectId, router]);
 
   const handleUploadComplete = useCallback(() => {
     // Trigger a refresh of the image grid
@@ -115,7 +92,7 @@ function CharacterViewContent() {
     );
   }
 
-  if (!character || !projectId) {
+  if (!character) {
     return null;
   }
 
@@ -128,7 +105,7 @@ function CharacterViewContent() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push(`/projects/view?projectId=${projectId}`)}
+              onClick={() => router.push(`/projects/${projectId}`)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -205,7 +182,7 @@ function CharacterViewContent() {
               <h2 className="text-lg font-medium">{tMedia('upload.addImages')}</h2>
             </div>
             <ImageUploader
-              characterId={characterId!}
+              characterId={characterId}
               onUploadComplete={handleUploadComplete}
             />
           </section>
@@ -215,14 +192,14 @@ function CharacterViewContent() {
             <h2 className="text-lg font-medium mb-4">{tMedia('referenceImages')}</h2>
             <ImageGrid
               key={refreshKey}
-              characterId={characterId!}
+              characterId={characterId}
             />
           </section>
         </main>
       ) : viewMode === 'canvas' ? (
         <main className="h-[calc(100vh-73px)]">
           <MoodboardCanvas
-            characterId={characterId!}
+            characterId={characterId}
             canvasState={character.canvasState}
             onCanvasChange={handleCanvasChange}
           />
@@ -236,21 +213,5 @@ function CharacterViewContent() {
         </main>
       )}
     </div>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-    </div>
-  );
-}
-
-export default function CharacterViewPage() {
-  return (
-    <Suspense fallback={<LoadingSkeleton />}>
-      <CharacterViewContent />
-    </Suspense>
   );
 }

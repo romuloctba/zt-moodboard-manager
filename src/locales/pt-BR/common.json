@@ -1,0 +1,49 @@
+{
+  "appName": "Gerenciador de Moodboard",
+  "actions": {
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "create": "Criar",
+    "creating": "Criando...",
+    "delete": "Excluir",
+    "deleting": "Excluindo...",
+    "rename": "Renomear",
+    "archive": "Arquivar",
+    "export": "Exportar",
+    "exporting": "Exportando...",
+    "import": "Importar",
+    "importing": "Importando...",
+    "upload": "Enviar",
+    "uploading": "Enviando...",
+    "download": "Baixar",
+    "select": "Selecionar",
+    "selectAll": "Selecionar Tudo",
+    "clear": "Limpar",
+    "clearFilter": "Limpar filtro",
+    "filter": "Filtrar",
+    "browse": "procurar",
+    "confirm": "Confirmar",
+    "goBack": "Voltar",
+    "goHome": "Ir para Início",
+    "copyToClipboard": "{value} copiado para a área de transferência"
+  },
+  "navigation": {
+    "settings": "Configurações",
+    "back": "Voltar"
+  },
+  "time": {
+    "created": "Criado em {date}"
+  },
+  "units": {
+    "images": "{count, plural, =0 {Nenhuma imagem} one {# imagem} other {# imagens}}",
+    "tags": "{count, plural, =0 {Nenhuma tag} one {# tag} other {# tags}}"
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Conteúdo Não Encontrado",
+    "description": "A página ou recurso que você está procurando não existe ou pode ter sido removido.",
+    "redirecting": "Redirecionando para o início em {seconds}s...",
+    "cancelRedirect": "Cancelar redirecionamento"
+  }
+}

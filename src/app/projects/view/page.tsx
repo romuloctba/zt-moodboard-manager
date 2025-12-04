@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ function ProjectViewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('projectId');
+  const t = useTranslations('characters');
   
   const { 
     currentProject, 
@@ -76,7 +78,7 @@ function ProjectViewContent() {
               <CreateCharacterDialog>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
-                  New Character
+                  {t('header.newCharacter')}
                 </Button>
               </CreateCharacterDialog>
               <Button variant="ghost" size="icon" asChild>
@@ -102,17 +104,18 @@ function ProjectViewContent() {
 }
 
 function EmptyCharacterState() {
+  const t = useTranslations('characters.emptyState');
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <Users className="w-16 h-16 text-muted-foreground mb-6" />
-      <h2 className="text-2xl font-semibold mb-2">No characters yet</h2>
+      <h2 className="text-2xl font-semibold mb-2">{t('title')}</h2>
       <p className="text-muted-foreground mb-6 max-w-md">
-        Create your first character to start building your moodboard.
+        {t('description')}
       </p>
       <CreateCharacterDialog>
         <Button size="lg">
           <Plus className="w-4 h-4 mr-2" />
-          Create Your First Character
+          {t('action')}
         </Button>
       </CreateCharacterDialog>
     </div>

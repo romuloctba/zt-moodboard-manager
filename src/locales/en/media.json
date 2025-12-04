@@ -1,0 +1,61 @@
+{
+  "upload": {
+    "addImages": "Add Images"
+  },
+  "uploader": {
+    "dropzone": {
+      "title": "Drop images here, or",
+      "browse": "browse",
+      "formats": "Supports JPG, PNG, GIF, WebP up to 50MB"
+    },
+    "buttons": {
+      "selectFiles": "Select Files",
+      "pasteClipboard": "Paste from Clipboard"
+    },
+    "progress": {
+      "processing": "Processing image...",
+      "saving": "Saving to storage...",
+      "complete": "Upload complete",
+      "error": "Upload failed"
+    },
+    "toast": {
+      "success": "{count, plural, one {# image} other {# images}} uploaded successfully",
+      "noValidImages": "No valid images found. Supported: JPG, PNG, GIF, WebP (max 50MB)",
+      "filesSkipped": "{count} file(s) skipped (invalid type or too large)",
+      "noClipboardImages": "No images found in clipboard",
+      "clipboardError": "Could not access clipboard. Try using Ctrl+V while focused on the drop zone."
+    }
+  },
+  "grid": {
+    "empty": {
+      "title": "No images yet",
+      "description": "Upload some reference images to get started"
+    },
+    "imageCount": "{count, plural, one {# image} other {# images}}",
+    "withTag": "with tag \"{tag}\"",
+    "selected": "{count} selected",
+    "toolbar": {
+      "select": "Select",
+      "selectAll": "Select All",
+      "clear": "Clear",
+      "cancel": "Cancel",
+      "export": "Export ({count})",
+      "delete": "Delete ({count})"
+    },
+    "confirmBulkDelete": "Delete {count} selected image{count, plural, one {} other {s}}? This cannot be undone.",
+    "toast": {
+      "deleted": "{count, plural, one {# image} other {# images}} deleted",
+      "deleteFailed": "Failed to delete some images",
+      "exported": "Exported {count} images",
+      "exportFailed": "Failed to export images",
+      "loadFailed": "Failed to load images"
+    }
+  },
+  "preview": {
+    "tags": "Tags",
+    "tagsPlaceholder": "Add tags...",
+    "colorPalette": "Color Palette",
+    "dimensions": "{width} × {height}"
+  },
+  "referenceImages": "Reference Images"
+}

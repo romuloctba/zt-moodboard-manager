@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,8 @@ interface CreateProjectDialogProps {
 }
 
 export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
+  const t = useTranslations('projects');
+  const tCommon = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -31,19 +34,19 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
     e.preventDefault();
     
     if (!name.trim()) {
-      toast.error('Please enter a project name');
+      toast.error(t('validation.nameRequired'));
       return;
     }
 
     setIsLoading(true);
     try {
       await createProject(name.trim(), description.trim() || undefined);
-      toast.success('Project created successfully');
+      toast.success(t('toast.created'));
       setOpen(false);
       setName('');
       setDescription('');
     } catch (error) {
-      toast.error('Failed to create project');
+      toast.error(t('toast.createFailed'));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -56,27 +59,27 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
+            <DialogTitle>{t('createDialog.title')}</DialogTitle>
             <DialogDescription>
-              Create a new project to organize your character references.
+              {t('createDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Project Name</Label>
+              <Label htmlFor="name">{t('createDialog.nameLabel')}</Label>
               <Input
                 id="name"
-                placeholder="e.g., Cyberpunk Story, Fantasy RPG..."
+                placeholder={t('createDialog.namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description">{t('createDialog.descriptionLabel')}</Label>
               <Input
                 id="description"
-                placeholder="Brief description of your project"
+                placeholder={t('createDialog.descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -84,10 +87,10 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Project'}
+              {isLoading ? tCommon('actions.creating') : t('createDialog.submit')}
             </Button>
           </DialogFooter>
         </form>

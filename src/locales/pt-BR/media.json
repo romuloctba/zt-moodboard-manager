@@ -1,0 +1,61 @@
+{
+  "upload": {
+    "addImages": "Adicionar Imagens"
+  },
+  "uploader": {
+    "dropzone": {
+      "title": "Solte imagens aqui, ou",
+      "browse": "procure",
+      "formats": "Suporta JPG, PNG, GIF, WebP até 50MB"
+    },
+    "buttons": {
+      "selectFiles": "Selecionar Arquivos",
+      "pasteClipboard": "Colar da Área de Transferência"
+    },
+    "progress": {
+      "processing": "Processando imagem...",
+      "saving": "Salvando no armazenamento...",
+      "complete": "Upload concluído",
+      "error": "Falha no upload"
+    },
+    "toast": {
+      "success": "{count, plural, one {# imagem enviada} other {# imagens enviadas}} com sucesso",
+      "noValidImages": "Nenhuma imagem válida encontrada. Suportados: JPG, PNG, GIF, WebP (máx 50MB)",
+      "filesSkipped": "{count} arquivo(s) ignorado(s) (tipo inválido ou muito grande)",
+      "noClipboardImages": "Nenhuma imagem encontrada na área de transferência",
+      "clipboardError": "Não foi possível acessar a área de transferência. Tente usar Ctrl+V enquanto focado na zona de soltar."
+    }
+  },
+  "grid": {
+    "empty": {
+      "title": "Nenhuma imagem ainda",
+      "description": "Envie algumas imagens de referência para começar"
+    },
+    "imageCount": "{count, plural, one {# imagem} other {# imagens}}",
+    "withTag": "com tag \"{tag}\"",
+    "selected": "{count} selecionada(s)",
+    "toolbar": {
+      "select": "Selecionar",
+      "selectAll": "Selecionar Tudo",
+      "clear": "Limpar",
+      "cancel": "Cancelar",
+      "export": "Exportar ({count})",
+      "delete": "Excluir ({count})"
+    },
+    "confirmBulkDelete": "Excluir {count} {count, plural, one {imagem selecionada} other {imagens selecionadas}}? Esta ação não pode ser desfeita.",
+    "toast": {
+      "deleted": "{count, plural, one {# imagem excluída} other {# imagens excluídas}}",
+      "deleteFailed": "Falha ao excluir algumas imagens",
+      "exported": "{count} imagens exportadas",
+      "exportFailed": "Falha ao exportar imagens",
+      "loadFailed": "Falha ao carregar imagens"
+    }
+  },
+  "preview": {
+    "tags": "Tags",
+    "tagsPlaceholder": "Adicionar tags...",
+    "colorPalette": "Paleta de Cores",
+    "dimensions": "{width} × {height}"
+  },
+  "referenceImages": "Imagens de Referência"
+}

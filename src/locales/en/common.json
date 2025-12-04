@@ -1,0 +1,49 @@
+{
+  "appName": "Moodboard Manager",
+  "actions": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "create": "Create",
+    "creating": "Creating...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "rename": "Rename",
+    "archive": "Archive",
+    "export": "Export",
+    "exporting": "Exporting...",
+    "import": "Import",
+    "importing": "Importing...",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "download": "Download",
+    "select": "Select",
+    "selectAll": "Select All",
+    "clear": "Clear",
+    "clearFilter": "Clear filter",
+    "filter": "Filter",
+    "browse": "browse",
+    "confirm": "Confirm",
+    "goBack": "Go Back",
+    "goHome": "Go Home",
+    "copyToClipboard": "Copied {value} to clipboard"
+  },
+  "navigation": {
+    "settings": "Settings",
+    "back": "Back"
+  },
+  "time": {
+    "created": "Created {date}"
+  },
+  "units": {
+    "images": "{count, plural, =0 {No images} one {# image} other {# images}}",
+    "tags": "{count, plural, =0 {No tags} one {# tag} other {# tags}}"
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Content Not Found",
+    "description": "The page or resource you're looking for doesn't exist or may have been removed.",
+    "redirecting": "Redirecting to home in {seconds}s...",
+    "cancelRedirect": "Cancel redirect"
+  }
+}

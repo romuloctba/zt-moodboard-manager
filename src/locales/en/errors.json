@@ -1,0 +1,26 @@
+{
+  "generic": "Something went wrong",
+  "notFound": {
+    "project": "Project not found",
+    "character": "Character not found",
+    "image": "Image not found"
+  },
+  "validation": {
+    "required": "This field is required",
+    "nameRequired": "Please enter a name",
+    "projectNameRequired": "Please enter a project name",
+    "characterNameRequired": "Please enter a character name"
+  },
+  "storage": {
+    "failed": "Storage operation failed",
+    "quotaExceeded": "Storage quota exceeded"
+  },
+  "export": {
+    "noImages": "No images to export",
+    "failed": "Failed to export images"
+  },
+  "import": {
+    "invalidFile": "Invalid file format",
+    "failed": "Failed to import"
+  }
+}

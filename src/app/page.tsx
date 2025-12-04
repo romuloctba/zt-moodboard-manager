@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/store/projectStore';
 import { ProjectList } from '@/components/projects/ProjectList';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
@@ -10,6 +11,7 @@ import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { Plus, Palette, Settings } from 'lucide-react';
 
 export default function HomePage() {
+  const t = useTranslations('projects');
   const { projects, isLoading, loadProjects } = useProjectStore();
 
   useEffect(() => {
@@ -23,14 +25,14 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Palette className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl font-bold">Moodboard Manager</h1>
+            <h1 className="text-2xl font-bold">{t('header.title')}</h1>
           </div>
           <div className="flex items-center gap-4">
             <StorageIndicator />
             <CreateProjectDialog>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                New Project
+                {t('header.newProject')}
               </Button>
             </CreateProjectDialog>
             <Button variant="ghost" size="icon" asChild>
@@ -61,17 +63,19 @@ export default function HomePage() {
 }
 
 function EmptyState() {
+  const t = useTranslations('projects');
+  
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <Palette className="w-16 h-16 text-muted-foreground mb-6" />
-      <h2 className="text-2xl font-semibold mb-2">No projects yet</h2>
+      <h2 className="text-2xl font-semibold mb-2">{t('emptyState.title')}</h2>
       <p className="text-muted-foreground mb-6 max-w-md">
-        Create your first project to start organizing visual references for your characters.
+        {t('emptyState.description')}
       </p>
       <CreateProjectDialog>
         <Button size="lg">
           <Plus className="w-4 h-4 mr-2" />
-          Create Your First Project
+          {t('emptyState.action')}
         </Button>
       </CreateProjectDialog>
     </div>

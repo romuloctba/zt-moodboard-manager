@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { 
   ArrowLeft, 
   Download, 
@@ -11,7 +12,8 @@ import {
   AlertTriangle,
   FileArchive,
   Database,
-  Trash2
+  Trash2,
+  Globe
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,9 +38,12 @@ import {
   type BackupManifest
 } from '@/lib/export/backupService';
 import { fileStorage } from '@/lib/storage/fileStorage';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 export default function SettingsPage() {
   const router = useRouter();
+  const t = useTranslations('settings');
+  const tCommon = useTranslations('common');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // State
@@ -94,10 +99,10 @@ export default function SettingsPage() {
       await createFullBackup((progress) => {
         setBackupProgress(progress);
       });
-      toast.success('Backup created successfully!');
+      toast.success(t('backup.toast.created'));
     } catch (error) {
       console.error('Backup failed:', error);
-      toast.error('Failed to create backup');
+      toast.error(t('backup.toast.createFailed'));
     } finally {
       setIsBackingUp(false);
       setBackupProgress(null);
@@ -116,7 +121,7 @@ export default function SettingsPage() {
     const validation = await validateBackup(file);
     
     if (!validation.valid) {
-      toast.error(validation.error || 'Invalid backup file');
+      toast.error(validation.error || t('backup.toast.invalidFile'));
       return;
     }
     
@@ -139,7 +144,7 @@ export default function SettingsPage() {
         setRestoreProgress(progress);
       });
       
-      toast.success('Restore complete! Refreshing...');
+      toast.success(t('backup.toast.restored'));
       
       // Refresh stats
       const dbStats = await getDatabaseStats();
@@ -151,7 +156,7 @@ export default function SettingsPage() {
       }, 1500);
     } catch (error) {
       console.error('Restore failed:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to restore backup');
+      toast.error(error instanceof Error ? error.message : t('backup.toast.restoreFailed'));
     } finally {
       setIsRestoring(false);
       setRestoreProgress(null);
@@ -167,7 +172,7 @@ export default function SettingsPage() {
     
     try {
       const result = await clearAllData();
-      toast.success(`Cleared ${result.filesDeleted} files. Storage freed!`);
+      toast.success(t('dangerZone.toast.cleared', { count: result.filesDeleted }));
       
       // Refresh stats
       const dbStats = await getDatabaseStats();
@@ -177,7 +182,7 @@ export default function SettingsPage() {
       setStorageInfo(storage);
     } catch (error) {
       console.error('Clear data failed:', error);
-      toast.error('Failed to clear data');
+      toast.error(t('dangerZone.toast.clearFailed'));
     } finally {
       setIsClearing(false);
     }
@@ -204,21 +209,37 @@ export default function SettingsPage() {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-semibold">Settings</h1>
+            <h1 className="text-xl font-semibold">{t('title')}</h1>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
+        {/* Language Selection */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              {t('language.title')}
+            </CardTitle>
+            <CardDescription>
+              {t('language.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LanguageSwitcher />
+          </CardContent>
+        </Card>
+
         {/* Storage Stats */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <HardDrive className="h-5 w-5" />
-              Storage
+              {t('storage.title')}
             </CardTitle>
             <CardDescription>
-              Your data is stored locally on this device
+              {t('storage.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -227,23 +248,23 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
                     <div className="text-2xl font-bold">{stats.projects}</div>
-                    <div className="text-sm text-muted-foreground">Projects</div>
+                    <div className="text-sm text-muted-foreground">{t('storage.projects')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold">{stats.characters}</div>
-                    <div className="text-sm text-muted-foreground">Characters</div>
+                    <div className="text-sm text-muted-foreground">{t('storage.characters')}</div>
                   </div>
                   <div>
                     <div className="text-2xl font-bold">{stats.images}</div>
-                    <div className="text-sm text-muted-foreground">Images</div>
+                    <div className="text-sm text-muted-foreground">{t('storage.images')}</div>
                   </div>
                 </div>
                 
                 {storageInfo && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Storage used</span>
-                      <span>{formatBytes(storageInfo.used)} / {formatBytes(storageInfo.quota)}</span>
+                      <span>{t('storage.storageUsed')}</span>
+                      <span>{t('storage.storageFormat', { used: formatBytes(storageInfo.used), quota: formatBytes(storageInfo.quota) })}</span>
                     </div>
                     <Progress value={storageInfo.percentage} className="h-2" />
                   </div>
@@ -262,10 +283,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
-              Backup & Restore
+              {t('backup.title')}
             </CardTitle>
             <CardDescription>
-              Export your data to transfer to another device or create a backup
+              {t('backup.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -276,9 +297,9 @@ export default function SettingsPage() {
                   <Download className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <div className="font-medium">Create Backup</div>
+                  <div className="font-medium">{t('backup.create.title')}</div>
                   <div className="text-sm text-muted-foreground">
-                    Download all projects, characters, and images
+                    {t('backup.create.description')}
                   </div>
                 </div>
               </div>
@@ -289,12 +310,12 @@ export default function SettingsPage() {
                 {isBackingUp ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Backing up...
+                    {t('backup.create.inProgress')}
                   </>
                 ) : (
                   <>
                     <FileArchive className="h-4 w-4 mr-2" />
-                    Backup
+                    {t('backup.create.button')}
                   </>
                 )}
               </Button>
@@ -318,9 +339,9 @@ export default function SettingsPage() {
                   <Upload className="h-5 w-5 text-orange-500" />
                 </div>
                 <div>
-                  <div className="font-medium">Restore from Backup</div>
+                  <div className="font-medium">{t('backup.restore.title')}</div>
                   <div className="text-sm text-muted-foreground">
-                    Import a previously exported backup file
+                    {t('backup.restore.description')}
                   </div>
                 </div>
               </div>
@@ -332,12 +353,12 @@ export default function SettingsPage() {
                 {isRestoring ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Restoring...
+                    {t('backup.restore.inProgress')}
                   </>
                 ) : (
                   <>
                     <Upload className="h-4 w-4 mr-2" />
-                    Restore
+                    {t('backup.restore.button')}
                   </>
                 )}
               </Button>
@@ -365,9 +386,9 @@ export default function SettingsPage() {
             <div className="flex items-start gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
               <AlertTriangle className="h-5 w-5 text-orange-500 shrink-0 mt-0.5" />
               <div className="text-sm">
-                <div className="font-medium text-orange-500">Important</div>
+                <div className="font-medium text-orange-500">{t('backup.warning.title')}</div>
                 <div className="text-muted-foreground">
-                  Restoring a backup will replace all current data. Make sure to create a backup first if you want to keep your current work.
+                  {t('backup.warning.description')}
                 </div>
               </div>
             </div>
@@ -379,10 +400,10 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
               <Trash2 className="h-5 w-5" />
-              Danger Zone
+              {t('dangerZone.title')}
             </CardTitle>
             <CardDescription>
-              Permanently delete all data including files from storage
+              {t('dangerZone.description')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -392,9 +413,9 @@ export default function SettingsPage() {
                   <Trash2 className="h-5 w-5 text-destructive" />
                 </div>
                 <div>
-                  <div className="font-medium">Clear All Data</div>
+                  <div className="font-medium">{t('dangerZone.clearAll.title')}</div>
                   <div className="text-sm text-muted-foreground">
-                    Delete all projects, characters, images, and free up storage
+                    {t('dangerZone.clearAll.description')}
                   </div>
                 </div>
               </div>
@@ -406,12 +427,12 @@ export default function SettingsPage() {
                 {isClearing ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Clearing...
+                    {t('dangerZone.clearAll.inProgress')}
                   </>
                 ) : (
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Clear All
+                    {t('dangerZone.clearAll.button')}
                   </>
                 )}
               </Button>
@@ -426,31 +447,31 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-500" />
-              Confirm Restore
+              {t('backup.confirmRestore.title')}
             </DialogTitle>
             <DialogDescription>
-              This will replace all your current data with the backup contents.
+              {t('backup.confirmRestore.description')}
             </DialogDescription>
           </DialogHeader>
 
           {pendingManifest && (
             <div className="space-y-3 py-2">
-              <div className="text-sm font-medium">Backup Details:</div>
+              <div className="text-sm font-medium">{t('backup.confirmRestore.details')}</div>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="text-muted-foreground">Created:</div>
+                <div className="text-muted-foreground">{t('backup.confirmRestore.created')}</div>
                 <div>{new Date(pendingManifest.createdAt).toLocaleString()}</div>
-                <div className="text-muted-foreground">Projects:</div>
+                <div className="text-muted-foreground">{t('backup.confirmRestore.projects')}</div>
                 <div>{pendingManifest.stats.projects}</div>
-                <div className="text-muted-foreground">Characters:</div>
+                <div className="text-muted-foreground">{t('backup.confirmRestore.characters')}</div>
                 <div>{pendingManifest.stats.characters}</div>
-                <div className="text-muted-foreground">Images:</div>
+                <div className="text-muted-foreground">{t('backup.confirmRestore.images')}</div>
                 <div>{pendingManifest.stats.images}</div>
               </div>
 
               <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
                 <Trash2 className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                 <div className="text-sm text-destructive">
-                  Your current {stats?.projects || 0} projects, {stats?.characters || 0} characters, and {stats?.images || 0} images will be deleted.
+                  {t('backup.confirmRestore.warning', { projects: stats?.projects || 0, characters: stats?.characters || 0, images: stats?.images || 0 })}
                 </div>
               </div>
             </div>
@@ -458,11 +479,11 @@ export default function SettingsPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowRestoreConfirm(false)}>
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button variant="destructive" onClick={confirmRestore}>
               <Upload className="h-4 w-4 mr-2" />
-              Restore Backup
+              {t('backup.confirmRestore.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -474,10 +495,10 @@ export default function SettingsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trash2 className="h-5 w-5 text-destructive" />
-              Clear All Data?
+              {t('dangerZone.confirmClear.title')}
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. All your data will be permanently deleted.
+              {t('dangerZone.confirmClear.description')}
             </DialogDescription>
           </DialogHeader>
 
@@ -485,12 +506,12 @@ export default function SettingsPage() {
             <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
               <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
               <div className="text-sm text-destructive">
-                This will permanently delete:
+                {t('dangerZone.confirmClear.warning')}
                 <ul className="list-disc list-inside mt-1">
-                  <li>{stats?.projects || 0} projects</li>
-                  <li>{stats?.characters || 0} characters</li>
-                  <li>{stats?.images || 0} images</li>
-                  <li>All files in OPFS storage</li>
+                  <li>{t('dangerZone.confirmClear.projects', { count: stats?.projects || 0 })}</li>
+                  <li>{t('dangerZone.confirmClear.characters', { count: stats?.characters || 0 })}</li>
+                  <li>{t('dangerZone.confirmClear.images', { count: stats?.images || 0 })}</li>
+                  <li>{t('dangerZone.confirmClear.files')}</li>
                 </ul>
               </div>
             </div>
@@ -498,11 +519,11 @@ export default function SettingsPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button variant="destructive" onClick={confirmClearData}>
               <Trash2 className="h-4 w-4 mr-2" />
-              Yes, Delete Everything
+              {t('dangerZone.confirmClear.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -1,0 +1,130 @@
+{
+  "header": {
+    "newCharacter": "Novo Personagem"
+  },
+  "emptyState": {
+    "title": "Nenhum personagem ainda",
+    "description": "Crie seu primeiro personagem para começar a construir seu moodboard.",
+    "action": "Criar Seu Primeiro Personagem"
+  },
+  "createDialog": {
+    "title": "Criar Novo Personagem",
+    "description": "Adicione um novo personagem para organizar suas referências visuais.",
+    "nameLabel": "Nome do Personagem",
+    "namePlaceholder": "ex.: Herói, Vilão, Coadjuvante...",
+    "submit": "Criar Personagem"
+  },
+  "renameDialog": {
+    "title": "Renomear Personagem"
+  },
+  "card": {
+    "created": "Criado em {date}",
+    "images": "{count, plural, =0 {Nenhuma imagem} one {# imagem} other {# imagens}}",
+    "tags": "{count} tags"
+  },
+  "menu": {
+    "rename": "Renomear",
+    "delete": "Excluir"
+  },
+  "confirmDelete": "Tem certeza que deseja excluir este personagem? Esta ação não pode ser desfeita.",
+  "validation": {
+    "nameRequired": "Por favor, insira um nome para o personagem"
+  },
+  "toast": {
+    "created": "Personagem criado com sucesso",
+    "renamed": "Personagem renomeado",
+    "deleted": "Personagem excluído",
+    "createFailed": "Falha ao criar personagem",
+    "noProject": "Nenhum projeto selecionado",
+    "exportSuccess": "Imagens exportadas com sucesso",
+    "noImagesToExport": "Nenhuma imagem para exportar",
+    "exportFailed": "Falha ao exportar imagens"
+  },
+  "viewMode": {
+    "grid": "Grade",
+    "canvas": "Canvas",
+    "profile": "Perfil"
+  },
+  "export": {
+    "all": "Exportar Tudo"
+  },
+  "canvas": {
+    "sidebar": {
+      "title": "Imagens",
+      "hint": "Clique para adicionar",
+      "onCanvas": "No Canvas",
+      "noImages": "Nenhuma imagem enviada ainda"
+    },
+    "controls": {
+      "rotateLeft": "Girar -15°",
+      "rotateRight": "Girar +15°",
+      "resetRotation": "Resetar rotação",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "remove": "Remover do canvas"
+    },
+    "empty": {
+      "title": "Clique nas imagens para adicionar ao canvas",
+      "hint": "Arraste para mover • Role para zoom"
+    },
+    "toast": {
+      "loadFailed": "Falha ao carregar imagens",
+      "imageAlreadyOnCanvas": "Imagem já está no canvas"
+    }
+  },
+  "profile": {
+    "title": "Perfil do Personagem",
+    "saveChanges": "Salvar Alterações",
+    "saved": "Personagem salvo",
+    "saveFailed": "Falha ao salvar personagem",
+    "basicInfo": {
+      "title": "Informações Básicas",
+      "description": "Detalhes essenciais sobre seu personagem",
+      "name": "Nome",
+      "nameRequired": "Nome *",
+      "namePlaceholder": "Nome do personagem",
+      "age": "Idade",
+      "agePlaceholder": "ex.: 25, Desconhecida, Imortal",
+      "role": "Função / Ocupação",
+      "rolePlaceholder": "ex.: Protagonista, Vilão, Personagem Secundário",
+      "shortDescription": "Descrição Curta",
+      "shortDescriptionPlaceholder": "Uma breve visão geral do personagem...",
+      "archetype": "Arquétipo",
+      "archetypePlaceholder": "ex.: O Herói, O Mentor, O Trapaceiro"
+    },
+    "personality": {
+      "title": "Traços de Personalidade",
+      "description": "Características principais da personalidade",
+      "empty": "Nenhum traço adicionado ainda",
+      "addPlaceholder": "Adicionar um traço..."
+    },
+    "abilities": {
+      "title": "Habilidades & Poderes",
+      "description": "Poderes, habilidades ou capacidades especiais",
+      "empty": "Nenhuma habilidade adicionada ainda",
+      "addPlaceholder": "Adicionar uma habilidade..."
+    },
+    "backstory": {
+      "title": "História de Fundo",
+      "description": "Histórico e antecedentes do personagem",
+      "placeholder": "Escreva a história de fundo, histórico e eventos importantes da vida do personagem..."
+    },
+    "inspirations": {
+      "title": "Inspirações",
+      "description": "Personagens, pessoas ou conceitos que inspiraram este personagem",
+      "empty": "Nenhuma inspiração adicionada ainda",
+      "addPlaceholder": "Adicionar uma inspiração..."
+    },
+    "customFields": {
+      "title": "Campos Personalizados",
+      "description": "Adicione seus próprios atributos personalizados",
+      "addTitle": "Adicionar Campo Personalizado",
+      "fieldName": "Nome do campo",
+      "value": "Valor"
+    },
+    "colorPalette": {
+      "title": "Paleta de Cores",
+      "description": "Extraída das imagens de referência"
+    }
+  }
+}

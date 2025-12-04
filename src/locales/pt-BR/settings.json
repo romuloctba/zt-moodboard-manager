@@ -1,0 +1,79 @@
+{
+  "title": "Configurações",
+  "storage": {
+    "title": "Armazenamento",
+    "description": "Seus dados são armazenados localmente neste dispositivo",
+    "projects": "Projetos",
+    "characters": "Personagens",
+    "images": "Imagens",
+    "storageUsed": "Armazenamento usado",
+    "storageFormat": "{used} / {quota}"
+  },
+  "backup": {
+    "title": "Backup & Restauração",
+    "description": "Exporte seus dados para transferir para outro dispositivo ou criar um backup",
+    "create": {
+      "title": "Criar Backup",
+      "description": "Baixe todos os projetos, personagens e imagens",
+      "button": "Backup",
+      "inProgress": "Fazendo backup..."
+    },
+    "restore": {
+      "title": "Restaurar do Backup",
+      "description": "Importe um arquivo de backup exportado anteriormente",
+      "button": "Restaurar",
+      "inProgress": "Restaurando..."
+    },
+    "warning": {
+      "title": "Importante",
+      "description": "Restaurar um backup substituirá todos os dados atuais. Certifique-se de criar um backup primeiro se quiser manter seu trabalho atual."
+    },
+    "confirmRestore": {
+      "title": "Confirmar Restauração",
+      "description": "Isso substituirá todos os seus dados atuais pelo conteúdo do backup.",
+      "details": "Detalhes do Backup:",
+      "created": "Criado em:",
+      "projects": "Projetos:",
+      "characters": "Personagens:",
+      "images": "Imagens:",
+      "warning": "Seus atuais {projects} projetos, {characters} personagens e {images} imagens serão excluídos.",
+      "confirm": "Restaurar Backup"
+    },
+    "toast": {
+      "created": "Backup criado com sucesso!",
+      "createFailed": "Falha ao criar backup",
+      "restored": "Restauração concluída! Atualizando...",
+      "restoreFailed": "Falha ao restaurar backup",
+      "invalidFile": "Arquivo de backup inválido"
+    }
+  },
+  "dangerZone": {
+    "title": "Zona de Perigo",
+    "description": "Excluir permanentemente todos os dados incluindo arquivos do armazenamento",
+    "clearAll": {
+      "title": "Limpar Todos os Dados",
+      "description": "Excluir todos os projetos, personagens, imagens e liberar armazenamento",
+      "button": "Limpar Tudo",
+      "inProgress": "Limpando..."
+    },
+    "confirmClear": {
+      "title": "Limpar Todos os Dados?",
+      "description": "Esta ação não pode ser desfeita. Todos os seus dados serão excluídos permanentemente.",
+      "warning": "Isso excluirá permanentemente:",
+      "projects": "{count} projetos",
+      "characters": "{count} personagens",
+      "images": "{count} imagens",
+      "files": "Todos os arquivos no armazenamento OPFS",
+      "confirm": "Sim, Excluir Tudo"
+    },
+    "toast": {
+      "cleared": "{count} arquivos limpos. Armazenamento liberado!",
+      "clearFailed": "Falha ao limpar dados"
+    }
+  },
+  "language": {
+    "title": "Idioma",
+    "description": "Escolha seu idioma preferido",
+    "select": "Selecionar idioma"
+  }
+}

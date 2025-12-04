@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,8 @@ interface CreateCharacterDialogProps {
 }
 
 export function CreateCharacterDialog({ children }: CreateCharacterDialogProps) {
+  const t = useTranslations('characters');
+  const tCommon = useTranslations('common');
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +33,7 @@ export function CreateCharacterDialog({ children }: CreateCharacterDialogProps) 
     e.preventDefault();
     
     if (!name.trim()) {
-      toast.error('Please enter a character name');
+      toast.error(t('validation.nameRequired'));
       return;
     }
 
@@ -38,14 +41,14 @@ export function CreateCharacterDialog({ children }: CreateCharacterDialogProps) 
     try {
       const character = await createCharacter(name.trim());
       if (character) {
-        toast.success('Character created successfully');
+        toast.success(t('toast.created'));
         setOpen(false);
         setName('');
       } else {
-        toast.error('No project selected');
+        toast.error(t('toast.noProject'));
       }
     } catch (error) {
-      toast.error('Failed to create character');
+      toast.error(t('toast.createFailed'));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -58,17 +61,17 @@ export function CreateCharacterDialog({ children }: CreateCharacterDialogProps) 
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Character</DialogTitle>
+            <DialogTitle>{t('createDialog.title')}</DialogTitle>
             <DialogDescription>
-              Add a new character to organize your visual references.
+              {t('createDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="character-name">Character Name</Label>
+              <Label htmlFor="character-name">{t('createDialog.nameLabel')}</Label>
               <Input
                 id="character-name"
-                placeholder="e.g., Hero, Villain, Supporting Cast..."
+                placeholder={t('createDialog.namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
@@ -77,10 +80,10 @@ export function CreateCharacterDialog({ children }: CreateCharacterDialogProps) 
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {tCommon('actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create Character'}
+              {isLoading ? tCommon('actions.creating') : t('createDialog.submit')}
             </Button>
           </DialogFooter>
         </form>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGesture } from '@use-gesture/react';
+import { useTranslations } from 'next-intl';
 import { Loader2, ZoomIn, ZoomOut, Maximize, Lock, Unlock, Trash2, RotateCcw, RotateCw, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -38,6 +39,7 @@ export function MoodboardCanvas({
   className 
 }: MoodboardCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('characters.canvas');
   const [images, setImages] = useState<ImageWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -70,14 +72,14 @@ export function MoodboardCanvas({
         setImages(imagesWithUrls);
       } catch (error) {
         console.error('Failed to load images:', error);
-        toast.error('Failed to load images');
+        toast.error(t('toast.loadFailed'));
       } finally {
         setLoading(false);
       }
     }
     
     loadImages();
-  }, [characterId]);
+  }, [characterId, t]);
 
   // Save canvas state when it changes
   const saveCanvasState = useCallback(() => {
@@ -138,7 +140,7 @@ export function MoodboardCanvas({
   const addImageToCanvas = useCallback((image: ImageWithUrl) => {
     // Check if already on canvas
     if (items.some(item => item.imageId === image.id)) {
-      toast.error('Image already on canvas');
+      toast.error(t('toast.imageAlreadyOnCanvas'));
       return;
     }
 
@@ -174,7 +176,7 @@ export function MoodboardCanvas({
 
     setItems(prev => [...prev, newItem]);
     setSelectedId(newItem.id);
-  }, [items, viewport]);
+  }, [items, viewport, t]);
 
   // Update item position
   const updateItemPosition = useCallback((id: string, x: number, y: number) => {
@@ -256,8 +258,8 @@ export function MoodboardCanvas({
       {/* Image sidebar */}
       <div className="w-48 border-r bg-background/50 flex flex-col">
         <div className="p-2 border-b">
-          <h3 className="text-sm font-medium">Images</h3>
-          <p className="text-xs text-muted-foreground">Drag to canvas</p>
+          <h3 className="text-sm font-medium">{t('sidebar.title')}</h3>
+          <p className="text-xs text-muted-foreground">{t('sidebar.hint')}</p>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {images.map(image => {
@@ -282,7 +284,7 @@ export function MoodboardCanvas({
                 )}
                 {isOnCanvas && (
                   <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
-                    <span className="text-xs font-medium">On Canvas</span>
+                    <span className="text-xs font-medium">{t('sidebar.onCanvas')}</span>
                   </div>
                 )}
               </div>
@@ -290,7 +292,7 @@ export function MoodboardCanvas({
           })}
           {images.length === 0 && (
             <p className="text-xs text-muted-foreground text-center py-4">
-              No images uploaded yet
+              {t('sidebar.noImages')}
             </p>
           )}
         </div>
@@ -379,7 +381,7 @@ export function MoodboardCanvas({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>Rotate -15°</p>
+                  <p>{t('controls.rotateLeft')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -394,7 +396,7 @@ export function MoodboardCanvas({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>Rotate +15°</p>
+                  <p>{t('controls.rotateRight')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -410,7 +412,7 @@ export function MoodboardCanvas({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>Reset rotation</p>
+                  <p>{t('controls.resetRotation')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -429,7 +431,7 @@ export function MoodboardCanvas({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>{selectedItem.locked ? 'Unlock' : 'Lock'}</p>
+                  <p>{selectedItem.locked ? t('controls.unlock') : t('controls.lock')}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -444,7 +446,7 @@ export function MoodboardCanvas({
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
-                  <p>Remove from canvas</p>
+                  <p>{t('controls.remove')}</p>
                 </TooltipContent>
               </Tooltip>
             </div>
@@ -455,8 +457,8 @@ export function MoodboardCanvas({
         {items.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center text-muted-foreground">
-              <p className="text-lg font-medium">Click images to add to canvas</p>
-              <p className="text-sm">Drag to pan • Scroll to zoom</p>
+              <p className="text-lg font-medium">{t('empty.title')}</p>
+              <p className="text-sm">{t('empty.hint')}</p>
             </div>
           </div>
         )}

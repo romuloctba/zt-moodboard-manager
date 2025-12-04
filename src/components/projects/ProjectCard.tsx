@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import type { Project } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,30 +23,32 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, onClick }: ProjectCardProps) {
+  const t = useTranslations('projects');
+  const locale = useLocale();
   const [showRename, setShowRename] = useState(false);
   const { archiveProject, deleteProject, renameProject } = useProjectStore();
 
   const handleArchive = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await archiveProject(project.id);
-    toast.success('Project archived');
+    toast.success(t('toast.archived'));
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+    if (confirm(t('confirmDelete'))) {
       await deleteProject(project.id);
-      toast.success('Project deleted');
+      toast.success(t('toast.deleted'));
     }
   };
 
   const handleRename = async (newName: string) => {
     await renameProject(project.id, newName);
-    toast.success('Project renamed');
+    toast.success(t('toast.renamed'));
     setShowRename(false);
   };
 
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
+  const formattedDate = new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -76,11 +79,11 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowRename(true); }}>
                   <Pencil className="w-4 h-4 mr-2" />
-                  Rename
+                  {t('menu.rename')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleArchive}>
                   <Archive className="w-4 h-4 mr-2" />
-                  Archive
+                  {t('menu.archive')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -88,7 +91,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
                   className="text-destructive focus:text-destructive"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  Delete
+                  {t('menu.delete')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -101,11 +104,11 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
             </CardDescription>
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Created {formattedDate}</span>
+            <span>{t('card.created', { date: formattedDate })}</span>
             {project.tags.length > 0 && (
               <>
                 <span>•</span>
-                <span>{project.tags.length} tags</span>
+                <span>{t('card.tags', { count: project.tags.length })}</span>
               </>
             )}
           </div>
@@ -115,7 +118,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
       <RenameDialog
         open={showRename}
         onOpenChange={setShowRename}
-        title="Rename Project"
+        title={t('renameDialog.title')}
         currentName={project.name}
         onRename={handleRename}
       />

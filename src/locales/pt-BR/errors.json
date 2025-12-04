@@ -1,0 +1,26 @@
+{
+  "generic": "Algo deu errado",
+  "notFound": {
+    "project": "Projeto não encontrado",
+    "character": "Personagem não encontrado",
+    "image": "Imagem não encontrada"
+  },
+  "validation": {
+    "required": "Este campo é obrigatório",
+    "nameRequired": "Por favor, insira um nome",
+    "projectNameRequired": "Por favor, insira um nome para o projeto",
+    "characterNameRequired": "Por favor, insira um nome para o personagem"
+  },
+  "storage": {
+    "failed": "Operação de armazenamento falhou",
+    "quotaExceeded": "Cota de armazenamento excedida"
+  },
+  "export": {
+    "noImages": "Nenhuma imagem para exportar",
+    "failed": "Falha ao exportar imagens"
+  },
+  "import": {
+    "invalidFile": "Formato de arquivo inválido",
+    "failed": "Falha ao importar"
+  }
+}
