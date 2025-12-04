@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useGesture } from '@use-gesture/react';
+import { TransformWrapper, TransformComponent, useControls, useTransformContext } from 'react-zoom-pan-pinch';
 import { useTranslations } from 'next-intl';
 import { Loader2, ZoomIn, ZoomOut, Maximize, Lock, Unlock, Trash2, RotateCcw, RotateCw, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,6 @@ interface ImageWithUrl extends MoodboardImage {
 
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
-const ZOOM_STEP = 0.1;
 
 const DEFAULT_VIEWPORT: CanvasViewport = {
   x: 0,
@@ -32,13 +31,127 @@ const DEFAULT_VIEWPORT: CanvasViewport = {
   zoom: 1,
 };
 
+// Zoom controls component that uses the transform context
+function ZoomControls({ zoom }: { zoom: number }) {
+  const { zoomIn, zoomOut, resetTransform } = useControls();
+  
+  return (
+    <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-background/80 backdrop-blur rounded-lg p-1 z-10">
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => zoomOut()}>
+        <ZoomOut className="h-4 w-4" />
+      </Button>
+      <span className="text-xs w-12 text-center">{Math.round(zoom * 100)}%</span>
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => zoomIn()}>
+        <ZoomIn className="h-4 w-4" />
+      </Button>
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => resetTransform()}>
+        <Maximize className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+// Canvas content component that accesses transform state via context
+interface CanvasContentProps {
+  items: CanvasImageItem[];
+  selectedId: string | null;
+  viewport: CanvasViewport;
+  setSelectedId: (id: string | null) => void;
+  bringToFront: (id: string) => void;
+  updateItemPosition: (id: string, x: number, y: number) => void;
+  updateItemSize: (id: string, width: number, height: number) => void;
+  setItems: React.Dispatch<React.SetStateAction<CanvasImageItem[]>>;
+  setIsDraggingItem: (dragging: boolean) => void;
+  getImageUrl: (imageId: string) => string | undefined;
+  getImageInfo: (imageId: string) => ImageWithUrl | undefined;
+  t: ReturnType<typeof useTranslations<'characters.canvas'>>;
+}
+
+function CanvasContent({
+  items,
+  selectedId,
+  viewport,
+  setSelectedId,
+  bringToFront,
+  updateItemPosition,
+  updateItemSize,
+  setItems,
+  setIsDraggingItem,
+  getImageUrl,
+  getImageInfo,
+  t,
+}: CanvasContentProps) {
+  const { transformState } = useTransformContext();
+  const currentScale = transformState?.scale ?? viewport.zoom;
+
+  return (
+    <>
+      <TransformComponent
+        wrapperStyle={{
+          width: '100%',
+          height: '100%',
+        }}
+        contentStyle={{
+          width: '100%',
+          height: '100%',
+        }}
+      >
+        {/* Canvas content */}
+        <div 
+          className="relative w-[5000px] h-[5000px]"
+          onClick={() => setSelectedId(null)}
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+          }}
+        >
+          {items.map(item => (
+            <CanvasImage
+              key={item.id}
+              item={item}
+              imageUrl={getImageUrl(item.imageId)}
+              imageInfo={getImageInfo(item.imageId)}
+              isSelected={selectedId === item.id}
+              onSelect={() => {
+                setSelectedId(item.id);
+                bringToFront(item.id);
+              }}
+              onPositionChange={(x, y) => updateItemPosition(item.id, x, y)}
+              onSizeChange={(w, h) => updateItemSize(item.id, w, h)}
+              onRotationChange={(r) => setItems(prev => prev.map(i => i.id === item.id ? { ...i, rotation: r } : i))}
+              onDragStart={() => setIsDraggingItem(true)}
+              onDragEnd={() => setIsDraggingItem(false)}
+              zoom={currentScale}
+            />
+          ))}
+          
+          {/* Help text */}
+          {items.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center text-muted-foreground">
+                <p className="text-lg font-medium">{t('empty.title')}</p>
+                <p className="text-sm">{t('empty.hint')}</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </TransformComponent>
+
+      {/* Zoom controls */}
+      <ZoomControls zoom={currentScale} />
+    </>
+  );
+}
+
 export function MoodboardCanvas({ 
   characterId, 
   canvasState, 
   onCanvasChange,
   className 
 }: MoodboardCanvasProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const t = useTranslations('characters.canvas');
   const [images, setImages] = useState<ImageWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,7 +162,6 @@ export function MoodboardCanvas({
   );
   const [items, setItems] = useState<CanvasImageItem[]>(canvasState?.items || []);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isDraggingCanvas, setIsDraggingCanvas] = useState(false);
   const [isDraggingItem, setIsDraggingItem] = useState(false);
 
   // Track highest z-index
@@ -96,45 +208,6 @@ export function MoodboardCanvas({
     const timeout = setTimeout(saveCanvasState, 500);
     return () => clearTimeout(timeout);
   }, [saveCanvasState]);
-
-  // Canvas pan/zoom gestures
-  useGesture(
-    {
-      onDrag: ({ delta: [dx, dy], event, pinching }) => {
-        if (pinching || isDraggingItem) return;
-        event.preventDefault();
-        setIsDraggingCanvas(true);
-        setViewport(prev => ({
-          ...prev,
-          x: prev.x + dx,
-          y: prev.y + dy,
-        }));
-      },
-      onDragEnd: () => {
-        setIsDraggingCanvas(false);
-      },
-      onWheel: ({ delta: [, dy], event }) => {
-        event.preventDefault();
-        const zoomDelta = dy > 0 ? -ZOOM_STEP : ZOOM_STEP;
-        setViewport(prev => ({
-          ...prev,
-          zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, prev.zoom + zoomDelta)),
-        }));
-      },
-      onPinch: ({ offset: [scale] }) => {
-        setViewport(prev => ({
-          ...prev,
-          zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale)),
-        }));
-      },
-    },
-    {
-      target: containerRef,
-      drag: { filterTaps: true },
-      wheel: { eventOptions: { passive: false } },
-      pinch: { scaleBounds: { min: MIN_ZOOM, max: MAX_ZOOM } },
-    }
-  );
 
   // Add image to canvas
   const addImageToCanvas = useCallback((image: ImageWithUrl) => {
@@ -220,30 +293,26 @@ export function MoodboardCanvas({
     ));
   }, []);
 
-  // Zoom controls
-  const zoomIn = () => setViewport(prev => ({ 
-    ...prev, 
-    zoom: Math.min(MAX_ZOOM, prev.zoom + ZOOM_STEP * 2) 
-  }));
-  
-  const zoomOut = () => setViewport(prev => ({ 
-    ...prev, 
-    zoom: Math.max(MIN_ZOOM, prev.zoom - ZOOM_STEP * 2) 
-  }));
-  
-  const resetView = () => setViewport(DEFAULT_VIEWPORT);
-
   // Get image URL by ID
   const getImageUrl = useCallback((imageId: string) => {
     return images.find(img => img.id === imageId)?.thumbnailUrl;
   }, [images]);
 
-  // Get image aspect ratio
+  // Get image info
   const getImageInfo = useCallback((imageId: string) => {
     return images.find(img => img.id === imageId);
   }, [images]);
 
   const selectedItem = items.find(i => i.id === selectedId);
+
+  // Handle transform change from react-zoom-pan-pinch
+  const handleTransformChange = useCallback((ref: { state: { scale: number; positionX: number; positionY: number } }) => {
+    setViewport({
+      zoom: ref.state.scale,
+      x: ref.state.positionX,
+      y: ref.state.positionY,
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -300,75 +369,42 @@ export function MoodboardCanvas({
 
       {/* Canvas area */}
       <div className="flex-1 relative overflow-hidden bg-neutral-900">
-        {/* Canvas */}
-        <div
-          ref={containerRef}
-          className={cn(
-            'absolute inset-0',
-            isDraggingCanvas ? 'cursor-grabbing' : 'cursor-grab'
-          )}
-          onClick={() => setSelectedId(null)}
+        <TransformWrapper
+          initialScale={viewport.zoom}
+          initialPositionX={viewport.x}
+          initialPositionY={viewport.y}
+          minScale={MIN_ZOOM}
+          maxScale={MAX_ZOOM}
+          limitToBounds={false}
+          onTransformed={handleTransformChange}
+          panning={{
+            disabled: isDraggingItem,
+            velocityDisabled: true,
+          }}
+          pinch={{ disabled: isDraggingItem }}
+          wheel={{ smoothStep: 0.05 }}
+          doubleClick={{ disabled: true }}
         >
-          {/* Grid pattern */}
-          <div 
-            className="absolute inset-0 pointer-events-none opacity-20"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: `${50 * viewport.zoom}px ${50 * viewport.zoom}px`,
-              backgroundPosition: `${viewport.x}px ${viewport.y}px`,
-            }}
+          <CanvasContent
+            items={items}
+            selectedId={selectedId}
+            viewport={viewport}
+            setSelectedId={setSelectedId}
+            bringToFront={bringToFront}
+            updateItemPosition={updateItemPosition}
+            updateItemSize={updateItemSize}
+            setItems={setItems}
+            setIsDraggingItem={setIsDraggingItem}
+            getImageUrl={getImageUrl}
+            getImageInfo={getImageInfo}
+            t={t}
           />
-
-          {/* Canvas items container */}
-          <div
-            style={{
-              transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
-              transformOrigin: '0 0',
-            }}
-          >
-            {items.map(item => (
-              <CanvasImage
-                key={item.id}
-                item={item}
-                imageUrl={getImageUrl(item.imageId)}
-                imageInfo={getImageInfo(item.imageId)}
-                isSelected={selectedId === item.id}
-                onSelect={() => {
-                  setSelectedId(item.id);
-                  bringToFront(item.id);
-                }}
-                onPositionChange={(x, y) => updateItemPosition(item.id, x, y)}
-                onSizeChange={(w, h) => updateItemSize(item.id, w, h)}
-                onRotationChange={(r) => setItems(prev => prev.map(i => i.id === item.id ? { ...i, rotation: r } : i))}
-                onDragStart={() => setIsDraggingItem(true)}
-                onDragEnd={() => setIsDraggingItem(false)}
-                zoom={viewport.zoom}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Zoom controls */}
-        <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-background/80 backdrop-blur rounded-lg p-1">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomOut}>
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <span className="text-xs w-12 text-center">{Math.round(viewport.zoom * 100)}%</span>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={zoomIn}>
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={resetView}>
-            <Maximize className="h-4 w-4" />
-          </Button>
-        </div>
+        </TransformWrapper>
 
         {/* Selected item controls */}
         {selectedItem && (
           <TooltipProvider delayDuration={300}>
-            <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/80 backdrop-blur rounded-lg p-1">
+            <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/80 backdrop-blur rounded-lg p-1 z-10">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button 
@@ -452,22 +488,12 @@ export function MoodboardCanvas({
             </div>
           </TooltipProvider>
         )}
-
-        {/* Help text */}
-        {items.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center text-muted-foreground">
-              <p className="text-lg font-medium">{t('empty.title')}</p>
-              <p className="text-sm">{t('empty.hint')}</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-// Individual canvas image component
+// Individual canvas image component with pointer events for touch support
 interface CanvasImageProps {
   item: CanvasImageItem;
   imageUrl?: string;
@@ -497,50 +523,66 @@ function CanvasImage({
 }: CanvasImageProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
 
-  useGesture(
-    {
-      onDrag: ({ delta: [dx, dy], first, last, event }) => {
-        if (item.locked) return;
-        event.stopPropagation();
-        
-        if (first) {
-          setIsDragging(true);
-          onDragStart();
-          onSelect();
-        }
-        
-        onPositionChange(item.x + dx / zoom, item.y + dy / zoom);
-        
-        if (last) {
-          setIsDragging(false);
-          onDragEnd();
-        }
-      },
-    },
-    {
-      target: elementRef,
-      drag: { filterTaps: true },
-    }
-  );
-
-  // Resize handler
-  const handleResize = useCallback((e: React.MouseEvent, corner: string) => {
+  // Drag handler using pointer events
+  const handleDragStart = useCallback((e: React.PointerEvent) => {
     if (item.locked) return;
     e.stopPropagation();
     e.preventDefault();
     
+    const target = e.currentTarget as HTMLElement;
+    target.setPointerCapture(e.pointerId);
+    
+    setIsDragging(true);
+    onDragStart();
+    onSelect();
+    
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startItemX = item.x;
+    const startItemY = item.y;
+
+    const onPointerMove = (moveEvent: PointerEvent) => {
+      const dx = (moveEvent.clientX - startX) / zoom;
+      const dy = (moveEvent.clientY - startY) / zoom;
+      onPositionChange(startItemX + dx, startItemY + dy);
+    };
+
+    const onPointerUp = () => {
+      setIsDragging(false);
+      onDragEnd();
+      target.releasePointerCapture(e.pointerId);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
+    };
+
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
+  }, [item, zoom, onPositionChange, onDragStart, onDragEnd, onSelect]);
+
+  // Resize handler using pointer events
+  const handleResize = useCallback((e: React.PointerEvent, corner: string) => {
+    if (item.locked) return;
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const target = e.currentTarget as HTMLElement;
+    target.setPointerCapture(e.pointerId);
+    
     setIsResizing(true);
+    onDragStart(); // Disable canvas panning during resize
+    
     const startX = e.clientX;
     const startY = e.clientY;
     const startWidth = item.width;
     const startHeight = item.height;
     const aspectRatio = imageInfo ? imageInfo.width / imageInfo.height : 1;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
       const dx = (moveEvent.clientX - startX) / zoom;
       const dy = (moveEvent.clientY - startY) / zoom;
       
@@ -552,31 +594,39 @@ function CanvasImage({
       if (corner.includes('s')) newHeight = Math.max(50, startHeight + dy);
       if (corner.includes('n')) newHeight = Math.max(50, startHeight - dy);
       
-      // Maintain aspect ratio with shift key
-      if (moveEvent.shiftKey) {
+      // Maintain aspect ratio with shift key (desktop) or always on touch
+      if (moveEvent.shiftKey || moveEvent.pointerType === 'touch') {
         newHeight = newWidth / aspectRatio;
       }
       
       onSizeChange(newWidth, newHeight);
     };
 
-    const onMouseUp = () => {
+    const onPointerUp = () => {
       setIsResizing(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      onDragEnd();
+      target.releasePointerCapture(e.pointerId);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }, [item, imageInfo, zoom, onSizeChange]);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
+  }, [item, imageInfo, zoom, onSizeChange, onDragStart, onDragEnd]);
 
-  // Rotation handler
-  const handleRotate = useCallback((e: React.MouseEvent) => {
+  // Rotation handler using pointer events
+  const handleRotate = useCallback((e: React.PointerEvent) => {
     if (item.locked) return;
     e.stopPropagation();
     e.preventDefault();
     
+    const target = e.currentTarget as HTMLElement;
+    target.setPointerCapture(e.pointerId);
+    
     setIsRotating(true);
+    onDragStart(); // Disable canvas panning during rotation
     
     // Get center of the element
     const rect = elementRef.current?.getBoundingClientRect();
@@ -589,11 +639,11 @@ function CanvasImage({
     const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
     const startRotation = item.rotation;
 
-    const onMouseMove = (moveEvent: MouseEvent) => {
+    const onPointerMove = (moveEvent: PointerEvent) => {
       const currentAngle = Math.atan2(moveEvent.clientY - centerY, moveEvent.clientX - centerX) * (180 / Math.PI);
       let newRotation = startRotation + (currentAngle - startAngle);
       
-      // Snap to 15° increments when holding shift
+      // Snap to 15° increments when holding shift (desktop only)
       if (moveEvent.shiftKey) {
         newRotation = Math.round(newRotation / 15) * 15;
       }
@@ -601,15 +651,19 @@ function CanvasImage({
       onRotationChange(newRotation);
     };
 
-    const onMouseUp = () => {
+    const onPointerUp = () => {
       setIsRotating(false);
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
+      onDragEnd();
+      target.releasePointerCapture(e.pointerId);
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+      document.removeEventListener('pointercancel', onPointerUp);
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  }, [item, onRotationChange]);
+    document.addEventListener('pointermove', onPointerMove);
+    document.addEventListener('pointerup', onPointerUp);
+    document.addEventListener('pointercancel', onPointerUp);
+  }, [item, onRotationChange, onDragStart, onDragEnd]);
 
   return (
     <div
@@ -627,7 +681,9 @@ function CanvasImage({
         height: item.height,
         zIndex: item.zIndex,
         transform: `rotate(${item.rotation}deg)`,
+        touchAction: 'none',
       }}
+      onPointerDown={handleDragStart}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -659,38 +715,43 @@ function CanvasImage({
       {isSelected && !item.locked && (
         <>
           <div
-            className="absolute -right-1 -bottom-1 w-3 h-3 bg-primary rounded-sm cursor-se-resize"
-            onMouseDown={(e) => handleResize(e, 'se')}
+            className="absolute -right-6 -bottom-6 w-5 h-5 bg-primary rounded-sm cursor-se-resize"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => handleResize(e, 'se')}
           />
           <div
-            className="absolute -left-1 -bottom-1 w-3 h-3 bg-primary rounded-sm cursor-sw-resize"
-            onMouseDown={(e) => handleResize(e, 'sw')}
+            className="absolute -left-6 -bottom-6 w-5 h-5 bg-primary rounded-sm cursor-sw-resize"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => handleResize(e, 'sw')}
           />
           <div
-            className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-sm cursor-ne-resize"
-            onMouseDown={(e) => handleResize(e, 'ne')}
+            className="absolute -right-6 -top-6 w-5 h-5 bg-primary rounded-sm cursor-ne-resize"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => handleResize(e, 'ne')}
           />
           <div
-            className="absolute -left-1 -top-1 w-3 h-3 bg-primary rounded-sm cursor-nw-resize"
-            onMouseDown={(e) => handleResize(e, 'nw')}
+            className="absolute -left-6 -top-6 w-5 h-5 bg-primary rounded-sm cursor-nw-resize"
+            style={{ touchAction: 'none' }}
+            onPointerDown={(e) => handleResize(e, 'nw')}
           />
           {/* Rotation handle */}
           <div
             className={cn(
-              "absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center",
+              "absolute left-1/2 -translate-x-1/2 -top-12 flex flex-col items-center",
               isRotating && "cursor-grabbing"
             )}
-            onMouseDown={handleRotate}
+            style={{ touchAction: 'none' }}
+            onPointerDown={handleRotate}
           >
-            <div className="w-0.5 h-4 bg-primary" />
             <div 
               className={cn(
-                "w-4 h-4 bg-primary rounded-full flex items-center justify-center cursor-grab",
+                "w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-grab",
                 isRotating && "cursor-grabbing ring-2 ring-primary/50"
               )}
             >
-              <RotateCcw className="h-2.5 w-2.5 text-primary-foreground" />
+              <RotateCcw className="h-4 w-4 text-primary-foreground" />
             </div>
+            <div className="w-0.5 h-4 bg-primary" />
           </div>
         </>
       )}
@@ -700,6 +761,11 @@ function CanvasImage({
         <div className="absolute top-1 right-1 bg-background/80 rounded p-0.5">
           <Lock className="h-3 w-3 text-muted-foreground" />
         </div>
+      )}
+      
+      {/* Visual feedback for resize/rotate */}
+      {(isResizing || isRotating) && (
+        <div className="absolute inset-0 border-2 border-primary border-dashed rounded-md pointer-events-none" />
       )}
     </div>
   );
