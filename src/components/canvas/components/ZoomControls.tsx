@@ -3,6 +3,7 @@
 import { useControls } from 'react-zoom-pan-pinch';
 import { ZoomIn, ZoomOut, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DEFAULT_VIEWPORT } from '../constants';
 
 interface ZoomControlsProps {
   zoom: number;
@@ -13,7 +14,11 @@ interface ZoomControlsProps {
  * Must be rendered inside a TransformWrapper context
  */
 export function ZoomControls({ zoom }: ZoomControlsProps) {
-  const { zoomIn, zoomOut, resetTransform } = useControls();
+  const { zoomIn, zoomOut, setTransform } = useControls();
+
+  const handleReset = () => {
+    setTransform(DEFAULT_VIEWPORT.x, DEFAULT_VIEWPORT.y, DEFAULT_VIEWPORT.zoom);
+  };
 
   return (
     <div className="absolute bottom-4 right-4 flex items-center gap-2 bg-background/80 backdrop-blur rounded-lg p-1 z-10">
@@ -38,7 +43,7 @@ export function ZoomControls({ zoom }: ZoomControlsProps) {
         variant="ghost"
         size="icon"
         className="h-8 w-8"
-        onClick={() => resetTransform()}
+        onClick={handleReset}
       >
         <Maximize className="h-4 w-4" />
       </Button>
