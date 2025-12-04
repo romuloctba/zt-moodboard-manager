@@ -15,7 +15,7 @@ interface ProjectState {
   // Actions - Projects
   loadProjects: () => Promise<void>;
   createProject: (name: string, description?: string) => Promise<Project>;
-  selectProject: (id: string) => Promise<void>;
+  selectProject: (id: string) => Promise<boolean>;
   renameProject: (id: string, name: string) => Promise<void>;
   archiveProject: (id: string) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
@@ -23,7 +23,7 @@ interface ProjectState {
   // Actions - Characters
   loadCharacters: (projectId: string) => Promise<void>;
   createCharacter: (name: string) => Promise<Character | null>;
-  selectCharacter: (id: string) => Promise<void>;
+  selectCharacter: (id: string) => Promise<boolean>;
   renameCharacter: (id: string, name: string) => Promise<void>;
   deleteCharacter: (id: string) => Promise<void>;
 
@@ -63,7 +63,10 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     if (project) {
       set({ currentProject: project, currentCharacter: null });
       await get().loadCharacters(id);
+      return true;
     }
+    set({ isLoading: false });
+    return false;
   },
 
   renameProject: async (id: string, name: string) => {
@@ -112,7 +115,11 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   selectCharacter: async (id: string) => {
     const character = await characterRepository.getById(id);
-    set({ currentCharacter: character || null });
+    if (character) {
+      set({ currentCharacter: character });
+      return true;
+    }
+    return false;
   },
 
   renameCharacter: async (id: string, name: string) => {

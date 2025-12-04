@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectStore } from '@/store/projectStore';
+import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
@@ -23,14 +24,26 @@ function ProjectViewContent() {
     clearCurrentProject 
   } = useProjectStore();
 
+  const { triggerNotFound } = useNotFound({
+    entity: 'Project',
+  });
+
   useEffect(() => {
     if (!projectId) {
       router.push('/');
       return;
     }
-    selectProject(projectId);
+
+    async function loadProject() {
+      const found = await selectProject(projectId!);
+      if (!found) {
+        triggerNotFound();
+      }
+    }
+
+    loadProject();
     return () => clearCurrentProject();
-  }, [projectId, selectProject, clearCurrentProject, router]);
+  }, [projectId, selectProject, clearCurrentProject, router, triggerNotFound]);
 
   if (isLoading || !currentProject) {
     return <ProjectDetailSkeleton />;

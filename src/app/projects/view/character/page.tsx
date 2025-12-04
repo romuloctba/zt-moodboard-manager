@@ -6,8 +6,9 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
-import { characterRepository } from '@/lib/db/repositories';
+import { characterRepository, projectRepository } from '@/lib/db/repositories';
 import { exportCharacterImages } from '@/lib/export/exportService';
+import { useNotFound } from '@/hooks/use-not-found';
 import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
@@ -29,6 +30,15 @@ function CharacterViewContent() {
   const [exporting, setExporting] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
+  const { triggerNotFound: triggerProjectNotFound } = useNotFound({
+    entity: 'Project',
+  });
+
+  const { triggerNotFound: triggerCharacterNotFound } = useNotFound({
+    entity: 'Character',
+    redirectTo: projectId ? `/projects/view?projectId=${projectId}` : undefined,
+  });
+
   useEffect(() => {
     async function loadCharacter() {
       if (!characterId || !projectId) {
@@ -37,22 +47,29 @@ function CharacterViewContent() {
       }
 
       try {
+        // First verify the project exists
+        const project = await projectRepository.getById(projectId);
+        if (!project) {
+          triggerProjectNotFound();
+          return;
+        }
+
         const char = await characterRepository.getById(characterId);
         if (char && char.projectId === projectId) {
           setCharacter(char);
         } else {
-          router.replace(`/projects/view?projectId=${projectId}`);
+          triggerCharacterNotFound();
         }
       } catch (error) {
         console.error('Failed to load character:', error);
-        router.replace(`/projects/view?projectId=${projectId}`);
+        triggerCharacterNotFound();
       } finally {
         setLoading(false);
       }
     }
 
     loadCharacter();
-  }, [characterId, projectId, router]);
+  }, [characterId, projectId, router, triggerProjectNotFound, triggerCharacterNotFound]);
 
   const handleUploadComplete = useCallback(() => {
     // Trigger a refresh of the image grid
