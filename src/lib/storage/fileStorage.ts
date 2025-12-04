@@ -31,6 +31,7 @@ export class FileStorage {
   private root: FileSystemDirectoryHandle | null = null;
   private initialized = false;
   private useOPFS = true;
+  private supportsCreateWritable = true;
   private fallbackDb: FileStorageDatabase | null = null;
 
   async initialize(): Promise<void> {
@@ -40,8 +41,35 @@ export class FileStorage {
       // Check if OPFS is available
       if ('storage' in navigator && 'getDirectory' in navigator.storage) {
         this.root = await navigator.storage.getDirectory();
-        this.useOPFS = true;
-        console.log('[FileStorage] Using OPFS');
+
+        // Test if createWritable is supported (Safari doesn't support it)
+        try {
+          const testHandle = await this.root.getFileHandle('.opfs-test', { create: true });
+          if (typeof testHandle.createWritable === 'function') {
+            // Try to actually call it to make sure it works
+            const writable = await testHandle.createWritable();
+            await writable.close();
+            this.supportsCreateWritable = true;
+          } else {
+            this.supportsCreateWritable = false;
+          }
+          // Clean up test file
+          await this.root.removeEntry('.opfs-test');
+        } catch {
+          // createWritable not supported (Safari)
+          this.supportsCreateWritable = false;
+        }
+
+        if (this.supportsCreateWritable) {
+          this.useOPFS = true;
+          console.log('[FileStorage] Using OPFS with createWritable');
+        } else {
+          // Safari: OPFS exists but createWritable doesn't work
+          // Fall back to IndexedDB
+          this.useOPFS = false;
+          this.fallbackDb = new FileStorageDatabase();
+          console.log('[FileStorage] OPFS available but createWritable not supported (Safari), using IndexedDB fallback');
+        }
       } else {
         this.useOPFS = false;
         this.fallbackDb = new FileStorageDatabase();
