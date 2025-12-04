@@ -5,6 +5,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { ProjectList } from '@/components/projects/ProjectList';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { Button } from '@/components/ui/button';
+import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { Plus, Palette } from 'lucide-react';
 
 export default function HomePage() {
@@ -23,12 +24,15 @@ export default function HomePage() {
             <Palette className="w-8 h-8 text-primary" />
             <h1 className="text-2xl font-bold">Moodboard Manager</h1>
           </div>
-          <CreateProjectDialog>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              New Project
-            </Button>
-          </CreateProjectDialog>
+          <div className="flex items-center gap-4">
+            <StorageIndicator />
+            <CreateProjectDialog>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                New Project
+              </Button>
+            </CreateProjectDialog>
+          </div>
         </div>
       </header>
 

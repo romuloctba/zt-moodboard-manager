@@ -11,17 +11,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, User } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, User, ImageIcon } from 'lucide-react';
 import { useProjectStore } from '@/store/projectStore';
 import { toast } from 'sonner';
 import { RenameDialog } from '@/components/projects/RenameDialog';
 
 interface CharacterCardProps {
   character: Character;
+  imageCount?: number;
   onClick: () => void;
 }
 
-export function CharacterCard({ character, onClick }: CharacterCardProps) {
+export function CharacterCard({ character, imageCount = 0, onClick }: CharacterCardProps) {
   const [showRename, setShowRename] = useState(false);
   const { deleteCharacter, renameCharacter } = useProjectStore();
 
@@ -93,6 +94,11 @@ export function CharacterCard({ character, onClick }: CharacterCardProps) {
           )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>Created {formattedDate}</span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              {imageCount} {imageCount === 1 ? 'image' : 'images'}
+            </span>
             {character.tags.length > 0 && (
               <>
                 <span>•</span>

@@ -27,7 +27,7 @@ export class MoodboardDatabase extends Dexie {
       characters: 'id, projectId, name, sortOrder, createdAt',
       sections: 'id, characterId, type, sortOrder',
       canvasItems: 'id, sectionId, type, createdAt',
-      images: 'id, filename, mimeType, createdAt, *tags',
+      images: 'id, characterId, sectionId, filename, mimeType, createdAt, *tags',
       tags: 'id, name, category',
       settings: 'id',
     });

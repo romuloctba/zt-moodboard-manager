@@ -117,6 +117,8 @@ export interface ConnectionContent {
 // Image Types
 export interface MoodboardImage {
   id: string;
+  characterId: string;  // Direct link to character for MVP simplicity
+  sectionId?: string;   // Optional section for organized view
   filename: string;
   originalName: string;
   mimeType: string;
@@ -127,6 +129,7 @@ export interface MoodboardImage {
   thumbnailPath: string;
   palette?: ColorPalette;
   tags: string[];
+  notes?: string;
   createdAt: Date;
 }
 

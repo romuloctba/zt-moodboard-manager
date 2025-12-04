@@ -4,7 +4,7 @@ import { fileStorage } from '@/lib/storage/fileStorage';
 import { processImage } from '@/lib/storage/imageProcessor';
 
 export const imageRepository = {
-  async create(file: File): Promise<MoodboardImage> {
+  async create(file: File, characterId: string): Promise<MoodboardImage> {
     const id = generateId();
 
     // Process the image (compress, thumbnail, palette)
@@ -26,6 +26,7 @@ export const imageRepository = {
 
     const image: MoodboardImage = {
       id,
+      characterId,
       filename: `${id}.${file.name.split('.').pop() || 'jpg'}`,
       originalName: file.name,
       mimeType: file.type,
@@ -49,6 +50,10 @@ export const imageRepository = {
 
   async getAll(): Promise<MoodboardImage[]> {
     return db.images.orderBy('createdAt').reverse().toArray();
+  },
+
+  async getByCharacterId(characterId: string): Promise<MoodboardImage[]> {
+    return db.images.where('characterId').equals(characterId).reverse().sortBy('createdAt');
   },
 
   async getByIds(ids: string[]): Promise<MoodboardImage[]> {
