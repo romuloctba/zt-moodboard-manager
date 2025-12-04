@@ -34,6 +34,23 @@ export class FileStorage {
   private supportsCreateWritable = true;
   private fallbackDb: FileStorageDatabase | null = null;
 
+  /**
+   * Check if createWritable is supported by checking the prototype.
+   * This is more reliable than user agent detection and faster than
+   * creating a test file.
+   */
+  private checkCreateWritableSupport(): boolean {
+    try {
+      // Check if FileSystemFileHandle exists and has createWritable on its prototype
+      if (typeof FileSystemFileHandle !== 'undefined') {
+        return typeof FileSystemFileHandle.prototype.createWritable === 'function';
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
@@ -42,33 +59,51 @@ export class FileStorage {
       if ('storage' in navigator && 'getDirectory' in navigator.storage) {
         this.root = await navigator.storage.getDirectory();
 
-        // Test if createWritable is supported (Safari doesn't support it)
-        try {
-          const testHandle = await this.root.getFileHandle('.opfs-test', { create: true });
-          if (typeof testHandle.createWritable === 'function') {
-            // Try to actually call it to make sure it works
-            const writable = await testHandle.createWritable();
-            await writable.close();
-            this.supportsCreateWritable = true;
-          } else {
-            this.supportsCreateWritable = false;
-          }
-          // Clean up test file
-          await this.root.removeEntry('.opfs-test');
-        } catch {
-          // createWritable not supported (Safari)
-          this.supportsCreateWritable = false;
-        }
+        // First, check if createWritable exists on the prototype
+        // This catches Safari/WebKit browsers that have OPFS but not createWritable
+        const hasCreateWritableAPI = this.checkCreateWritableSupport();
 
-        if (this.supportsCreateWritable) {
-          this.useOPFS = true;
-          console.log('[FileStorage] Using OPFS with createWritable');
-        } else {
-          // Safari: OPFS exists but createWritable doesn't work
-          // Fall back to IndexedDB
+        if (!hasCreateWritableAPI) {
+          // API not available (Safari/iOS WebKit) - use IndexedDB
           this.useOPFS = false;
+          this.supportsCreateWritable = false;
           this.fallbackDb = new FileStorageDatabase();
-          console.log('[FileStorage] OPFS available but createWritable not supported (Safari), using IndexedDB fallback');
+          console.log('[FileStorage] createWritable API not available, using IndexedDB fallback');
+        } else {
+          // API exists, but verify it actually works with a test write
+          // Use a unique filename to avoid conflicts
+          const testFileName = `.opfs-test-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+          let testSucceeded = false;
+
+          try {
+            const testHandle = await this.root.getFileHandle(testFileName, { create: true });
+            const writable = await testHandle.createWritable();
+            await writable.write(new Uint8Array([1, 2, 3])); // Write actual data
+            await writable.close();
+            testSucceeded = true;
+
+            // Clean up test file
+            try {
+              await this.root.removeEntry(testFileName);
+            } catch {
+              // Ignore cleanup errors
+            }
+          } catch (testError) {
+            console.warn('[FileStorage] createWritable test failed:', testError);
+            testSucceeded = false;
+          }
+
+          if (testSucceeded) {
+            this.useOPFS = true;
+            this.supportsCreateWritable = true;
+            console.log('[FileStorage] Using OPFS with createWritable');
+          } else {
+            // Test failed despite API being present
+            this.useOPFS = false;
+            this.supportsCreateWritable = false;
+            this.fallbackDb = new FileStorageDatabase();
+            console.log('[FileStorage] createWritable test failed, using IndexedDB fallback');
+          }
         }
       } else {
         this.useOPFS = false;
