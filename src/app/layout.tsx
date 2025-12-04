@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
@@ -15,7 +15,26 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Moodboard Manager",
-  description: "Visual reference management for character creators",
+  description: "Visual reference management for character creators, graphic novel artists, and storytellers",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Moodboard",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  applicationName: "Moodboard Manager",
+  keywords: ["moodboard", "character design", "graphic novel", "visual reference", "concept art"],
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -25,6 +44,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
