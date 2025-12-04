@@ -145,12 +145,18 @@ export class FileStorage {
 
     try {
       const cleanPath = path.replace('opfs://', '');
-      const [dirName, filename] = cleanPath.split('/');
+      const parts = cleanPath.split('/');
+      const filename = parts.pop()!;
+      const dirName = parts.join('/') || 'images';
+
+      console.log(`[FileStorage] Deleting file: ${dirName}/${filename}`);
 
       const directory = await this.root.getDirectoryHandle(dirName);
       await directory.removeEntry(filename);
-    } catch {
-      console.warn('[FileStorage] Failed to delete:', path);
+
+      console.log(`[FileStorage] Successfully deleted: ${path}`);
+    } catch (error) {
+      console.warn('[FileStorage] Failed to delete:', path, error);
     }
   }
 
