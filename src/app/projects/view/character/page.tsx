@@ -1,7 +1,8 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
@@ -16,11 +17,11 @@ import type { Character, CanvasState } from '@/types';
 
 type ViewMode = 'grid' | 'canvas' | 'profile';
 
-export default function CharacterDetailPage() {
-  const params = useParams();
+function CharacterViewContent() {
   const router = useRouter();
-  const projectId = params.projectId as string;
-  const characterId = params.characterId as string;
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
+  const characterId = searchParams.get('characterId');
 
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,16 +31,21 @@ export default function CharacterDetailPage() {
 
   useEffect(() => {
     async function loadCharacter() {
+      if (!characterId || !projectId) {
+        router.push('/');
+        return;
+      }
+
       try {
         const char = await characterRepository.getById(characterId);
         if (char && char.projectId === projectId) {
           setCharacter(char);
         } else {
-          router.replace(`/projects/${projectId}`);
+          router.replace(`/projects/view?projectId=${projectId}`);
         }
       } catch (error) {
         console.error('Failed to load character:', error);
-        router.replace(`/projects/${projectId}`);
+        router.replace(`/projects/view?projectId=${projectId}`);
       } finally {
         setLoading(false);
       }
@@ -89,7 +95,7 @@ export default function CharacterDetailPage() {
     );
   }
 
-  if (!character) {
+  if (!character || !projectId) {
     return null;
   }
 
@@ -102,7 +108,7 @@ export default function CharacterDetailPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push(`/projects/${projectId}`)}
+              onClick={() => router.push(`/projects/view?projectId=${projectId}`)}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -179,7 +185,7 @@ export default function CharacterDetailPage() {
               <h2 className="text-lg font-medium">Add Images</h2>
             </div>
             <ImageUploader
-              characterId={characterId}
+              characterId={characterId!}
               onUploadComplete={handleUploadComplete}
             />
           </section>
@@ -189,14 +195,14 @@ export default function CharacterDetailPage() {
             <h2 className="text-lg font-medium mb-4">Reference Images</h2>
             <ImageGrid
               key={refreshKey}
-              characterId={characterId}
+              characterId={characterId!}
             />
           </section>
         </main>
       ) : viewMode === 'canvas' ? (
         <main className="h-[calc(100vh-73px)]">
           <MoodboardCanvas
-            characterId={characterId}
+            characterId={characterId!}
             canvasState={character.canvasState}
             onCanvasChange={handleCanvasChange}
           />
@@ -210,5 +216,21 @@ export default function CharacterDetailPage() {
         </main>
       )}
     </div>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+    </div>
+  );
+}
+
+export default function CharacterViewPage() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <CharacterViewContent />
+    </Suspense>
   );
 }

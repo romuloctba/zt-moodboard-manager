@@ -1,7 +1,8 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useProjectStore } from '@/store/projectStore';
 import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
@@ -9,10 +10,10 @@ import { CharacterList } from '@/components/characters/CharacterList';
 import { ArrowLeft, Plus, Users, Settings } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ProjectDetailPage() {
-  const params = useParams();
+function ProjectViewContent() {
   const router = useRouter();
-  const projectId = params.projectId as string;
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
   
   const { 
     currentProject, 
@@ -23,11 +24,13 @@ export default function ProjectDetailPage() {
   } = useProjectStore();
 
   useEffect(() => {
-    if (projectId) {
-      selectProject(projectId);
+    if (!projectId) {
+      router.push('/');
+      return;
     }
+    selectProject(projectId);
     return () => clearCurrentProject();
-  }, [projectId, selectProject, clearCurrentProject]);
+  }, [projectId, selectProject, clearCurrentProject, router]);
 
   if (isLoading || !currentProject) {
     return <ProjectDetailSkeleton />;
@@ -127,3 +130,12 @@ function ProjectDetailSkeleton() {
     </div>
   );
 }
+
+export default function ProjectViewPage() {
+  return (
+    <Suspense fallback={<ProjectDetailSkeleton />}>
+      <ProjectViewContent />
+    </Suspense>
+  );
+}
+

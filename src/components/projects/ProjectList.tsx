@@ -12,7 +12,7 @@ export function ProjectList({ projects }: ProjectListProps) {
   const router = useRouter();
 
   const handleProjectClick = (project: Project) => {
-    router.push(`/projects/${project.id}`);
+    router.push(`/projects/view?projectId=${project.id}`);
   };
 
   return (

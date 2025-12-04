@@ -13,7 +13,7 @@ interface CharacterListProps {
 export function CharacterList({ characters }: CharacterListProps) {
   const router = useRouter();
   const params = useParams();
-  const projectId = params.projectId as string;
+  const projectId = params.projectId as string || new URLSearchParams(window.location.search).get('projectId');
   const [imageCounts, setImageCounts] = useState<Record<string, number>>({});
 
   // Fetch image counts for all characters
@@ -32,7 +32,7 @@ export function CharacterList({ characters }: CharacterListProps) {
   }, [characters]);
 
   const handleCharacterClick = (character: Character) => {
-    router.push(`/projects/${projectId}/characters/${character.id}`);
+    router.push(`/projects/view/character?projectId=${projectId}&characterId=${character.id}`);
   };
 
   return (

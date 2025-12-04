@@ -48,6 +48,9 @@ const withPWA = withPWAInit({
   ],
 });
 
+// Check if we're building for static export
+const isStaticExport = process.env.STATIC_EXPORT === 'true';
+
 const nextConfig: NextConfig = {
   // Use webpack for builds (required for next-pwa)
   // Turbopack doesn't support next-pwa yet
@@ -55,6 +58,17 @@ const nextConfig: NextConfig = {
   // Inject version at build time
   env: {
     NEXT_PUBLIC_APP_VERSION: appVersion,
+  },
+  // Enable static export only when explicitly requested
+  // Run with: STATIC_EXPORT=true pnpm build
+  ...(isStaticExport && {
+    output: 'export',
+    basePath: '/moodboard-manager',
+    trailingSlash: true,
+  }),
+  // Disable image optimization for easier deployment
+  images: {
+    unoptimized: true,
   },
 };
 
