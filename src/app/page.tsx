@@ -9,6 +9,7 @@ import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { Plus, Palette, Settings } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/ui/language-switcher';
 
 export default function HomePage() {
   const t = useTranslations('projects');
@@ -26,6 +27,9 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Palette className="w-8 h-8 text-primary" />
             <h1 className="text-2xl font-bold">{t('header.title')}</h1>
+          </div>
+          <div className="flex">
+            <LanguageSwitcher />
           </div>
           <div className="flex items-center gap-4">
             <StorageIndicator />
