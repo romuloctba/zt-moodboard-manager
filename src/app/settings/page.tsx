@@ -172,7 +172,7 @@ export default function SettingsPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push('/')}
+              onClick={() => router.back()}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>

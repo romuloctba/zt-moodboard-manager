@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
 import { ArrowLeft, Plus, Users, Settings } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ProjectDetailPage() {
   const params = useParams();
@@ -55,15 +56,17 @@ export default function ProjectDetailPage() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
               <CreateCharacterDialog>
                 <Button>
                   <Plus className="w-4 h-4 mr-2" />
                   New Character
                 </Button>
               </CreateCharacterDialog>
-              <Button variant="outline" size="icon">
-                <Settings className="w-4 h-4" />
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/settings">
+                  <Settings className="w-5 h-5" />
+                </Link>
               </Button>
             </div>
           </div>
