@@ -9,5 +9,5 @@ export { useStorageStats, type StorageStats, type StorageEstimate } from './useS
 export { useBackupRestore, getProgressPercent } from './useBackupRestore';
 
 // Utility Hooks
-export { useMobile } from './use-mobile';
+export { useIsMobile } from './use-mobile';
 export { useNotFound } from './use-not-found';
