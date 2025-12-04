@@ -2,8 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGesture } from '@use-gesture/react';
-import { Loader2, ZoomIn, ZoomOut, Maximize, Lock, Unlock, Trash2, RotateCcw } from 'lucide-react';
+import { Loader2, ZoomIn, ZoomOut, Maximize, Lock, Unlock, Trash2, RotateCcw, RotateCw, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { imageRepository } from '@/lib/db/repositories';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -339,6 +340,7 @@ export function MoodboardCanvas({
                 }}
                 onPositionChange={(x, y) => updateItemPosition(item.id, x, y)}
                 onSizeChange={(w, h) => updateItemSize(item.id, w, h)}
+                onRotationChange={(r) => setItems(prev => prev.map(i => i.id === item.id ? { ...i, rotation: r } : i))}
                 onDragStart={() => setIsDraggingItem(true)}
                 onDragEnd={() => setIsDraggingItem(false)}
                 zoom={viewport.zoom}
@@ -363,36 +365,90 @@ export function MoodboardCanvas({
 
         {/* Selected item controls */}
         {selectedItem && (
-          <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/80 backdrop-blur rounded-lg p-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
-              onClick={() => rotateItem(selectedItem.id, -15)}
-            >
-              <RotateCcw className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8"
-              onClick={() => toggleLock(selectedItem.id)}
-            >
-              {selectedItem.locked ? (
-                <Lock className="h-4 w-4" />
-              ) : (
-                <Unlock className="h-4 w-4" />
-              )}
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-destructive hover:text-destructive"
-              onClick={() => deleteItem(selectedItem.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          <TooltipProvider delayDuration={300}>
+            <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/80 backdrop-blur rounded-lg p-1">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => rotateItem(selectedItem.id, -15)}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Rotate -15°</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => rotateItem(selectedItem.id, 15)}
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Rotate +15°</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => setItems(prev => prev.map(i => i.id === selectedItem.id ? { ...i, rotation: 0 } : i))}
+                    disabled={selectedItem.rotation === 0}
+                  >
+                    <Circle className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Reset rotation</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8"
+                    onClick={() => toggleLock(selectedItem.id)}
+                  >
+                    {selectedItem.locked ? (
+                      <Lock className="h-4 w-4" />
+                    ) : (
+                      <Unlock className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{selectedItem.locked ? 'Unlock' : 'Lock'}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => deleteItem(selectedItem.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Remove from canvas</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
         )}
 
         {/* Help text */}
@@ -418,6 +474,7 @@ interface CanvasImageProps {
   onSelect: () => void;
   onPositionChange: (x: number, y: number) => void;
   onSizeChange: (width: number, height: number) => void;
+  onRotationChange: (rotation: number) => void;
   onDragStart: () => void;
   onDragEnd: () => void;
   zoom: number;
@@ -431,13 +488,16 @@ function CanvasImage({
   onSelect,
   onPositionChange,
   onSizeChange,
+  onRotationChange,
   onDragStart,
   onDragEnd,
   zoom,
 }: CanvasImageProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
 
   useGesture(
     {
@@ -508,6 +568,47 @@ function CanvasImage({
     document.addEventListener('mouseup', onMouseUp);
   }, [item, imageInfo, zoom, onSizeChange]);
 
+  // Rotation handler
+  const handleRotate = useCallback((e: React.MouseEvent) => {
+    if (item.locked) return;
+    e.stopPropagation();
+    e.preventDefault();
+    
+    setIsRotating(true);
+    
+    // Get center of the element
+    const rect = elementRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Calculate initial angle
+    const startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    const startRotation = item.rotation;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const currentAngle = Math.atan2(moveEvent.clientY - centerY, moveEvent.clientX - centerX) * (180 / Math.PI);
+      let newRotation = startRotation + (currentAngle - startAngle);
+      
+      // Snap to 15° increments when holding shift
+      if (moveEvent.shiftKey) {
+        newRotation = Math.round(newRotation / 15) * 15;
+      }
+      
+      onRotationChange(newRotation);
+    };
+
+    const onMouseUp = () => {
+      setIsRotating(false);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }, [item, onRotationChange]);
+
   return (
     <div
       ref={elementRef}
@@ -571,6 +672,24 @@ function CanvasImage({
             className="absolute -left-1 -top-1 w-3 h-3 bg-primary rounded-sm cursor-nw-resize"
             onMouseDown={(e) => handleResize(e, 'nw')}
           />
+          {/* Rotation handle */}
+          <div
+            className={cn(
+              "absolute left-1/2 -translate-x-1/2 -top-8 flex flex-col items-center",
+              isRotating && "cursor-grabbing"
+            )}
+            onMouseDown={handleRotate}
+          >
+            <div className="w-0.5 h-4 bg-primary" />
+            <div 
+              className={cn(
+                "w-4 h-4 bg-primary rounded-full flex items-center justify-center cursor-grab",
+                isRotating && "cursor-grabbing ring-2 ring-primary/50"
+              )}
+            >
+              <RotateCcw className="h-2.5 w-2.5 text-primary-foreground" />
+            </div>
+          </div>
         </>
       )}
 
