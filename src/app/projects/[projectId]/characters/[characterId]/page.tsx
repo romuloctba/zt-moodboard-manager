@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Upload, User, Loader2, Download } from 'lucide-react';
+import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository } from '@/lib/db/repositories';
@@ -10,7 +10,10 @@ import { exportCharacterImages } from '@/lib/export/exportService';
 import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
-import type { Character } from '@/types';
+import { MoodboardCanvas } from '@/components/canvas';
+import type { Character, CanvasState } from '@/types';
+
+type ViewMode = 'grid' | 'canvas';
 
 export default function CharacterDetailPage() {
   const params = useParams();
@@ -22,6 +25,7 @@ export default function CharacterDetailPage() {
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
   const [exporting, setExporting] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
   useEffect(() => {
     async function loadCharacter() {
@@ -47,6 +51,15 @@ export default function CharacterDetailPage() {
     // Trigger a refresh of the image grid
     setRefreshKey(prev => prev + 1);
   }, []);
+
+  const handleCanvasChange = useCallback(async (canvasState: CanvasState) => {
+    if (!character) return;
+    try {
+      await characterRepository.updateCanvasState(character.id, canvasState);
+    } catch (error) {
+      console.error('Failed to save canvas state:', error);
+    }
+  }, [character]);
 
   const handleExportAll = async () => {
     if (!character || exporting) return;
@@ -82,7 +95,7 @@ export default function CharacterDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button
@@ -107,6 +120,27 @@ export default function CharacterDetailPage() {
             </div>
             <div className="flex items-center gap-3">
               <StorageIndicator />
+              {/* View Mode Toggle */}
+              <div className="flex items-center border rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setViewMode('grid')}
+                >
+                  <LayoutGrid className="h-4 w-4 mr-1.5" />
+                  Grid
+                </Button>
+                <Button
+                  variant={viewMode === 'canvas' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setViewMode('canvas')}
+                >
+                  <PenTool className="h-4 w-4 mr-1.5" />
+                  Canvas
+                </Button>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
@@ -126,28 +160,38 @@ export default function CharacterDetailPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {/* Upload Section */}
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Upload className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-medium">Add Images</h2>
-          </div>
-          <ImageUploader
-            characterId={characterId}
-            onUploadComplete={handleUploadComplete}
-          />
-        </section>
+      {viewMode === 'grid' ? (
+        <main className="container mx-auto px-4 py-6">
+          {/* Upload Section */}
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Upload className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-lg font-medium">Add Images</h2>
+            </div>
+            <ImageUploader
+              characterId={characterId}
+              onUploadComplete={handleUploadComplete}
+            />
+          </section>
 
-        {/* Image Gallery */}
-        <section>
-          <h2 className="text-lg font-medium mb-4">Reference Images</h2>
-          <ImageGrid
-            key={refreshKey}
+          {/* Image Gallery */}
+          <section>
+            <h2 className="text-lg font-medium mb-4">Reference Images</h2>
+            <ImageGrid
+              key={refreshKey}
+              characterId={characterId}
+            />
+          </section>
+        </main>
+      ) : (
+        <main className="h-[calc(100vh-73px)]">
+          <MoodboardCanvas
             characterId={characterId}
+            canvasState={character.canvasState}
+            onCanvasChange={handleCanvasChange}
           />
-        </section>
-      </main>
+        </main>
+      )}
     </div>
   );
 }

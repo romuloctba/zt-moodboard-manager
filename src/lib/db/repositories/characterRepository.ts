@@ -1,5 +1,5 @@
 import { db, generateId } from '../database';
-import type { Character, CharacterProfile, CharacterMetadata } from '@/types';
+import type { Character, CharacterProfile, CharacterMetadata, CanvasState } from '@/types';
 
 export const characterRepository = {
   async create(projectId: string, name: string): Promise<Character> {
@@ -77,6 +77,10 @@ export const characterRepository = {
     if (character) {
       await this.update(id, { tags: character.tags.filter(t => t !== tag) });
     }
+  },
+
+  async updateCanvasState(id: string, canvasState: CanvasState): Promise<void> {
+    await this.update(id, { canvasState });
   },
 
   async reorder(id: string, newOrder: number): Promise<void> {

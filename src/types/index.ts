@@ -32,6 +32,7 @@ export interface Character {
   tags: string[];
   profile: CharacterProfile;
   metadata: CharacterMetadata;
+  canvasState?: CanvasState;  // Canvas layout for this character
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
@@ -66,7 +67,32 @@ export interface Section {
 
 export type SectionType = 'costume' | 'poses' | 'expressions' | 'references' | 'custom';
 
-// Canvas Types
+// Canvas State Types (stored on Character for MVP)
+export interface CanvasState {
+  viewport: CanvasViewport;
+  items: CanvasImageItem[];
+  updatedAt: Date;
+}
+
+export interface CanvasViewport {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+export interface CanvasImageItem {
+  id: string;
+  imageId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  zIndex: number;
+  locked?: boolean;
+}
+
+// Legacy Canvas Types (for future sections feature)
 export interface CanvasItem {
   id: string;
   sectionId: string;

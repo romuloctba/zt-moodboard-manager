@@ -1,0 +1,1 @@
+export { MoodboardCanvas } from './MoodboardCanvas';
