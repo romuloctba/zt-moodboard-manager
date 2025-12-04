@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { useProjectStore } from '@/store/projectStore';
 import { ProjectList } from '@/components/projects/ProjectList';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
-import { Plus, Palette } from 'lucide-react';
+import { Plus, Palette, Settings } from 'lucide-react';
 
 export default function HomePage() {
   const { projects, isLoading, loadProjects } = useProjectStore();
@@ -32,6 +33,11 @@ export default function HomePage() {
                 New Project
               </Button>
             </CreateProjectDialog>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/settings">
+                <Settings className="w-5 h-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
