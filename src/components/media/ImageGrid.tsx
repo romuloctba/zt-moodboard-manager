@@ -1,15 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2, Trash2, Expand, ImageOff, CheckCircle2, X } from 'lucide-react';
+import { Loader2, Trash2, Expand, ImageOff, CheckCircle2, X, Download, Tag, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { imageRepository } from '@/lib/db/repositories';
+import { exportSelectedImages } from '@/lib/export/exportService';
+import { TagInput } from '@/components/ui/tag-input';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { MoodboardImage } from '@/types';
@@ -34,6 +44,13 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  
+  // Tag filtering
+  const [allTags, setAllTags] = useState<string[]>([]);
+  const [filterTag, setFilterTag] = useState<string | null>(null);
+  
+  // Export state
+  const [exporting, setExporting] = useState(false);
 
   // Load images for this character
   const loadImages = useCallback(async () => {
@@ -53,6 +70,11 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       );
 
       setImages(imagesWithUrls);
+      
+      // Extract all unique tags
+      const tags = new Set<string>();
+      imagesWithUrls.forEach(img => img.tags.forEach(tag => tags.add(tag)));
+      setAllTags(Array.from(tags).sort());
     } catch (error) {
       console.error('Failed to load images:', error);
       toast.error('Failed to load images');
@@ -158,6 +180,58 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
     setSelectedImage(image);
   };
 
+  // Handle tag update for selected image
+  const handleTagsUpdate = async (newTags: string[]) => {
+    if (!selectedImage) return;
+    
+    try {
+      await imageRepository.update(selectedImage.id, { tags: newTags });
+      
+      // Update local state
+      setImages(prev => prev.map(img => 
+        img.id === selectedImage.id ? { ...img, tags: newTags } : img
+      ));
+      setSelectedImage(prev => prev ? { ...prev, tags: newTags } : null);
+      
+      // Update all tags list
+      const allTagsSet = new Set<string>();
+      images.forEach(img => {
+        if (img.id === selectedImage.id) {
+          newTags.forEach(t => allTagsSet.add(t));
+        } else {
+          img.tags.forEach(t => allTagsSet.add(t));
+        }
+      });
+      setAllTags(Array.from(allTagsSet).sort());
+    } catch (error) {
+      console.error('Failed to update tags:', error);
+      toast.error('Failed to update tags');
+    }
+  };
+
+  // Export selected images
+  const handleExportSelected = async () => {
+    if (selectedIds.size === 0) return;
+    
+    const selectedImages = images.filter(img => selectedIds.has(img.id));
+    
+    try {
+      setExporting(true);
+      await exportSelectedImages(selectedImages, 'selected-images');
+      toast.success(`Exported ${selectedImages.length} images`);
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Failed to export images');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Filter images by tag
+  const filteredImages = filterTag 
+    ? images.filter(img => img.tags.includes(filterTag))
+    : images;
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -186,7 +260,8 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            {images.length} image{images.length !== 1 ? 's' : ''}
+            {filteredImages.length} image{filteredImages.length !== 1 ? 's' : ''}
+            {filterTag && ` with tag "${filterTag}"`}
           </span>
           {selectionMode && selectedIds.size > 0 && (
             <span className="text-sm font-medium text-primary">
@@ -195,6 +270,38 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          {/* Tag filter dropdown */}
+          {allTags.length > 0 && !selectionMode && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  {filterTag || 'Filter'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {filterTag && (
+                  <>
+                    <DropdownMenuItem onClick={() => setFilterTag(null)}>
+                      Clear filter
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                  </>
+                )}
+                {allTags.map(tag => (
+                  <DropdownMenuItem 
+                    key={tag} 
+                    onClick={() => setFilterTag(tag)}
+                    className={filterTag === tag ? 'bg-accent' : ''}
+                  >
+                    <Tag className="h-3 w-3 mr-2" />
+                    {tag}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          
           {selectionMode ? (
             <>
               <Button variant="ghost" size="sm" onClick={selectAll}>
@@ -202,6 +309,19 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
               </Button>
               <Button variant="ghost" size="sm" onClick={clearSelection}>
                 Clear
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportSelected}
+                disabled={selectedIds.size === 0 || exporting}
+              >
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Export ({selectedIds.size})
               </Button>
               <Button
                 variant="destructive"
@@ -237,7 +357,7 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
           className
         )}
       >
-        {images.map((image) => (
+        {filteredImages.map((image) => (
           <div
             key={image.id}
             className={cn(
@@ -325,6 +445,22 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
                   ))}
                 </div>
               )}
+              
+              {/* Tag badges (show on top) */}
+              {image.tags.length > 0 && !selectionMode && (
+                <div className="absolute top-2 left-2 right-2 flex flex-wrap gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {image.tags.slice(0, 3).map(tag => (
+                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {tag}
+                    </Badge>
+                  ))}
+                  {image.tags.length > 3 && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      +{image.tags.length - 3}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -332,15 +468,15 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
 
       {/* Image Preview Dialog */}
       <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
-          <DialogHeader className="p-4 pb-2">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-4 pb-2 shrink-0">
             <DialogTitle className="text-sm font-medium truncate">
               {selectedImage?.originalName}
             </DialogTitle>
           </DialogHeader>
           
           {selectedImage && (
-            <div className="relative flex-1 overflow-auto p-4 pt-0">
+            <div className="flex-1 overflow-y-auto p-4 pt-0 min-h-0">
               {selectedImage.fullUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -368,11 +504,22 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
                 <span>{selectedImage.mimeType}</span>
               </div>
 
+              {/* Tags */}
+              <div className="mt-4">
+                <p className="text-sm font-medium mb-2">Tags</p>
+                <TagInput
+                  tags={selectedImage.tags}
+                  onTagsChange={handleTagsUpdate}
+                  suggestions={allTags}
+                  placeholder="Add tags..."
+                />
+              </div>
+
               {/* Color palette */}
               {selectedImage.palette && selectedImage.palette.colors.length > 0 && (
-                <div className="mt-4">
+                <div className="mt-4 pb-2">
                   <p className="text-sm font-medium mb-2">Color Palette</p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {selectedImage.palette.colors.map((color, i) => (
                       <button
                         key={i}

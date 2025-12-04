@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Upload, User, Loader2 } from 'lucide-react';
+import { ArrowLeft, Upload, User, Loader2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository } from '@/lib/db/repositories';
+import { exportCharacterImages } from '@/lib/export/exportService';
+import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
 import type { Character } from '@/types';
@@ -19,6 +21,7 @@ export default function CharacterDetailPage() {
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     async function loadCharacter() {
@@ -44,6 +47,25 @@ export default function CharacterDetailPage() {
     // Trigger a refresh of the image grid
     setRefreshKey(prev => prev + 1);
   }, []);
+
+  const handleExportAll = async () => {
+    if (!character || exporting) return;
+    
+    try {
+      setExporting(true);
+      await exportCharacterImages(character);
+      toast.success('Images exported successfully');
+    } catch (error) {
+      if (error instanceof Error && error.message === 'No images to export') {
+        toast.error('No images to export');
+      } else {
+        console.error('Export failed:', error);
+        toast.error('Failed to export images');
+      }
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -83,7 +105,22 @@ export default function CharacterDetailPage() {
                 )}
               </div>
             </div>
-            <StorageIndicator />
+            <div className="flex items-center gap-3">
+              <StorageIndicator />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportAll}
+                disabled={exporting}
+              >
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Export All
+              </Button>
+            </div>
           </div>
         </div>
       </header>
