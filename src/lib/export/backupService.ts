@@ -433,3 +433,32 @@ export async function getDatabaseStats(): Promise<{
     storageUsed: fileStorage.formatBytes(storage.used),
   };
 }
+
+/**
+ * Clear all data - both database and OPFS files
+ * This completely resets the app to a fresh state
+ */
+export async function clearAllData(): Promise<{
+  tablesCleared: number;
+  filesDeleted: number;
+}> {
+  console.log('[BackupService] Starting full data clear...');
+
+  // Step 1: Clear OPFS files first
+  await fileStorage.initialize();
+  const { totalDeleted } = await fileStorage.clearAllFiles();
+
+  // Step 2: Clear all database tables
+  await db.transaction('rw', [db.projects, db.characters, db.images], async () => {
+    await db.images.clear();
+    await db.characters.clear();
+    await db.projects.clear();
+  });
+
+  console.log('[BackupService] All data cleared');
+
+  return {
+    tablesCleared: 3,
+    filesDeleted: totalDeleted,
+  };
+}

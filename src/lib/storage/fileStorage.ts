@@ -194,6 +194,90 @@ export class FileStorage {
   isUsingOPFS(): boolean {
     return this.useOPFS;
   }
+
+  /**
+   * Clear all files from a specific directory
+   */
+  private async clearDirectory(dirName: string): Promise<number> {
+    if (!this.useOPFS || !this.root) return 0;
+
+    try {
+      const directory = await this.root.getDirectoryHandle(dirName);
+      let count = 0;
+
+      // Collect all file names first (can't modify while iterating)
+      const entries: string[] = [];
+      // Use entries() which returns [name, handle] pairs
+      for await (const [name] of directory as unknown as AsyncIterable<[string, FileSystemHandle]>) {
+        entries.push(name);
+      }
+
+      // Delete each file
+      for (const name of entries) {
+        try {
+          await directory.removeEntry(name);
+          count++;
+        } catch (e) {
+          console.warn(`[FileStorage] Failed to delete ${dirName}/${name}:`, e);
+        }
+      }
+
+      return count;
+    } catch {
+      // Directory doesn't exist
+      return 0;
+    }
+  }
+
+  /**
+   * Clear all files from OPFS (images, thumbnails, exports, backups)
+   * Returns the total number of files deleted
+   */
+  async clearAllFiles(): Promise<{ imagesDeleted: number; thumbnailsDeleted: number; totalDeleted: number }> {
+    await this.ensureInitialized();
+
+    if (!this.useOPFS || !this.root) {
+      return { imagesDeleted: 0, thumbnailsDeleted: 0, totalDeleted: 0 };
+    }
+
+    console.log('[FileStorage] Clearing all OPFS files...');
+
+    const imagesDeleted = await this.clearDirectory('images');
+    const thumbnailsDeleted = await this.clearDirectory('thumbnails');
+    const exportsDeleted = await this.clearDirectory('exports');
+    const backupsDeleted = await this.clearDirectory('backups');
+
+    const totalDeleted = imagesDeleted + thumbnailsDeleted + exportsDeleted + backupsDeleted;
+
+    console.log(`[FileStorage] Cleared ${totalDeleted} files (${imagesDeleted} images, ${thumbnailsDeleted} thumbnails)`);
+
+    return { imagesDeleted, thumbnailsDeleted, totalDeleted };
+  }
+
+  /**
+   * Clear all files AND remove the directories themselves
+   * Use this for a complete reset
+   */
+  async clearAllAndReset(): Promise<void> {
+    await this.ensureInitialized();
+
+    if (!this.useOPFS || !this.root) return;
+
+    const directories = ['images', 'thumbnails', 'exports', 'backups'];
+
+    for (const dirName of directories) {
+      try {
+        // First clear the directory contents
+        await this.clearDirectory(dirName);
+        // Then remove the directory itself
+        await this.root.removeEntry(dirName, { recursive: true });
+      } catch {
+        // Directory doesn't exist, that's fine
+      }
+    }
+
+    console.log('[FileStorage] Complete OPFS reset done');
+  }
 }
 
 // Singleton instance

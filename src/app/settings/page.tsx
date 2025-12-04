@@ -30,6 +30,7 @@ import {
   restoreFromBackup, 
   validateBackup,
   getDatabaseStats,
+  clearAllData,
   type BackupProgress,
   type RestoreProgress,
   type BackupManifest
@@ -50,6 +51,10 @@ export default function SettingsPage() {
   const [showRestoreConfirm, setShowRestoreConfirm] = useState(false);
   const [pendingRestoreFile, setPendingRestoreFile] = useState<File | null>(null);
   const [pendingManifest, setPendingManifest] = useState<BackupManifest | null>(null);
+  
+  // Clear data dialog
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   
   // Stats
   const [stats, setStats] = useState<{
@@ -154,6 +159,29 @@ export default function SettingsPage() {
       setPendingManifest(null);
     }
   }, [pendingRestoreFile, router]);
+
+  // Clear all data
+  const confirmClearData = useCallback(async () => {
+    setShowClearConfirm(false);
+    setIsClearing(true);
+    
+    try {
+      const result = await clearAllData();
+      toast.success(`Cleared ${result.filesDeleted} files. Storage freed!`);
+      
+      // Refresh stats
+      const dbStats = await getDatabaseStats();
+      setStats(dbStats);
+      
+      const storage = await fileStorage.getStorageEstimate();
+      setStorageInfo(storage);
+    } catch (error) {
+      console.error('Clear data failed:', error);
+      toast.error('Failed to clear data');
+    } finally {
+      setIsClearing(false);
+    }
+  }, []);
 
   const formatBytes = (bytes: number) => fileStorage.formatBytes(bytes);
 
@@ -345,6 +373,51 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Danger Zone */}
+        <Card className="mt-6 border-destructive/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="h-5 w-5" />
+              Danger Zone
+            </CardTitle>
+            <CardDescription>
+              Permanently delete all data including files from storage
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-destructive/10 rounded-lg">
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                </div>
+                <div>
+                  <div className="font-medium">Clear All Data</div>
+                  <div className="text-sm text-muted-foreground">
+                    Delete all projects, characters, images, and free up storage
+                  </div>
+                </div>
+              </div>
+              <Button 
+                variant="destructive"
+                onClick={() => setShowClearConfirm(true)}
+                disabled={isBackingUp || isRestoring || isClearing}
+              >
+                {isClearing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Clearing...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear All
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </main>
 
       {/* Restore Confirmation Dialog */}
@@ -390,6 +463,46 @@ export default function SettingsPage() {
             <Button variant="destructive" onClick={confirmRestore}>
               <Upload className="h-4 w-4 mr-2" />
               Restore Backup
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear Data Confirmation Dialog */}
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" />
+              Clear All Data?
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. All your data will be permanently deleted.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+              <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+              <div className="text-sm text-destructive">
+                This will permanently delete:
+                <ul className="list-disc list-inside mt-1">
+                  <li>{stats?.projects || 0} projects</li>
+                  <li>{stats?.characters || 0} characters</li>
+                  <li>{stats?.images || 0} images</li>
+                  <li>All files in OPFS storage</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmClearData}>
+              <Trash2 className="h-4 w-4 mr-2" />
+              Yes, Delete Everything
             </Button>
           </DialogFooter>
         </DialogContent>
