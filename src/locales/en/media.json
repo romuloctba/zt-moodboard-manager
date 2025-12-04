@@ -42,7 +42,9 @@
       "export": "Export ({count})",
       "delete": "Delete ({count})"
     },
+    "confirmSingleDeleteTitle": "Delete Image",
     "confirmSingleDelete": "Delete this image? This cannot be undone.",
+    "confirmBulkDeleteTitle": "Delete Images",
     "confirmBulkDelete": "Delete {count} selected image{count, plural, one {} other {s}}? This cannot be undone.",
     "toast": {
       "deleted": "{count, plural, one {# image} other {# images}} deleted",
