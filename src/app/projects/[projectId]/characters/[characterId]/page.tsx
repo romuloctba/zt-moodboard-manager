@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool } from 'lucide-react';
+import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository } from '@/lib/db/repositories';
@@ -11,9 +11,10 @@ import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
 import { MoodboardCanvas } from '@/components/canvas';
+import { CharacterProfile } from '@/components/characters';
 import type { Character, CanvasState } from '@/types';
 
-type ViewMode = 'grid' | 'canvas';
+type ViewMode = 'grid' | 'canvas' | 'profile';
 
 export default function CharacterDetailPage() {
   const params = useParams();
@@ -140,6 +141,15 @@ export default function CharacterDetailPage() {
                   <PenTool className="h-4 w-4 mr-1.5" />
                   Canvas
                 </Button>
+                <Button
+                  variant={viewMode === 'profile' ? 'secondary' : 'ghost'}
+                  size="sm"
+                  className="h-8"
+                  onClick={() => setViewMode('profile')}
+                >
+                  <FileText className="h-4 w-4 mr-1.5" />
+                  Profile
+                </Button>
               </div>
               <Button
                 variant="outline"
@@ -183,12 +193,19 @@ export default function CharacterDetailPage() {
             />
           </section>
         </main>
-      ) : (
+      ) : viewMode === 'canvas' ? (
         <main className="h-[calc(100vh-73px)]">
           <MoodboardCanvas
             characterId={characterId}
             canvasState={character.canvasState}
             onCanvasChange={handleCanvasChange}
+          />
+        </main>
+      ) : (
+        <main>
+          <CharacterProfile
+            character={character}
+            onUpdate={setCharacter}
           />
         </main>
       )}
