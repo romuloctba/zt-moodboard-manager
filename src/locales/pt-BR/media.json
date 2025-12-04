@@ -42,6 +42,7 @@
       "export": "Exportar ({count})",
       "delete": "Excluir ({count})"
     },
+    "confirmSingleDelete": "Excluir esta imagem? Esta ação não pode ser desfeita.",
     "confirmBulkDelete": "Excluir {count} {count, plural, one {imagem selecionada} other {imagens selecionadas}}? Esta ação não pode ser desfeita.",
     "toast": {
       "deleted": "{count, plural, one {# imagem excluída} other {# imagens excluídas}}",

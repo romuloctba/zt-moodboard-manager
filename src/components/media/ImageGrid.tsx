@@ -150,6 +150,10 @@ export function ImageGrid({ characterId, className }: ImageGridProps) {
     
     if (deletingId) return;
     
+    if (!confirm(t('confirmSingleDelete'))) {
+      return;
+    }
+    
     try {
       setDeletingId(imageId);
       await imageRepository.delete(imageId);
