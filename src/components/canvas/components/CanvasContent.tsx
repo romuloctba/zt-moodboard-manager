@@ -51,6 +51,12 @@ export function CanvasContent({
 }: CanvasContentProps) {
   const { transformState } = useTransformContext();
   const currentScale = transformState?.scale ?? viewport.zoom;
+  const positionX = transformState?.positionX ?? viewport.x;
+  const positionY = transformState?.positionY ?? viewport.y;
+
+  // Calculate grid size based on zoom level
+  const baseGridSize = 50;
+  const gridSize = baseGridSize * currentScale;
 
   const handleItemSelect = (id: string) => {
     onSelectItem(id);
@@ -59,6 +65,19 @@ export function CanvasContent({
 
   return (
     <>
+      {/* Fixed grid background layer - stays in place during pan */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: `${gridSize}px ${gridSize}px`,
+          backgroundPosition: `${positionX}px ${positionY}px`,
+        }}
+      />
+
       <TransformComponent
         wrapperStyle={{
           width: '100%',
@@ -69,17 +88,12 @@ export function CanvasContent({
           height: '100%',
         }}
       >
-        {/* Canvas content */}
+        {/* Canvas content - transparent background, grid is behind */}
         <div
           className="relative"
           style={{
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-            `,
-            backgroundSize: '50px 50px',
           }}
           onClick={() => onSelectItem(null)}
         >
