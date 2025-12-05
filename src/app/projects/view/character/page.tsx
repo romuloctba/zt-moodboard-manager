@@ -220,7 +220,7 @@ function CharacterViewContent() {
           </section>
         </main>
       ) : viewMode === 'canvas' ? (
-        <main className="h-[calc(100vh-73px)]">
+        <main className="h-[calc(100dvh-73px)]">
           <MoodboardCanvas
             characterId={characterId!}
             canvasState={character.canvasState}
