@@ -1,8 +1,17 @@
-# Static Export Deployment Guide
+# Deployment Guide
 
-This Next.js application is configured for static export (`output: 'export'`), which generates static HTML, CSS, and JavaScript files that can be deployed to any static hosting service.
+This Next.js application supports two deployment modes:
 
-## Building for Production
+1. **Static Export** - For Apache/static hosting (no Node.js required)
+2. **Standard Build** - For Node.js servers (Vercel, self-hosted, etc.)
+
+---
+
+## Option 1: Static Export (Apache Server)
+
+Use this when deploying to an Apache web server or any static file hosting.
+
+### Building for Static Export
 
 ```bash
 pnpm run build:static
@@ -11,75 +20,27 @@ pnpm run build:static
 This creates an `out/` directory with all static files ready for deployment.
 The `.htaccess` file is automatically copied to handle routing with the `/moodboard-manager/` base path.
 
-## Deployment Options
+### Deployment to Apache Server
 
-### 1. Netlify
+#### Prerequisites
 
-The project includes `public/_redirects` for Netlify configuration.
+- Apache server with `mod_rewrite` enabled
+- Access to upload files to your web server
 
-**Deploy steps:**
-1. Build the project: `pnpm build`
-2. Deploy the `out/` directory to Netlify
-3. The `_redirects` file will automatically handle client-side routing
+#### Deploy Steps
 
-Or use Netlify CLI:
-```bash
-pnpm build
-netlify deploy --prod --dir=out
-```
+1. Build the static export:
+   ```bash
+   pnpm run build:static
+   ```
 
-### 2. Vercel
+2. Upload the contents of the `out/` directory to your server's `/moodboard-manager/` folder
 
-The project includes `public/vercel.json` for Vercel configuration.
+3. Ensure the `.htaccess` file is included (it's automatically copied during build)
 
-**Deploy steps:**
-1. Connect your GitHub repository to Vercel
-2. Vercel will automatically detect Next.js and build the project
-3. The `vercel.json` configuration handles routing
+### .htaccess Configuration
 
-Or use Vercel CLI:
-```bash
-pnpm build
-vercel --prod
-```
-
-### 3. Firebase Hosting
-
-The project includes `firebase.json` for Firebase configuration.
-
-**Deploy steps:**
-1. Install Firebase CLI: `npm install -g firebase-tools`
-2. Login: `firebase login`
-3. Initialize (if not already): `firebase init hosting`
-4. Build and deploy:
-```bash
-pnpm build
-firebase deploy --only hosting
-```
-
-### 4. GitHub Pages
-
-**Deploy steps:**
-1. Build the project: `pnpm build`
-2. Push the `out/` directory to the `gh-pages` branch
-
-Or use a GitHub Action to automate deployment.
-
-### 5. AWS S3 + CloudFront
-
-**Deploy steps:**
-1. Build the project: `pnpm build`
-2. Upload the `out/` directory to an S3 bucket
-3. Configure CloudFront with the following:
-   - Origin: Your S3 bucket
-   - Default Root Object: `index.html`
-   - Error Pages: Configure 404 to return `/404.html` with 404 status
-
-### 6. Any Static Web Server
-
-For Apache with base path (`.htaccess`):
-The project automatically includes a `.htaccess` file configured for the `/moodboard-manager/` base path.
-After running `pnpm run build:static`, the `.htaccess` file is automatically copied to the `out/` directory.
+The project includes a pre-configured `.htaccess` file:
 
 ```apache
 <IfModule mod_rewrite.c>
@@ -95,14 +56,51 @@ After running `pnpm run build:static`, the `.htaccess` file is automatically cop
 </IfModule>
 ```
 
-For Nginx with base path (`nginx.conf`):
-```nginx
-location /moodboard-manager/ {
-  alias /path/to/your/out/;
-  try_files $uri $uri/ /moodboard-manager/404.html;
-  index index.html;
-}
+This configuration:
+- Enables URL rewriting for client-side routing
+- Serves existing static files directly
+- Redirects all other requests to `404.html` which handles client-side navigation
+
+---
+
+## Option 2: Standard Next.js Build (Node.js Server)
+
+Use this when deploying to platforms that support Node.js (Vercel, Railway, self-hosted, etc.).
+
+### Building for Node.js
+
+```bash
+pnpm run build
 ```
+
+This creates a standard Next.js build in the `.next/` directory.
+
+### Running the Production Server
+
+```bash
+pnpm run start
+```
+
+The app will be served at the root path (`/`) without the `/moodboard-manager/` base path.
+
+### Platform Deployment
+
+- **Vercel**: Connect your repository and deploy automatically
+- **Self-hosted**: Run `pnpm build && pnpm start` behind a reverse proxy (Nginx, Caddy, etc.)
+- **Docker**: Create a Dockerfile with Node.js and run the production server
+
+---
+
+## Build Mode Differences
+
+| Feature | Static Export (`build:static`) | Standard Build (`build`) |
+|---------|-------------------------------|-------------------------|
+| Output | `out/` directory (HTML/CSS/JS) | `.next/` directory |
+| Base Path | `/moodboard-manager/` | `/` (root) |
+| Server Required | No (static files only) | Yes (Node.js) |
+| Deployment | Apache, Nginx, S3, etc. | Vercel, Node.js server |
+
+---
 
 ## How Client-Side Routing Works
 
@@ -142,7 +140,9 @@ Then open `http://localhost:3000` in your browser.
 ## Troubleshooting
 
 If routes don't work after deployment:
-1. Ensure your hosting platform is configured to serve `/404.html` for unknown routes
-2. Check that all files from the `out/` directory are deployed
-3. Verify that the `_redirects` or equivalent configuration file is deployed
-4. Clear browser cache and test in incognito mode
+
+1. **Verify `mod_rewrite` is enabled** on your Apache server
+2. **Check `.htaccess` is uploaded** - some FTP clients hide dotfiles by default
+3. **Ensure `AllowOverride All`** is set in your Apache configuration for the directory
+4. **Clear browser cache** and test in incognito mode
+5. **Check file permissions** - files should be readable by the web server
