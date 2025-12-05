@@ -12,11 +12,12 @@ import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { Plus, Palette, Settings } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { InstallSection } from './settings/components';
+import { usePWAInstall } from '@/hooks';
 
 export default function HomePage() {
   const t = useTranslations('projects');
   const { projects, isLoading, loadProjects } = useProjectStore();
-
+ const { isInstalled } = usePWAInstall();
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
@@ -65,9 +66,13 @@ export default function HomePage() {
             <ProjectList projects={projects} />
           </>
         )}
+
+        {!isInstalled && (        
         <div className="w-4/6 mx-auto">
           <InstallSection />
         </div>
+        )}
+
       </main>
     </div>
   );
