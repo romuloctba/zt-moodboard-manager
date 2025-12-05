@@ -50,22 +50,10 @@ export function InstallSection() {
           </div>
         ) : canInstall ? (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-              <Download className="h-5 w-5 text-primary mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-medium">
-                  {t('install.available.title')}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {t('install.available.description')}
-                </p>
-              </div>
-            </div>
-            
             <Button
               onClick={promptInstall}
               disabled={isPrompting}
-              className="w-full"
+              className="w-40 mx-auto flex items-center justify-center"
             >
               <Download className="h-4 w-4 mr-2" />
               {isPrompting ? t('install.button.installing') : t('install.button.install')}

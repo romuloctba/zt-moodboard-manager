@@ -78,7 +78,7 @@
   },
   "install": {
     "title": "Instalar App",
-    "description": "Instale o Moodboard Manager no seu dispositivo para acesso rápido, e para conseguir carregar imagens arrastando do navegador em ipads/tablets.",
+    "description": "Instale o Moodboard Manager no seu dispositivo para acesso offline, e para conseguir carregar imagens arrastando do navegador em ipads/tablets.",
     "available": {
       "title": "App Disponível para Instalação",
       "description": "Instale o app para uma melhor experiência com acesso offline e carregamento mais rápido"
