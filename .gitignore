@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+# custom output directory for static build
+/moodboard-manager/
 
 # production
 /build

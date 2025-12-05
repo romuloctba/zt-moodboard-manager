@@ -63,6 +63,7 @@ const nextConfig: NextConfig = {
   // Run with: STATIC_EXPORT=true pnpm build
   ...(isStaticExport && {
     output: 'export',
+    distDir: 'moodboard-manager',
     basePath: '/moodboard-manager',
     trailingSlash: true,
   }),
