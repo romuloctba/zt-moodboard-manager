@@ -4,12 +4,24 @@ import { useState, useCallback, useEffect } from 'react';
 import { TransformWrapper } from 'react-zoom-pan-pinch';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { CanvasState } from '@/types';
 
 import { MIN_ZOOM, MAX_ZOOM, ROTATION_STEP } from './constants';
-import { useCanvasImages, useCanvasItems, useCanvasViewport, useCanvasExport } from './hooks';
-import { CanvasContent, ImageSidebar, SelectionControls } from './components';
+import {
+  useCanvasImages,
+  useCanvasItems,
+  useCanvasViewport,
+  useCanvasExport,
+  useCanvasDropUpload,
+} from './hooks';
+import {
+  CanvasContent,
+  CanvasDropOverlay,
+  ImageSidebar,
+  SelectionControls,
+} from './components';
 
 interface MoodboardCanvasProps {
   characterId: string;
@@ -33,7 +45,7 @@ export function MoodboardCanvas({
   const [isDraggingItem, setIsDraggingItem] = useState(false);
 
   // Custom hooks for managing canvas state
-  const { images, loading, getImageUrl, getImageInfo } = useCanvasImages(
+  const { images, loading, getImageUrl, getImageInfo, refetch } = useCanvasImages(
     characterId,
     t('toast.loadFailed')
   );
@@ -65,6 +77,33 @@ export function MoodboardCanvas({
     items,
     getImageUrl,
     filename: `moodboard-${characterId}`,
+  });
+
+  // Canvas drop upload hook
+  const {
+    isDraggingFiles,
+    isUploading,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useCanvasDropUpload({
+    characterId,
+    onImageUploaded: async (image) => {
+      toast.success(t('toast.imageUploaded'));
+      // Refresh images list to include the new image
+      await refetch();
+      // Add the uploaded image directly to canvas
+      addItem(
+        {
+          ...image,
+          thumbnailUrl: undefined, // Will be loaded by getImageUrl after refetch
+        },
+        viewport
+      );
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
   });
 
   // Save canvas state when it changes (debounced)
@@ -116,7 +155,20 @@ export function MoodboardCanvas({
       />
 
       {/* Canvas area */}
-      <div className="flex-1 relative overflow-hidden bg-neutral-900">
+      <div
+        className="flex-1 relative overflow-hidden bg-neutral-900"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {/* Drop overlay */}
+        <CanvasDropOverlay
+          isDragging={isDraggingFiles}
+          isUploading={isUploading}
+          dragLabel={t('dropzone.dragLabel')}
+          uploadingLabel={t('dropzone.uploadingLabel')}
+        />
+
         <TransformWrapper
           initialScale={viewport.zoom}
           initialPositionX={viewport.x}

@@ -68,9 +68,14 @@
       "title": "Clique nas imagens para adicionar ao canvas",
       "hint": "Arraste para mover • Role para zoom"
     },
+    "dropzone": {
+      "dragLabel": "Solte imagens para enviar e adicionar ao canvas",
+      "uploadingLabel": "Enviando..."
+    },
     "toast": {
       "loadFailed": "Falha ao carregar imagens",
-      "imageAlreadyOnCanvas": "Imagem já está no canvas"
+      "imageAlreadyOnCanvas": "Imagem já está no canvas",
+      "imageUploaded": "Imagem enviada e adicionada ao canvas"
     }
   },
   "profile": {

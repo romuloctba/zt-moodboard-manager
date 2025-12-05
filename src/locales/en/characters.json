@@ -68,9 +68,14 @@
       "title": "Click images to add to canvas",
       "hint": "Drag to pan • Scroll to zoom"
     },
+    "dropzone": {
+      "dragLabel": "Drop images to upload and add to canvas",
+      "uploadingLabel": "Uploading..."
+    },
     "toast": {
       "loadFailed": "Failed to load images",
-      "imageAlreadyOnCanvas": "Image already on canvas"
+      "imageAlreadyOnCanvas": "Image already on canvas",
+      "imageUploaded": "Image uploaded and added to canvas"
     }
   },
   "profile": {

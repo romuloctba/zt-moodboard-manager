@@ -1,3 +1,4 @@
+export { useCanvasDropUpload } from './useCanvasDropUpload';
 export { useCanvasExport } from './useCanvasExport';
 export { useCanvasImages } from './useCanvasImages';
 export { useCanvasItems } from './useCanvasItems';
