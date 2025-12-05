@@ -20,7 +20,7 @@ export default function HomePage() {
   }, [loadProjects]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-main bg-background">
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">

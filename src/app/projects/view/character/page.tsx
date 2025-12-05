@@ -109,7 +109,7 @@ function CharacterViewContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-main bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -120,7 +120,7 @@ function CharacterViewContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-main bg-background">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-4">
@@ -241,7 +241,7 @@ function CharacterViewContent() {
 
 function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="min-h-main bg-background flex items-center justify-center">
       <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
     </div>
   );
