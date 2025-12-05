@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "build:static": "STATIC_EXPORT=true next build --webpack && npm run postbuild:static",
-    "postbuild:static": "cp public/.htaccess out/.htaccess",
+    "postbuild:static": "cp public/.htaccess moodboard-manager/.htaccess",
     "start": "next start",
     "lint": "eslint",
     "generate-icons": "node scripts/generate-icons.mjs"

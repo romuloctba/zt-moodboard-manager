@@ -34,7 +34,7 @@ The `.htaccess` file is automatically copied to handle routing with the `/moodbo
    pnpm run build:static
    ```
 
-2. Upload the contents of the `out/` directory to your server's `/moodboard-manager/` folder
+2. Upload the contents of the `moodboard-manager/` directory to your server's `/` folder
 
 3. Ensure the `.htaccess` file is included (it's automatically copied during build)
 
@@ -95,7 +95,7 @@ The app will be served at the root path (`/`) without the `/moodboard-manager/` 
 
 | Feature | Static Export (`build:static`) | Standard Build (`build`) |
 |---------|-------------------------------|-------------------------|
-| Output | `out/` directory (HTML/CSS/JS) | `.next/` directory |
+| Output | `moodboard-manager/` directory (HTML/CSS/JS) | `.next/` directory |
 | Base Path | `/moodboard-manager/` | `/` (root) |
 | Server Required | No (static files only) | Yes (Node.js) |
 | Deployment | Apache, Nginx, S3, etc. | Vercel, Node.js server |
