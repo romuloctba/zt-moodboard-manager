@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Moodboard Manager",
-  description: "Visual reference management for character creators, graphic novel artists, and storytellers",
+  description: "Visual reference management for character creators, graphic novel artists, and storytellers. Offered by Zoch Tecnologia.",
   manifest: "/moodboard-manager/manifest.json",
   appleWebApp: {
     capable: true,
