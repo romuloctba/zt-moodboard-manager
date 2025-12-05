@@ -1,3 +1,4 @@
+export { useCanvasExport } from './useCanvasExport';
 export { useCanvasImages } from './useCanvasImages';
 export { useCanvasItems } from './useCanvasItems';
 export { useCanvasViewport } from './useCanvasViewport';

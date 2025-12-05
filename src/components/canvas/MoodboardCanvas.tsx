@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import type { CanvasState } from '@/types';
 
 import { MIN_ZOOM, MAX_ZOOM, ROTATION_STEP } from './constants';
-import { useCanvasImages, useCanvasItems, useCanvasViewport } from './hooks';
+import { useCanvasImages, useCanvasItems, useCanvasViewport, useCanvasExport } from './hooks';
 import { CanvasContent, ImageSidebar, SelectionControls } from './components';
 
 interface MoodboardCanvasProps {
@@ -58,6 +58,13 @@ export function MoodboardCanvas({
     bringToFront,
   } = useCanvasItems(t('toast.imageAlreadyOnCanvas'), {
     initialItems: canvasState?.items,
+  });
+
+  // Canvas export hook
+  const { exportCanvas, isExporting } = useCanvasExport({
+    items,
+    getImageUrl,
+    filename: `moodboard-${characterId}`,
   });
 
   // Save canvas state when it changes (debounced)
@@ -140,6 +147,9 @@ export function MoodboardCanvas({
             getImageInfo={getImageInfo}
             emptyStateTitle={t('empty.title')}
             emptyStateHint={t('empty.hint')}
+            onExportCanvas={exportCanvas}
+            isExporting={isExporting}
+            exportLabel={t('controls.exportCanvas')}
           />
         </TransformWrapper>
 

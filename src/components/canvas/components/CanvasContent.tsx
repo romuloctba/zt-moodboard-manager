@@ -21,6 +21,10 @@ interface CanvasContentProps {
   getImageInfo: (imageId: string) => ImageWithUrl | undefined;
   emptyStateTitle: string;
   emptyStateHint: string;
+  // Export props
+  onExportCanvas?: () => void;
+  isExporting?: boolean;
+  exportLabel?: string;
 }
 
 /**
@@ -41,6 +45,9 @@ export function CanvasContent({
   getImageInfo,
   emptyStateTitle,
   emptyStateHint,
+  onExportCanvas,
+  isExporting,
+  exportLabel,
 }: CanvasContentProps) {
   const { transformState } = useTransformContext();
   const currentScale = transformState?.scale ?? viewport.zoom;
@@ -106,7 +113,13 @@ export function CanvasContent({
       </TransformComponent>
 
       {/* Zoom controls */}
-      <ZoomControls zoom={currentScale} />
+      <ZoomControls
+        zoom={currentScale}
+        onExport={onExportCanvas}
+        isExporting={isExporting}
+        canExport={items.length > 0}
+        exportLabel={exportLabel}
+      />
     </>
   );
 }

@@ -61,7 +61,8 @@
       "resetRotation": "Resetar rotação",
       "lock": "Bloquear",
       "unlock": "Desbloquear",
-      "remove": "Remover do canvas"
+      "remove": "Remover do canvas",
+      "exportCanvas": "Exportar canvas como imagem"
     },
     "empty": {
       "title": "Clique nas imagens para adicionar ao canvas",
