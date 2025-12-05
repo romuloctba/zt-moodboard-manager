@@ -6,10 +6,12 @@ import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/store/projectStore';
 import { ProjectList } from '@/components/projects/ProjectList';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
+import { InstallButton } from '@/components/common';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { Plus, Palette, Settings } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
+import { InstallSection } from './settings/components';
 
 export default function HomePage() {
   const t = useTranslations('projects');
@@ -59,8 +61,13 @@ export default function HomePage() {
         ) : projects.length === 0 ? (
           <EmptyState />
         ) : (
-          <ProjectList projects={projects} />
+          <>
+            <ProjectList projects={projects} />
+          </>
         )}
+        <div className="w-4/6 mx-auto">
+          <InstallSection />
+        </div>
       </main>
     </div>
   );
@@ -82,6 +89,21 @@ function EmptyState() {
           {t('emptyState.action')}
         </Button>
       </CreateProjectDialog>
+    </div>
+  );
+}
+
+function InstallPromptBanner() {
+  const t = useTranslations('common');
+  
+  return (
+    <div className="mt-8 flex justify-center">
+      <InstallButton 
+        label={t('install.button')} 
+        tooltip={t('install.tooltip')}
+        variant="outline"
+        className="gap-2"
+      />
     </div>
   );
 }

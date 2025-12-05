@@ -45,5 +45,9 @@
     "description": "A página ou recurso que você está procurando não existe ou pode ter sido removido.",
     "redirecting": "Redirecionando para o início em {seconds}s...",
     "cancelRedirect": "Cancelar redirecionamento"
+  },
+  "install": {
+    "button": "Instalar App",
+    "tooltip": "Instalar para acesso offline"
   }
 }

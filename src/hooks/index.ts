@@ -8,6 +8,9 @@ export { useImageActions, type UseImageActionsReturn } from './useImageActions';
 export { useStorageStats, type StorageStats, type StorageEstimate } from './useStorageStats';
 export { useBackupRestore, getProgressPercent } from './useBackupRestore';
 
+// PWA Hooks
+export { usePWAInstall, type UsePWAInstallReturn } from './usePWAInstall';
+
 // Utility Hooks
 export { useIsMobile } from './use-mobile';
 export { useNotFound } from './use-not-found';

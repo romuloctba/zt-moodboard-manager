@@ -35,9 +35,6 @@ export function DangerZoneSection({
       <CardContent>
         <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/30 bg-destructive/5">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-destructive/10 rounded-lg">
-              <Trash2 className="h-5 w-5 text-destructive" />
-            </div>
             <div>
               <div className="font-medium">{t('dangerZone.clearAll.title')}</div>
               <div className="text-sm text-muted-foreground">

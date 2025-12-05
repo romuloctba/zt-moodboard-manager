@@ -75,5 +75,22 @@
     "title": "Language",
     "description": "Choose your preferred language",
     "select": "Select language"
+  },
+  "install": {
+    "title": "Install App",
+    "description": "Install Moodboard Manager on your device for quick access, and to be able to load images by dragging and dropping from the browser, on ipads/tablets.",
+    "available": {
+      "title": "App Available for Installation",
+      "description": "Install the app for a better experience with offline access and faster loading"
+    },
+    "installed": {
+      "title": "App Installed",
+      "description": "You're using the installed version of Moodboard Manager",
+      "badge": "Installed"
+    },
+    "button": {
+      "install": "Install App",
+      "installing": "Installing..."
+    }
   }
 }

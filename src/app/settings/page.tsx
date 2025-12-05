@@ -13,6 +13,7 @@ import {
   BackupSection,
   DangerZoneSection,
   LanguageSection,
+  InstallSection,
   RestoreConfirmDialog,
   ClearDataConfirmDialog,
 } from './components';
@@ -114,6 +115,9 @@ export default function SettingsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
+        {/* Install App */}
+        <InstallSection />
+
         {/* Language Selection */}
         <LanguageSection />
 
