@@ -327,8 +327,10 @@ export async function restoreFromBackup(
           const filename = path.split('/').pop()!;
           const blob = new Blob([arrayBuffer]);
           const newPath = await fileStorage.saveImage(filename, blob);
-          // Track the path mapping (original opfs:// path -> new path which could be idb://)
+          // Track path mappings for BOTH possible source formats (opfs:// and idb://)
+          // The backup might have been created on a device using either storage backend
           pathMapping.set(`opfs://images/${filename}`, newPath);
+          pathMapping.set(`idb://images/${filename}`, newPath);
         } catch (error) {
           console.warn(`Failed to restore image ${path}:`, error);
         }
@@ -358,8 +360,10 @@ export async function restoreFromBackup(
           const filename = path.split('/').pop()!;
           const blob = new Blob([arrayBuffer]);
           const newPath = await fileStorage.saveThumbnail(filename, blob);
-          // Track the path mapping (original opfs:// path -> new path which could be idb://)
+          // Track path mappings for BOTH possible source formats (opfs:// and idb://)
+          // The backup might have been created on a device using either storage backend
           pathMapping.set(`opfs://thumbnails/${filename}`, newPath);
+          pathMapping.set(`idb://thumbnails/${filename}`, newPath);
         } catch (error) {
           console.warn(`Failed to restore thumbnail ${path}:`, error);
         }
