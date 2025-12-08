@@ -71,6 +71,12 @@ export async function processImage(
   // Convert to WebP (and resize if needed)
   const processed = await convertToWebP(img, width, height, opts.quality);
 
+  // Debug: verify WebP conversion
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[ImageProcessor] Input:', file.type, file.size, 'bytes');
+    console.log('[ImageProcessor] Output:', processed.type, processed.size, 'bytes');
+  }
+
   // Generate thumbnail
   const thumbnail = await generateThumbnail(img, opts.thumbnailSize, opts.thumbnailQuality);
 
