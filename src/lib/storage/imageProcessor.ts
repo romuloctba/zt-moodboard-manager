@@ -1,11 +1,16 @@
 /**
  * Image Processor
  * 
- * Handles client-side image compression, thumbnail generation,
- * and color palette extraction.
+ * Handles client-side image processing: WebP conversion, resizing,
+ * thumbnail generation, and color palette extraction.
+ * 
+ * Strategy:
+ * - Convert all images to WebP for optimal quality/size ratio
+ * - Cap resolution at 2000px (longest side) for free tier
+ * - High quality (0.92) to preserve visual fidelity
+ * - Future: Premium tier can unlock higher resolutions
  */
 
-import imageCompression from 'browser-image-compression';
 import ColorThief from 'colorthief';
 
 export interface ProcessedImage {
@@ -17,21 +22,35 @@ export interface ProcessedImage {
 }
 
 export interface ImageProcessorOptions {
-  maxSizeMB?: number;
+  /** Maximum dimension (width or height) in pixels */
   maxWidthOrHeight?: number;
+  /** WebP quality (0-1), default 0.92 */
+  quality?: number;
+  /** Thumbnail max dimension in pixels */
   thumbnailSize?: number;
+  /** Thumbnail quality (0-1) */
+  thumbnailQuality?: number;
+  /** Whether to extract color palette */
   extractPalette?: boolean;
 }
 
-const DEFAULT_OPTIONS: ImageProcessorOptions = {
-  maxSizeMB: 5,
-  maxWidthOrHeight: 2000,
+// Quality tiers for future premium features
+export const QUALITY_TIERS = {
+  free: { maxWidthOrHeight: 2000, quality: 0.92 },
+  // premium: { maxWidthOrHeight: 4000, quality: 0.95 },  // Future
+  // original: { maxWidthOrHeight: Infinity, quality: 1 }, // Future
+} as const;
+
+const DEFAULT_OPTIONS: Required<ImageProcessorOptions> = {
+  maxWidthOrHeight: QUALITY_TIERS.free.maxWidthOrHeight,
+  quality: QUALITY_TIERS.free.quality,
   thumbnailSize: 300,
+  thumbnailQuality: 0.85,
   extractPalette: true,
 };
 
 /**
- * Process an image file: compress, generate thumbnail, extract palette
+ * Process an image file: convert to WebP, resize if needed, generate thumbnail, extract palette
  */
 export async function processImage(
   file: File,
@@ -39,50 +58,48 @@ export async function processImage(
 ): Promise<ProcessedImage> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
-  // Compress the original image if needed
-  let compressed: Blob;
-  if (file.size > (opts.maxSizeMB! * 1024 * 1024)) {
-    compressed = await imageCompression(file, {
-      maxSizeMB: opts.maxSizeMB,
-      maxWidthOrHeight: opts.maxWidthOrHeight,
-      useWebWorker: true,
-    });
-  } else {
-    compressed = file;
-  }
+  // Load the image
+  const img = await loadImage(file);
 
-  // Get image dimensions
-  const dimensions = await getImageDimensions(compressed);
+  // Calculate dimensions (resize if exceeds max)
+  const { width, height } = calculateDimensions(
+    img.naturalWidth,
+    img.naturalHeight,
+    opts.maxWidthOrHeight
+  );
+
+  // Convert to WebP (and resize if needed)
+  const processed = await convertToWebP(img, width, height, opts.quality);
 
   // Generate thumbnail
-  const thumbnail = await generateThumbnail(compressed, opts.thumbnailSize!);
+  const thumbnail = await generateThumbnail(img, opts.thumbnailSize, opts.thumbnailQuality);
 
   // Extract color palette
   let palette: string[] | undefined;
   if (opts.extractPalette) {
-    palette = await extractColorPalette(compressed);
+    palette = await extractColorPalette(img);
   }
 
   return {
-    original: compressed,
+    original: processed,
     thumbnail,
-    width: dimensions.width,
-    height: dimensions.height,
+    width,
+    height,
     palette,
   };
 }
 
 /**
- * Get image dimensions from a Blob
+ * Load an image from a File/Blob
  */
-export function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
+function loadImage(source: Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(source);
 
     img.onload = () => {
       URL.revokeObjectURL(url);
-      resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      resolve(img);
     };
 
     img.onerror = () => {
@@ -95,104 +112,141 @@ export function getImageDimensions(blob: Blob): Promise<{ width: number; height:
 }
 
 /**
- * Generate a thumbnail from an image blob
+ * Calculate output dimensions maintaining aspect ratio
  */
-export async function generateThumbnail(blob: Blob, maxSize: number): Promise<Blob> {
+function calculateDimensions(
+  originalWidth: number,
+  originalHeight: number,
+  maxSize: number
+): { width: number; height: number } {
+  let width = originalWidth;
+  let height = originalHeight;
+
+  // Only resize if exceeds max
+  if (width > maxSize || height > maxSize) {
+    if (width > height) {
+      height = Math.round((height * maxSize) / width);
+      width = maxSize;
+    } else {
+      width = Math.round((width * maxSize) / height);
+      height = maxSize;
+    }
+  }
+
+  return { width, height };
+}
+
+/**
+ * Convert image to WebP format with optional resizing
+ */
+function convertToWebP(
+  img: HTMLImageElement,
+  width: number,
+  height: number,
+  quality: number
+): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(blob);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
 
-    img.onload = () => {
-      URL.revokeObjectURL(url);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      reject(new Error('Failed to get canvas context'));
+      return;
+    }
 
-      // Calculate thumbnail dimensions maintaining aspect ratio
-      let width = img.naturalWidth;
-      let height = img.naturalHeight;
+    // Use high-quality image smoothing for resizing
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
-      if (width > height) {
-        if (width > maxSize) {
-          height = Math.round((height * maxSize) / width);
-          width = maxSize;
+    ctx.drawImage(img, 0, 0, width, height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to convert image to WebP'));
         }
-      } else {
-        if (height > maxSize) {
-          width = Math.round((width * maxSize) / height);
-          height = maxSize;
-        }
-      }
-
-      // Create canvas and draw resized image
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        reject(new Error('Failed to get canvas context'));
-        return;
-      }
-
-      ctx.drawImage(img, 0, 0, width, height);
-
-      // Convert to blob (WebP for better compression)
-      canvas.toBlob(
-        (thumbnailBlob) => {
-          if (thumbnailBlob) {
-            resolve(thumbnailBlob);
-          } else {
-            reject(new Error('Failed to generate thumbnail'));
-          }
-        },
-        'image/webp',
-        0.8
-      );
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Failed to load image for thumbnail'));
-    };
-
-    img.src = url;
+      },
+      'image/webp',
+      quality
+    );
   });
+}
+
+/**
+ * Generate a thumbnail from an image
+ */
+function generateThumbnail(
+  img: HTMLImageElement,
+  maxSize: number,
+  quality: number
+): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const { width, height } = calculateDimensions(
+      img.naturalWidth,
+      img.naturalHeight,
+      maxSize
+    );
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      reject(new Error('Failed to get canvas context'));
+      return;
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          resolve(blob);
+        } else {
+          reject(new Error('Failed to generate thumbnail'));
+        }
+      },
+      'image/webp',
+      quality
+    );
+  });
+}
+
+/**
+ * Get image dimensions from a Blob
+ */
+export async function getImageDimensions(blob: Blob): Promise<{ width: number; height: number }> {
+  const img = await loadImage(blob);
+  return { width: img.naturalWidth, height: img.naturalHeight };
 }
 
 /**
  * Extract color palette from an image
  */
-export async function extractColorPalette(blob: Blob): Promise<string[]> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    const url = URL.createObjectURL(blob);
+export async function extractColorPalette(source: HTMLImageElement | Blob): Promise<string[]> {
+  try {
+    const img = source instanceof HTMLImageElement ? source : await loadImage(source);
 
-    img.onload = () => {
-      URL.revokeObjectURL(url);
+    const colorThief = new ColorThief();
+    const palette = colorThief.getPalette(img, 6);
 
-      try {
-        const colorThief = new ColorThief();
-        const palette = colorThief.getPalette(img, 6);
-
-        // Convert RGB arrays to hex strings
-        const hexColors = palette.map(
-          ([r, g, b]: [number, number, number]) =>
-            `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
-        );
-
-        resolve(hexColors);
-      } catch (error) {
-        console.warn('Failed to extract palette:', error);
-        resolve([]);
-      }
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve([]);
-    };
-
-    img.src = url;
-  });
+    // Convert RGB arrays to hex strings
+    return palette.map(
+      ([r, g, b]: [number, number, number]) =>
+        `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+    );
+  } catch (error) {
+    console.warn('Failed to extract palette:', error);
+    return [];
+  }
 }
 
 /**
