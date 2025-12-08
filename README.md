@@ -43,7 +43,8 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 
 ### Image Management
 - **Drag & Drop Upload** - Easy image import with bulk upload support
-- **Automatic Compression** - Images are compressed client-side to save storage
+- **WebP Conversion** - All images converted to WebP for optimal quality and smaller file sizes
+- **Smart Resizing** - Images capped at 2000px (longest side) while preserving visual quality
 - **Thumbnail Generation** - Fast previews with auto-generated thumbnails
 - **Color Palette Extraction** - Automatic color palette detection from images
 - **Grid & Canvas Views** - Switch between grid gallery and canvas modes
@@ -105,7 +106,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - **State Management**: [Zustand](https://zustand-demo.pmnd.rs/)
 - **Database**: [Dexie.js](https://dexie.org/) (IndexedDB wrapper)
 - **File Storage**: OPFS (Origin Private File System)
-- **Image Processing**: [browser-image-compression](https://github.com/nickmitchell/browser-image-compression), [ColorThief](https://lokeshdhakar.com/projects/color-thief/)
+- **Image Processing**: Native Canvas API (WebP conversion), [ColorThief](https://lokeshdhakar.com/projects/color-thief/)
 - **Canvas**: [react-zoom-pan-pinch](https://github.com/BetterTyped/react-zoom-pan-pinch)
 - **i18n**: [next-intl](https://next-intl-docs.vercel.app/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
@@ -191,7 +192,8 @@ A versão atual permite uso totalmente local, com armazenamento de dados no nave
 
 ### Gerenciamento de Imagens
 - **Upload por Arrastar & Soltar** - Importe imagens facilmente, com suporte a upload em lote
-- **Compressão Automática** - Imagens são comprimidas no cliente para economizar espaço
+- **Conversão para WebP** - Todas as imagens são convertidas para WebP para qualidade otimizada e arquivos menores
+- **Redimensionamento Inteligente** - Imagens limitadas a 2000px (lado maior) preservando a qualidade visual
 - **Geração de Miniaturas** - Visualizações rápidas com miniaturas automáticas
 - **Extração de Paleta de Cores** - Detecção automática de paleta de cores das imagens
 - **Visualização em Grade & Canvas** - Alterne entre galeria em grade e modo canvas
@@ -252,7 +254,7 @@ Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 - **Gerenciamento de Estado**: [Zustand](https://zustand-demo.pmnd.rs/)
 - **Banco de Dados**: [Dexie.js](https://dexie.org/) (wrapper IndexedDB)
 - **Armazenamento de Arquivos**: OPFS (Origin Private File System)
-- **Processamento de Imagem**: [browser-image-compression](https://github.com/nickmitchell/browser-image-compression), [ColorThief](https://lokeshdhakar.com/projects/color-thief/)
+- **Processamento de Imagem**: API Canvas nativa (conversão WebP), [ColorThief](https://lokeshdhakar.com/projects/color-thief/)
 - **Canvas**: [react-zoom-pan-pinch](https://github.com/BetterTyped/react-zoom-pan-pinch)
 - **i18n**: [next-intl](https://next-intl-docs.vercel.app/)
 - **Animações**: [Framer Motion](https://www.framer.com/motion/)
