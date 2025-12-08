@@ -30,7 +30,8 @@
   },
   "navigation": {
     "settings": "Settings",
-    "back": "Back"
+    "back": "Back",
+    "menu": "Menu"
   },
   "time": {
     "created": "Created {date}"

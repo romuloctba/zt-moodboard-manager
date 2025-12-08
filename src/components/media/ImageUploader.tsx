@@ -225,24 +225,26 @@ export function ImageUploader({ characterId, onUploadComplete }: ImageUploaderPr
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto px-4 sm:px-0">
           <Button
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
+            className="w-full sm:w-auto min-w-0"
           >
-            <ImagePlus className="h-4 w-4 mr-2" />
-            {t('buttons.selectFiles')}
+            <ImagePlus className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{t('buttons.selectFiles')}</span>
           </Button>
           <Button
             variant="outline"
             size="sm"
             onClick={handlePaste}
             disabled={isUploading}
+            className="w-full sm:w-auto min-w-0"
           >
-            <Clipboard className="h-4 w-4 mr-2" />
-            {t('buttons.pasteClipboard')}
+            <Clipboard className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{t('buttons.pasteClipboard')}</span>
           </Button>
         </div>
 

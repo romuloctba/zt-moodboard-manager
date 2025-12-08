@@ -41,6 +41,7 @@
     "exportFailed": "Falha ao exportar imagens"
   },
   "viewMode": {
+    "label": "Modo de Visualização",
     "grid": "Grade",
     "canvas": "Canvas",
     "profile": "Perfil"
@@ -53,7 +54,9 @@
       "title": "Imagens",
       "hint": "Clique para adicionar",
       "onCanvas": "No Canvas",
-      "noImages": "Nenhuma imagem enviada ainda"
+      "noImages": "Nenhuma imagem enviada ainda",
+      "collapse": "Recolher painel",
+      "expand": "Expandir painel"
     },
     "controls": {
       "rotateLeft": "Girar -15°",

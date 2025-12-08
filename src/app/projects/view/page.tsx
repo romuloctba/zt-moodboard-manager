@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -9,14 +9,16 @@ import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
-import { ArrowLeft, Plus, Users, Settings } from 'lucide-react';
+import { Plus, Users, Settings } from 'lucide-react';
 import Link from 'next/link';
+import { Header, HeaderAction } from '@/components/layout';
 
 function ProjectViewContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams.get('projectId');
   const t = useTranslations('characters');
+  const tCommon = useTranslations('common');
   
   const { 
     currentProject, 
@@ -47,49 +49,46 @@ function ProjectViewContent() {
     return () => clearCurrentProject();
   }, [projectId, selectProject, clearCurrentProject, router, triggerNotFound]);
 
+  // Define header actions
+  const headerActions: HeaderAction[] = useMemo(() => [
+    {
+      id: 'new-character',
+      element: (
+        <CreateCharacterDialog>
+          <Button className="w-full md:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            {t('header.newCharacter')}
+          </Button>
+        </CreateCharacterDialog>
+      ),
+      mobilePriority: 1,
+    },
+    {
+      id: 'settings',
+      element: (
+        <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+          <Link href="/settings" className="flex items-center justify-center gap-2 md:gap-0">
+            <Settings className="w-5 h-5" />
+            <span className="md:hidden">{tCommon('navigation.settings')}</span>
+          </Link>
+        </Button>
+      ),
+      mobilePriority: 2,
+    },
+  ], [t, tCommon]);
+
   if (isLoading || !currentProject) {
     return <ProjectDetailSkeleton />;
   }
 
   return (
     <div className="min-h-main bg-background">
-      {/* Header */}
-      <header className="border-b border-border sticky top-0 bg-background/95 backdrop-blur z-10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => router.push('/')}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold">{currentProject.name}</h1>
-                {currentProject.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {currentProject.description}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <CreateCharacterDialog>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  {t('header.newCharacter')}
-                </Button>
-              </CreateCharacterDialog>
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/settings">
-                  <Settings className="w-5 h-5" />
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        title={currentProject.name}
+        subtitle={currentProject.description}
+        backHref="/"
+        actions={headerActions}
+      />
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">

@@ -3,9 +3,9 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Header } from '@/components/layout';
 
 // Section Components
 import {
@@ -98,21 +98,10 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.back()}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-semibold">{t('title')}</h1>
-          </div>
-        </div>
-      </header>
+      <Header
+        title={t('title')}
+        backHref={true}
+      />
 
       <main className="container mx-auto px-4 py-6 max-w-2xl">
         {/* Install App */}

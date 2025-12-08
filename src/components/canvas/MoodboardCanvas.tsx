@@ -151,6 +151,8 @@ export function MoodboardCanvas({
           hint: t('sidebar.hint'),
           onCanvas: t('sidebar.onCanvas'),
           noImages: t('sidebar.noImages'),
+          collapse: t('sidebar.collapse'),
+          expand: t('sidebar.expand'),
         }}
       />
 

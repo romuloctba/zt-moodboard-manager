@@ -1,10 +1,10 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, Upload, User, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
+import { Upload, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository, projectRepository } from '@/lib/db/repositories';
@@ -15,9 +15,92 @@ import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
 import { MoodboardCanvas } from '@/components/canvas';
 import { CharacterProfile } from '@/components/characters';
+import { Header, HeaderAction } from '@/components/layout';
 import type { Character, CanvasState } from '@/types';
 
 type ViewMode = 'grid' | 'canvas' | 'profile';
+
+// View Mode Toggle Component - used in both desktop header and mobile menu
+function ViewModeToggle({ 
+  viewMode, 
+  setViewMode, 
+  t,
+  variant = 'desktop'
+}: { 
+  viewMode: ViewMode; 
+  setViewMode: (mode: ViewMode) => void;
+  t: (key: string) => string;
+  variant?: 'desktop' | 'mobile';
+}) {
+  if (variant === 'mobile') {
+    return (
+      <div className="flex flex-col gap-2 w-full">
+        <span className="text-sm font-medium text-muted-foreground mb-1 px-4">{t('viewMode.label')}</span>
+        <div className="flex flex-col gap-1">
+          <Button
+            variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="justify-start h-10"
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGrid className="h-4 w-4 mr-2" />
+            {t('viewMode.grid')}
+          </Button>
+          <Button
+            variant={viewMode === 'canvas' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="justify-start h-10"
+            onClick={() => setViewMode('canvas')}
+          >
+            <PenTool className="h-4 w-4 mr-2" />
+            {t('viewMode.canvas')}
+          </Button>
+          <Button
+            variant={viewMode === 'profile' ? 'secondary' : 'ghost'}
+            size="sm"
+            className="justify-start h-10"
+            onClick={() => setViewMode('profile')}
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            {t('viewMode.profile')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center border rounded-lg p-1">
+      <Button
+        variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+        size="sm"
+        className="h-8"
+        onClick={() => setViewMode('grid')}
+      >
+        <LayoutGrid className="h-4 w-4 mr-1.5" />
+        {t('viewMode.grid')}
+      </Button>
+      <Button
+        variant={viewMode === 'canvas' ? 'secondary' : 'ghost'}
+        size="sm"
+        className="h-8"
+        onClick={() => setViewMode('canvas')}
+      >
+        <PenTool className="h-4 w-4 mr-1.5" />
+        {t('viewMode.canvas')}
+      </Button>
+      <Button
+        variant={viewMode === 'profile' ? 'secondary' : 'ghost'}
+        size="sm"
+        className="h-8"
+        onClick={() => setViewMode('profile')}
+      >
+        <FileText className="h-4 w-4 mr-1.5" />
+        {t('viewMode.profile')}
+      </Button>
+    </div>
+  );
+}
 
 function CharacterViewContent() {
   const router = useRouter();
@@ -88,7 +171,7 @@ function CharacterViewContent() {
     }
   }, [character]);
 
-  const handleExportAll = async () => {
+  const handleExportAll = useCallback(async () => {
     if (!character || exporting) return;
     
     try {
@@ -105,7 +188,48 @@ function CharacterViewContent() {
     } finally {
       setExporting(false);
     }
-  };
+  }, [character, exporting, t]);
+
+  // Define header actions
+  const headerActions: HeaderAction[] = useMemo(() => [
+    {
+      id: 'storage',
+      element: <StorageIndicator />,
+      mobilePriority: 4,
+    },
+    {
+      id: 'view-mode',
+      element: <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} t={t} variant="desktop" />,
+      showOnMobile: false,
+      mobilePriority: 1,
+    },
+    {
+      id: 'view-mode-mobile',
+      element: <ViewModeToggle viewMode={viewMode} setViewMode={setViewMode} t={t} variant="mobile" />,
+      showOnDesktop: false,
+      mobilePriority: 1,
+    },
+    {
+      id: 'export',
+      element: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExportAll}
+          disabled={exporting}
+          className="w-full md:w-auto"
+        >
+          {exporting ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <Download className="h-4 w-4 mr-2" />
+          )}
+          {t('export.all')}
+        </Button>
+      ),
+      mobilePriority: 2,
+    },
+  ], [viewMode, exporting, t, handleExportAll]);
 
   if (loading) {
     return (
@@ -121,79 +245,12 @@ function CharacterViewContent() {
 
   return (
     <div className="min-h-main bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push(`/projects/view?projectId=${projectId}`)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-xl font-semibold">{character.name}</h1>
-                {character.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-1">
-                    {character.description}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <StorageIndicator />
-              {/* View Mode Toggle */}
-              <div className="flex items-center border rounded-lg p-1">
-                <Button
-                  variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-8"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <LayoutGrid className="h-4 w-4 mr-1.5" />
-                  {t('viewMode.grid')}
-                </Button>
-                <Button
-                  variant={viewMode === 'canvas' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-8"
-                  onClick={() => setViewMode('canvas')}
-                >
-                  <PenTool className="h-4 w-4 mr-1.5" />
-                  {t('viewMode.canvas')}
-                </Button>
-                <Button
-                  variant={viewMode === 'profile' ? 'secondary' : 'ghost'}
-                  size="sm"
-                  className="h-8"
-                  onClick={() => setViewMode('profile')}
-                >
-                  <FileText className="h-4 w-4 mr-1.5" />
-                  {t('viewMode.profile')}
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportAll}
-                disabled={exporting}
-              >
-                {exporting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                ) : (
-                  <Download className="h-4 w-4 mr-2" />
-                )}
-                {t('export.all')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header
+        title={character.name}
+        subtitle={character.description}
+        backHref={`/projects/view?projectId=${projectId}`}
+        actions={headerActions}
+      />
 
       {/* Main Content */}
       {viewMode === 'grid' ? (
@@ -220,7 +277,7 @@ function CharacterViewContent() {
           </section>
         </main>
       ) : viewMode === 'canvas' ? (
-        <main className="h-[calc(100dvh-73px)]">
+        <main className="h-main">
           <MoodboardCanvas
             characterId={characterId!}
             canvasState={character.canvasState}

@@ -30,7 +30,8 @@
   },
   "navigation": {
     "settings": "Configurações",
-    "back": "Voltar"
+    "back": "Voltar",
+    "menu": "Menu"
   },
   "time": {
     "created": "Criado em {date}"
