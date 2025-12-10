@@ -6,6 +6,7 @@
  * 
  * Strategy:
  * - Convert all images to WebP for optimal quality/size ratio
+ * - Fall back to JPEG on browsers that don't support WebP encoding (Safari < 17)
  * - Cap resolution at 2000px (longest side) for free tier
  * - High quality (0.92) to preserve visual fidelity
  * - Future: Premium tier can unlock higher resolutions
@@ -19,12 +20,14 @@ export interface ProcessedImage {
   width: number;
   height: number;
   palette?: string[];
+  /** The actual output format (webp or jpeg) */
+  format: 'webp' | 'jpeg';
 }
 
 export interface ImageProcessorOptions {
   /** Maximum dimension (width or height) in pixels */
   maxWidthOrHeight?: number;
-  /** WebP quality (0-1), default 0.92 */
+  /** WebP/JPEG quality (0-1), default 0.92 */
   quality?: number;
   /** Thumbnail max dimension in pixels */
   thumbnailSize?: number;
@@ -41,6 +44,9 @@ export const QUALITY_TIERS = {
   // original: { maxWidthOrHeight: Infinity, quality: 1 }, // Future
 } as const;
 
+// JPEG fallback quality (for browsers without WebP encoding support like Safari < 17)
+const JPEG_FALLBACK_QUALITY = 0.65;
+
 const DEFAULT_OPTIONS: Required<ImageProcessorOptions> = {
   maxWidthOrHeight: QUALITY_TIERS.free.maxWidthOrHeight,
   quality: QUALITY_TIERS.free.quality,
@@ -49,14 +55,57 @@ const DEFAULT_OPTIONS: Required<ImageProcessorOptions> = {
   extractPalette: true,
 };
 
+// Cache the WebP support check result
+let webpEncodingSupported: boolean | null = null;
+
 /**
- * Process an image file: convert to WebP, resize if needed, generate thumbnail, extract palette
+ * Check if the browser supports WebP encoding via canvas.toBlob()
+ * Safari < 17 can decode WebP but cannot encode it
+ */
+async function supportsWebPEncoding(): Promise<boolean> {
+  if (webpEncodingSupported !== null) {
+    return webpEncodingSupported;
+  }
+
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1;
+    canvas.height = 1;
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/webp', 0.9);
+    });
+
+    // Check if we got a WebP blob (Safari falls back to PNG silently)
+    webpEncodingSupported = blob?.type === 'image/webp';
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[ImageProcessor] WebP encoding supported:', webpEncodingSupported);
+    }
+
+    return webpEncodingSupported;
+  } catch {
+    webpEncodingSupported = false;
+    return false;
+  }
+}
+
+/**
+ * Process an image file: convert to WebP (or JPEG fallback), resize if needed, generate thumbnail, extract palette
  */
 export async function processImage(
   file: File,
   options: ImageProcessorOptions = {}
 ): Promise<ProcessedImage> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
+
+  // Check WebP encoding support (cached after first check)
+  const useWebP = await supportsWebPEncoding();
+  const outputFormat = useWebP ? 'webp' : 'jpeg';
+  const mimeType = useWebP ? 'image/webp' : 'image/jpeg';
+
+  // Use lower quality for JPEG fallback (Safari/older browsers)
+  const outputQuality = useWebP ? opts.quality : JPEG_FALLBACK_QUALITY;
 
   // Load the image
   const img = await loadImage(file);
@@ -68,17 +117,17 @@ export async function processImage(
     opts.maxWidthOrHeight
   );
 
-  // Convert to WebP (and resize if needed)
-  const processed = await convertToWebP(img, width, height, opts.quality);
+  // Convert to WebP or JPEG (and resize if needed)
+  const processed = await convertToOptimizedFormat(img, width, height, outputQuality, mimeType);
 
-  // Debug: verify WebP conversion
+  // Debug: verify conversion
   if (process.env.NODE_ENV === 'development') {
     console.log('[ImageProcessor] Input:', file.type, file.size, 'bytes');
-    console.log('[ImageProcessor] Output:', processed.type, processed.size, 'bytes');
+    console.log('[ImageProcessor] Output:', processed.type, processed.size, 'bytes', `(${outputFormat} @ ${Math.round(outputQuality * 100)}%)`);
   }
 
-  // Generate thumbnail
-  const thumbnail = await generateThumbnail(img, opts.thumbnailSize, opts.thumbnailQuality);
+  // Generate thumbnail (always try WebP first, fall back to JPEG)
+  const thumbnail = await generateThumbnail(img, opts.thumbnailSize, opts.thumbnailQuality, mimeType);
 
   // Extract color palette
   let palette: string[] | undefined;
@@ -92,6 +141,7 @@ export async function processImage(
     width,
     height,
     palette,
+    format: outputFormat,
   };
 }
 
@@ -143,13 +193,14 @@ function calculateDimensions(
 }
 
 /**
- * Convert image to WebP format with optional resizing
+ * Convert image to optimized format (WebP or JPEG) with optional resizing
  */
-function convertToWebP(
+function convertToOptimizedFormat(
   img: HTMLImageElement,
   width: number,
   height: number,
-  quality: number
+  quality: number,
+  mimeType: 'image/webp' | 'image/jpeg'
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
@@ -173,10 +224,10 @@ function convertToWebP(
         if (blob) {
           resolve(blob);
         } else {
-          reject(new Error('Failed to convert image to WebP'));
+          reject(new Error(`Failed to convert image to ${mimeType}`));
         }
       },
-      'image/webp',
+      mimeType,
       quality
     );
   });
@@ -188,7 +239,8 @@ function convertToWebP(
 function generateThumbnail(
   img: HTMLImageElement,
   maxSize: number,
-  quality: number
+  quality: number,
+  mimeType: 'image/webp' | 'image/jpeg' = 'image/webp'
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const { width, height } = calculateDimensions(
@@ -220,7 +272,7 @@ function generateThumbnail(
           reject(new Error('Failed to generate thumbnail'));
         }
       },
-      'image/webp',
+      mimeType,
       quality
     );
   });

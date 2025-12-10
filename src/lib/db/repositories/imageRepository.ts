@@ -7,7 +7,7 @@ export const imageRepository = {
   async create(file: File, characterId: string): Promise<MoodboardImage> {
     const id = generateId();
 
-    // Process the image (convert to WebP, resize if needed, thumbnail, palette)
+    // Process the image (convert to WebP or JPEG, resize if needed, thumbnail, palette)
     const processed = await processImage(file);
 
     // Save files to OPFS
@@ -24,14 +24,17 @@ export const imageRepository = {
       }
       : undefined;
 
-    // Get original filename without extension, add .webp
+    // Use the actual output format (webp or jpeg depending on browser support)
+    const mimeType = processed.format === 'webp' ? 'image/webp' : 'image/jpeg';
+    const extension = processed.format;
+
     const image: MoodboardImage = {
       id,
       characterId,
-      filename: `${id}.webp`,
+      filename: `${id}.${extension}`,
       originalName: file.name,
-      mimeType: 'image/webp', // Always WebP after processing
-      size: processed.original.size, // Size of the processed WebP
+      mimeType,
+      size: processed.original.size,
       width: processed.width,
       height: processed.height,
       storagePath,
