@@ -193,7 +193,69 @@ function calculateDimensions(
 }
 
 /**
+ * Step-down resize an image for high-quality downsampling
+ * When downscaling by more than 2x, browsers (especially Safari) produce
+ * aliased/pixelated results. This function resizes in steps of 50% to get
+ * much better quality, similar to bicubic interpolation.
+ */
+function stepDownResize(
+  source: HTMLImageElement | HTMLCanvasElement,
+  targetWidth: number,
+  targetHeight: number
+): HTMLCanvasElement {
+  let currentWidth = source instanceof HTMLImageElement ? source.naturalWidth : source.width;
+  let currentHeight = source instanceof HTMLImageElement ? source.naturalHeight : source.height;
+
+  // If we're not downscaling much, just do it in one step
+  if (currentWidth <= targetWidth * 2 && currentHeight <= targetHeight * 2) {
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d')!;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
+    return canvas;
+  }
+
+  // Step down by halves until we're close to the target
+  let currentSource: HTMLImageElement | HTMLCanvasElement = source;
+
+  while (currentWidth > targetWidth * 2 || currentHeight > targetHeight * 2) {
+    // Halve the dimensions (but don't go below target)
+    const nextWidth = Math.max(Math.round(currentWidth / 2), targetWidth);
+    const nextHeight = Math.max(Math.round(currentHeight / 2), targetHeight);
+
+    const stepCanvas = document.createElement('canvas');
+    stepCanvas.width = nextWidth;
+    stepCanvas.height = nextHeight;
+
+    const stepCtx = stepCanvas.getContext('2d')!;
+    stepCtx.imageSmoothingEnabled = true;
+    stepCtx.imageSmoothingQuality = 'high';
+    stepCtx.drawImage(currentSource, 0, 0, nextWidth, nextHeight);
+
+    currentSource = stepCanvas;
+    currentWidth = nextWidth;
+    currentHeight = nextHeight;
+  }
+
+  // Final step to exact target dimensions
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width = targetWidth;
+  finalCanvas.height = targetHeight;
+
+  const finalCtx = finalCanvas.getContext('2d')!;
+  finalCtx.imageSmoothingEnabled = true;
+  finalCtx.imageSmoothingQuality = 'high';
+  finalCtx.drawImage(currentSource, 0, 0, targetWidth, targetHeight);
+
+  return finalCanvas;
+}
+
+/**
  * Convert image to optimized format (WebP or JPEG) with optional resizing
+ * Uses step-down resizing for high-quality results on all browsers
  */
 function convertToOptimizedFormat(
   img: HTMLImageElement,
@@ -203,21 +265,8 @@ function convertToOptimizedFormat(
   mimeType: 'image/webp' | 'image/jpeg'
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      reject(new Error('Failed to get canvas context'));
-      return;
-    }
-
-    // Use high-quality image smoothing for resizing
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    ctx.drawImage(img, 0, 0, width, height);
+    // Use step-down resizing for high-quality downsampling
+    const canvas = stepDownResize(img, width, height);
 
     canvas.toBlob(
       (blob) => {
@@ -235,6 +284,7 @@ function convertToOptimizedFormat(
 
 /**
  * Generate a thumbnail from an image
+ * Uses step-down resizing for high-quality results on all browsers
  */
 function generateThumbnail(
   img: HTMLImageElement,
@@ -249,20 +299,8 @@ function generateThumbnail(
       maxSize
     );
 
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      reject(new Error('Failed to get canvas context'));
-      return;
-    }
-
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
-    ctx.drawImage(img, 0, 0, width, height);
+    // Use step-down resizing for high-quality downsampling
+    const canvas = stepDownResize(img, width, height);
 
     canvas.toBlob(
       (blob) => {
