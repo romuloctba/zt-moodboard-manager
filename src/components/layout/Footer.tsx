@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from "../ui/button";
+
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0-dev';
 
 export function Footer() {
@@ -20,7 +22,10 @@ export function Footer() {
               Zoch Tecnologia
             </a>
           </div>
-          <span className="font-mono">v{APP_VERSION}</span>
+          <div>
+            <span className="font-mono">v{APP_VERSION}</span>
+            <Button variant={"ghost"} onClick={() => window.location.reload()}><span>Check for updates</span></Button>
+          </div>
         </div>
       </div>
     </footer>

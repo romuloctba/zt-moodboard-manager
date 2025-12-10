@@ -169,7 +169,10 @@ function loadImage(source: Blob): Promise<HTMLImageElement> {
 
 /**
  * Calculate output dimensions maintaining aspect ratio
+ * Ensures images are not downscaled below MIN_DIMENSION (unless original is smaller)
  */
+const MIN_DIMENSION = 500; // Minimum width or height when downscaling
+
 function calculateDimensions(
   originalWidth: number,
   originalHeight: number,
@@ -187,6 +190,17 @@ function calculateDimensions(
       width = Math.round((width * maxSize) / height);
       height = maxSize;
     }
+  }
+
+  // Ensure we don't downscale below MIN_DIMENSION (unless original was smaller)
+  const minDim = Math.min(width, height);
+  const originalMinDim = Math.min(originalWidth, originalHeight);
+
+  if (minDim < MIN_DIMENSION && originalMinDim >= MIN_DIMENSION) {
+    // Scale up to meet minimum, but don't exceed original size
+    const scale = Math.min(MIN_DIMENSION / minDim, originalMinDim / minDim);
+    width = Math.round(width * scale);
+    height = Math.round(height * scale);
   }
 
   return { width, height };
