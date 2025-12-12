@@ -73,6 +73,7 @@
     "resolution": {
       "keepLocal": "Keep Local",
       "keepRemote": "Keep Remote",
+      "keepNewest": "Keep Newest",
       "skip": "Skip"
     },
     "apply": "Apply",
