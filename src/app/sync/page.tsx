@@ -118,7 +118,7 @@ export default function SyncPage() {
           cancel: t('conflict.cancel'),
           keepAllLocal: t('conflict.resolution.keepLocal'),
           keepAllRemote: t('conflict.resolution.keepRemote'),
-          keepNewest: 'Keep Newest',
+          keepNewest: t('conflict.resolution.keepNewest'),
         }}
       />
     </div>
