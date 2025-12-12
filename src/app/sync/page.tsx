@@ -54,6 +54,7 @@ export default function SyncPage() {
               description: t('connect.description'),
               button: t('connect.button'),
               connecting: t('status.connecting'),
+              firstSyncNotice: t('connect.firstSyncNotice'),
             },
             account: {
               connectedAs: t('account.connectedAs'),
@@ -62,6 +63,7 @@ export default function SyncPage() {
               syncNow: t('actions.syncNow'),
               syncing: t('status.syncing'),
               disconnect: t('account.disconnect'),
+              firstSyncNotice: t('account.firstSyncNotice'),
             },
             settings: {
               autoSync: t('settings.autoSync'),

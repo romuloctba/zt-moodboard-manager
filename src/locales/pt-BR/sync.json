@@ -7,13 +7,15 @@
   "connect": {
     "title": "Conectar Conta",
     "description": "Faça login com Google para habilitar a sincronização",
-    "button": "Conectar Google Drive"
+    "button": "Conectar Google Drive",
+    "firstSyncNotice": "Sua primeira sincronização pode levar alguns minutos dependendo dos seus projetos e arquivos. Não se preocupe — as próximas sincronizações serão muito mais rápidas!"
   },
   "account": {
     "connectedAs": "Conectado como",
     "disconnect": "Desconectar",
     "lastSync": "Última sincronização:",
-    "never": "Nunca"
+    "never": "Nunca",
+    "firstSyncNotice": "Sua primeira sincronização pode levar alguns minutos dependendo dos seus projetos e arquivos. Não se preocupe — as próximas sincronizações serão muito mais rápidas!"
   },
   "settings": {
     "autoSync": "Sincronização Automática",

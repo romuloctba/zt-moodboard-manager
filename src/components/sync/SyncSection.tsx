@@ -35,6 +35,7 @@ export interface SyncSectionProps {
       description: string;
       button: string;
       connecting: string;
+      firstSyncNotice: string;
     };
     account: {
       connectedAs: string;
@@ -43,6 +44,7 @@ export interface SyncSectionProps {
       syncNow: string;
       syncing: string;
       disconnect: string;
+      firstSyncNotice: string;
     };
     settings: {
       autoSync: string;
@@ -118,6 +120,11 @@ export function SyncSection({
                 </>
               )}
             </Button>
+            <div>
+              <p className="mt-8 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-3 mb-4 text-sm text-blue-800 dark:text-blue-300">
+                💡 {labels.notConnected.firstSyncNotice}
+              </p>
+            </div>
           </div>
         )}
         
@@ -133,6 +140,13 @@ export function SyncSection({
               onDisconnect={onDisconnect}
               labels={labels.account}
             />
+            
+            {/* First Sync Notice */}
+            {!settings.lastSyncAt && (
+              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-lg p-3 text-sm text-blue-800 dark:text-blue-300">
+                💡 {labels.account.firstSyncNotice}
+              </div>
+            )}
             
             {/* Progress */}
             {isSyncing && progress && (

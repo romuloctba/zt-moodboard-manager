@@ -7,13 +7,15 @@
   "connect": {
     "title": "Connect Account",
     "description": "Sign in with Google to enable sync",
-    "button": "Connect Google Drive"
+    "button": "Connect Google Drive",
+    "firstSyncNotice": "Your first sync may take a few minutes depending on your projects and files. Don't worry — subsequent syncs will be much faster!"
   },
   "account": {
     "connectedAs": "Connected as",
     "disconnect": "Disconnect",
     "lastSync": "Last sync:",
-    "never": "Never"
+    "never": "Never",
+    "firstSyncNotice": "Your first sync may take a few minutes depending on your projects and files. Don't worry — subsequent syncs will be much faster!"
   },
   "settings": {
     "autoSync": "Auto Sync",
