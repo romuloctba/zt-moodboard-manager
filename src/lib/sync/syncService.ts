@@ -7,6 +7,7 @@
 
 import { db } from '@/lib/db/database';
 import { fileStorage } from '@/lib/storage/fileStorage';
+import { debug } from '@/lib/utils/debug';
 import { googleAuth } from './googleAuth';
 import { googleDrive } from './googleDriveService';
 import { syncManifest } from './syncManifest';
@@ -46,7 +47,8 @@ class SyncService {
 
     try {
       return JSON.parse(stored);
-    } catch {
+    } catch (error) {
+      debug.warn('[SyncService] Failed to parse sync settings:', error);
       return null;
     }
   }

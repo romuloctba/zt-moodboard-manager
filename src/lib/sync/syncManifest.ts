@@ -6,6 +6,7 @@
  */
 
 import { db } from '@/lib/db/database';
+import { debug } from '@/lib/utils/debug';
 import { hashObject } from './hash';
 import { getDeviceId, getDeviceName } from './deviceId';
 import {
@@ -124,7 +125,8 @@ class SyncManifestService {
       // Filter out old deletions (older than retention period)
       const cutoff = Date.now() - (SYNC_CONSTANTS.DELETED_ITEMS_RETENTION_DAYS * 24 * 60 * 60 * 1000);
       return items.filter(item => new Date(item.deletedAt).getTime() > cutoff);
-    } catch {
+    } catch (error) {
+      debug.warn('[SyncManifest] Failed to parse deleted items:', error);
       return [];
     }
   }

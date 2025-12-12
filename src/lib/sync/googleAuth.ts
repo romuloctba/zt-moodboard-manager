@@ -14,6 +14,7 @@
  * 5. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID environment variable
  */
 
+import { debug } from '@/lib/utils/debug';
 import { SYNC_CONSTANTS, type GoogleUserInfo } from './types';
 
 // Google Identity Services types
@@ -248,7 +249,7 @@ class GoogleAuthService {
     if (token && window.google?.accounts?.oauth2) {
       // Revoke the token
       window.google.accounts.oauth2.revoke(token, () => {
-        console.log('[GoogleAuth] Token revoked');
+        debug.info('[GoogleAuth] Token revoked');
       });
     }
 

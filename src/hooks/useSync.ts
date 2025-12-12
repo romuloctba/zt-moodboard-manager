@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { syncService } from '@/lib/sync/syncService';
+import { SYNC_CONSTANTS } from '@/lib/sync/types';
 import type {
   SyncSettings,
   SyncProgress,
@@ -55,13 +56,19 @@ export function useSync(): UseSyncReturn {
 
   // Initialize settings on mount
   useEffect(() => {
+    let mounted = true;
+
     const loadedSettings = syncService.initializeSettings();
+    if (!mounted) return;
+
     setSettings(loadedSettings);
 
     // Check if we're already connected
     if (loadedSettings.enabled && loadedSettings.provider === 'google-drive') {
       // Verify token is still valid
       import('@/lib/sync/googleAuth').then(({ googleAuth }) => {
+        if (!mounted) return;
+
         if (!googleAuth.isSignedIn()) {
           // Token expired, clear settings
           syncService.saveSyncSettings({
@@ -72,6 +79,10 @@ export function useSync(): UseSyncReturn {
         }
       });
     }
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   /**
@@ -239,6 +250,13 @@ export function useAutoSync(
 ) {
   const hasRunStartupSync = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastVisibilitySyncRef = useRef(0);
+
+  // Use ref to store sync function to avoid dependency issues
+  const syncRef = useRef(sync);
+  useEffect(() => {
+    syncRef.current = sync;
+  }, [sync]);
 
   // Startup sync
   useEffect(() => {
@@ -250,11 +268,11 @@ export function useAutoSync(
 
     // Delay startup sync slightly
     const timeout = setTimeout(() => {
-      sync({ force: false });
-    }, 2000);
+      syncRef.current({ force: false });
+    }, SYNC_CONSTANTS.STARTUP_SYNC_DELAY_MS);
 
     return () => clearTimeout(timeout);
-  }, [enabled, isConnected, syncOnStartup, sync]);
+  }, [enabled, isConnected, syncOnStartup]);
 
   // Interval sync
   useEffect(() => {
@@ -267,7 +285,7 @@ export function useAutoSync(
     }
 
     intervalRef.current = setInterval(() => {
-      sync({ force: false });
+      syncRef.current({ force: false });
     }, intervalMinutes * 60 * 1000);
 
     return () => {
@@ -276,7 +294,7 @@ export function useAutoSync(
         intervalRef.current = null;
       }
     };
-  }, [enabled, isConnected, intervalMinutes, sync]);
+  }, [enabled, isConnected, intervalMinutes]);
 
   // Visibility-based sync (when tab becomes visible)
   useEffect(() => {
@@ -284,12 +302,18 @@ export function useAutoSync(
 
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
-        // Quick check without full sync
-        sync({ force: false });
+        const now = Date.now();
+        const timeSinceLastSync = now - lastVisibilitySyncRef.current;
+
+        // Debounce: only sync if enough time has passed
+        if (timeSinceLastSync >= SYNC_CONSTANTS.VISIBILITY_SYNC_DEBOUNCE_MS) {
+          lastVisibilitySyncRef.current = now;
+          syncRef.current({ force: false });
+        }
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibility);
     return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [enabled, isConnected, sync]);
+  }, [enabled, isConnected]);
 }

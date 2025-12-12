@@ -5,6 +5,7 @@
  * Uses the app data folder (hidden from user) for sync storage.
  */
 
+import { retryWithBackoff } from '@/lib/utils/retry';
 import { googleAuth } from './googleAuth';
 import {
   SYNC_CONSTANTS,
@@ -36,26 +37,28 @@ class GoogleDriveService {
     url: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const headers = await this.getHeaders();
+    return retryWithBackoff(async () => {
+      const headers = await this.getHeaders();
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...headers,
-        ...options.headers,
-      },
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...headers,
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
+        throw new Error(`Drive API Error: ${error.error?.message || response.statusText}`);
+      }
+
+      // Handle empty responses
+      const text = await response.text();
+      if (!text) return {} as T;
+
+      return JSON.parse(text);
     });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: { message: response.statusText } }));
-      throw new Error(`Drive API Error: ${error.error?.message || response.statusText}`);
-    }
-
-    // Handle empty responses
-    const text = await response.text();
-    if (!text) return {} as T;
-
-    return JSON.parse(text);
   }
 
   /**

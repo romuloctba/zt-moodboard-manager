@@ -6,6 +6,30 @@
  */
 
 // ===========================================
+// Error Handling
+// ===========================================
+
+export type SyncErrorCode =
+  | 'AUTH_FAILED'
+  | 'NETWORK_ERROR'
+  | 'INVALID_DATA'
+  | 'STORAGE_FULL'
+  | 'CONFLICT_UNRESOLVED'
+  | 'RATE_LIMITED'
+  | 'UNKNOWN';
+
+export class SyncException extends Error {
+  constructor(
+    message: string,
+    public code: SyncErrorCode,
+    public recoverable: boolean = true
+  ) {
+    super(message);
+    this.name = 'SyncException';
+  }
+}
+
+// ===========================================
 // Sync Settings & Configuration
 // ===========================================
 
@@ -285,4 +309,12 @@ export const SYNC_CONSTANTS = {
 
   // Cleanup
   DELETED_ITEMS_RETENTION_DAYS: 30,
+
+  // Auto-sync timing
+  STARTUP_SYNC_DELAY_MS: 2_000, // Delay before first sync on startup
+  VISIBILITY_SYNC_DEBOUNCE_MS: 5_000, // Minimum time between visibility-triggered syncs
+
+  // Retry configuration
+  MAX_RETRIES: 3,
+  RETRY_BASE_DELAY_MS: 1_000, // Base delay for exponential backoff
 } as const;
