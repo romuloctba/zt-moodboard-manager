@@ -9,6 +9,94 @@
     "storageUsed": "Armazenamento usado",
     "storageFormat": "{used} / {quota}"
   },
+  "sync": {
+    "title": "Sincronização na Nuvem",
+    "description": "Sincronize seus dados entre dispositivos usando o Google Drive",
+    "connect": {
+      "title": "Conectar Conta",
+      "description": "Faça login com Google para habilitar a sincronização",
+      "button": "Conectar Google Drive"
+    },
+    "account": {
+      "title": "Conta Conectada",
+      "connectedAs": "Conectado como",
+      "disconnect": "Desconectar",
+      "lastSync": "Última sincronização:",
+      "never": "Nunca"
+    },
+    "settings": {
+      "title": "Configurações de Sincronização",
+      "autoSync": "Sincronização Automática",
+      "autoSyncDescription": "Sincronizar alterações automaticamente em segundo plano",
+      "syncInterval": "Intervalo de Sincronização",
+      "syncIntervalDescription": "Com que frequência verificar por alterações",
+      "intervalOptions": {
+        "5": "A cada 5 minutos",
+        "15": "A cada 15 minutos",
+        "30": "A cada 30 minutos",
+        "60": "A cada hora",
+        "manual": "Somente manual"
+      },
+      "conflictStrategy": "Resolução de Conflitos",
+      "conflictStrategyDescription": "Como lidar com conflitos entre alterações locais e remotas",
+      "conflictOptions": {
+        "ask": "Perguntar",
+        "localWins": "Manter local",
+        "remoteWins": "Manter remoto",
+        "newestWins": "Manter mais recente"
+      },
+      "syncOnStartup": "Sincronizar ao Iniciar",
+      "syncOnStartupDescription": "Verificar por alterações quando o app abrir"
+    },
+    "status": {
+      "idle": "Ocioso",
+      "connecting": "Conectando...",
+      "syncing": "Sincronizando...",
+      "uploading": "Enviando...",
+      "downloading": "Baixando...",
+      "success": "Sincronizado",
+      "error": "Erro de Sincronização"
+    },
+    "progress": {
+      "connecting": "Conectando ao Google Drive",
+      "analyzing": "Analisando dados locais",
+      "checking": "Verificando dados remotos",
+      "comparing": "Comparando alterações",
+      "uploading": "Enviando",
+      "downloading": "Baixando",
+      "finalizing": "Finalizando",
+      "complete": "Completo",
+      "projects": "projetos",
+      "characters": "personagens",
+      "images": "imagens",
+      "files": "arquivos"
+    },
+    "actions": {
+      "syncNow": "Sincronizar Agora"
+    },
+    "conflict": {
+      "title": "Conflito de Sincronização",
+      "description": "Alterações conflitam com o remoto. Escolha qual versão manter.",
+      "itemCount": "{count} item(ns) têm conflitos",
+      "local": "Local",
+      "remote": "Remoto",
+      "modified": "Modificado",
+      "resolution": {
+        "keepLocal": "Manter Local",
+        "keepRemote": "Manter Remoto",
+        "skip": "Pular"
+      },
+      "apply": "Aplicar",
+      "cancel": "Cancelar"
+    },
+    "toast": {
+      "connected": "Google Drive conectado!",
+      "disconnected": "Google Drive desconectado",
+      "syncComplete": "Sincronização concluída!",
+      "syncFailed": "Falha na sincronização",
+      "noChanges": "Tudo atualizado"
+    }
+  },
   "backup": {
     "title": "Backup & Restauração",
     "description": "Exporte seus dados para transferir para outro dispositivo ou criar um backup",

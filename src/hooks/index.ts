@@ -11,6 +11,9 @@ export { useBackupRestore, getProgressPercent } from './useBackupRestore';
 // PWA Hooks
 export { usePWAInstall, type UsePWAInstallReturn } from './usePWAInstall';
 
+// Sync Hooks
+export { useSync, useAutoSync } from './useSync';
+
 // Utility Hooks
 export { useIsMobile } from './use-mobile';
 export { useNotFound } from './use-not-found';
