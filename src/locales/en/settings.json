@@ -1,5 +1,12 @@
 {
   "title": "Settings",
+  "syncLink": {
+    "title": "Cloud Sync",
+    "description": "Manage cloud synchronization settings",
+    "connected": "Connected",
+    "notConnected": "Not Connected",
+    "manageSync": "Manage Sync"
+  },
   "storage": {
     "title": "Storage",
     "description": "Your data is stored locally on this device",

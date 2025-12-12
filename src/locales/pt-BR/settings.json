@@ -1,5 +1,12 @@
 {
   "title": "Configurações",
+  "syncLink": {
+    "title": "Sincronização na Nuvem",
+    "description": "Gerenciar configurações de sincronização na nuvem",
+    "connected": "Conectado",
+    "notConnected": "Não Conectado",
+    "manageSync": "Gerenciar Sincronização"
+  },
   "storage": {
     "title": "Armazenamento",
     "description": "Seus dados são armazenados localmente neste dispositivo",

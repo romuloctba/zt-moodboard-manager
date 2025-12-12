@@ -9,7 +9,7 @@ import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
-import { Plus, Users, Settings } from 'lucide-react';
+import { Plus, Users, Settings, Cloud } from 'lucide-react';
 import Link from 'next/link';
 import { Header, HeaderAction } from '@/components/layout';
 
@@ -64,6 +64,18 @@ function ProjectViewContent() {
       mobilePriority: 1,
     },
     {
+      id: 'sync',
+      element: (
+        <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+          <Link href="/sync" className="flex items-center justify-center gap-2 md:gap-0">
+            <Cloud className="w-5 h-5" />
+            <span className="md:hidden">{tCommon('navigation.sync')}</span>
+          </Link>
+        </Button>
+      ),
+      mobilePriority: 2,
+    },
+    {
       id: 'settings',
       element: (
         <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
@@ -73,7 +85,7 @@ function ProjectViewContent() {
           </Link>
         </Button>
       ),
-      mobilePriority: 2,
+      mobilePriority: 3,
     },
   ], [t, tCommon]);
 

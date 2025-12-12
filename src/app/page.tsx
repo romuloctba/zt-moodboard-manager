@@ -8,7 +8,7 @@ import { ProjectList } from '@/components/projects/ProjectList';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
-import { Plus, Settings, Palette } from 'lucide-react';
+import { Plus, Settings, Cloud, Palette } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/ui/language-switcher';
 import { InstallSection } from './settings/components';
 import { usePWAInstall } from '@/hooks';
@@ -49,6 +49,18 @@ export default function HomePage() {
       mobilePriority: 2,
     },
     {
+      id: 'sync',
+      element: (
+        <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+          <Link href="/sync" className="flex items-center justify-center gap-2 md:gap-0">
+            <Cloud className="w-5 h-5" />
+            <span className="md:hidden">{tCommon('navigation.sync')}</span>
+          </Link>
+        </Button>
+      ),
+      mobilePriority: 3,
+    },
+    {
       id: 'settings',
       element: (
         <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
@@ -58,7 +70,7 @@ export default function HomePage() {
           </Link>
         </Button>
       ),
-      mobilePriority: 3,
+      mobilePriority: 4,
     },
   ], [t, tCommon]);
 

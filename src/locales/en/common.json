@@ -30,6 +30,7 @@
   },
   "navigation": {
     "settings": "Settings",
+    "sync": "Sync",
     "back": "Back",
     "menu": "Menu"
   },

@@ -20,6 +20,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     projects: (await import(`@/locales/${locale}/projects.json`)).default,
     characters: (await import(`@/locales/${locale}/characters.json`)).default,
     settings: (await import(`@/locales/${locale}/settings.json`)).default,
+    sync: (await import(`@/locales/${locale}/sync.json`)).default,
     media: (await import(`@/locales/${locale}/media.json`)).default,
     errors: (await import(`@/locales/${locale}/errors.json`)).default,
   };

@@ -10,6 +10,7 @@ import enCommon from '@/locales/en/common.json';
 import enProjects from '@/locales/en/projects.json';
 import enCharacters from '@/locales/en/characters.json';
 import enSettings from '@/locales/en/settings.json';
+import enSync from '@/locales/en/sync.json';
 import enMedia from '@/locales/en/media.json';
 import enErrors from '@/locales/en/errors.json';
 
@@ -17,6 +18,7 @@ import ptBRCommon from '@/locales/pt-BR/common.json';
 import ptBRProjects from '@/locales/pt-BR/projects.json';
 import ptBRCharacters from '@/locales/pt-BR/characters.json';
 import ptBRSettings from '@/locales/pt-BR/settings.json';
+import ptBRSync from '@/locales/pt-BR/sync.json';
 import ptBRMedia from '@/locales/pt-BR/media.json';
 import ptBRErrors from '@/locales/pt-BR/errors.json';
 
@@ -26,6 +28,7 @@ const messages: Record<Locale, AbstractIntlMessages> = {
     projects: enProjects,
     characters: enCharacters,
     settings: enSettings,
+    sync: enSync,
     media: enMedia,
     errors: enErrors,
   },
@@ -34,6 +37,7 @@ const messages: Record<Locale, AbstractIntlMessages> = {
     projects: ptBRProjects,
     characters: ptBRCharacters,
     settings: ptBRSettings,
+    sync: ptBRSync,
     media: ptBRMedia,
     errors: ptBRErrors,
   },

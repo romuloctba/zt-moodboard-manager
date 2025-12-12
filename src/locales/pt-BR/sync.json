@@ -1,0 +1,86 @@
+{
+  "title": "Sincronização na Nuvem",
+  "section": {
+    "title": "Sincronização Google Drive",
+    "description": "Sincronize seus dados entre dispositivos usando o Google Drive"
+  },
+  "connect": {
+    "title": "Conectar Conta",
+    "description": "Faça login com Google para habilitar a sincronização",
+    "button": "Conectar Google Drive"
+  },
+  "account": {
+    "connectedAs": "Conectado como",
+    "disconnect": "Desconectar",
+    "lastSync": "Última sincronização:",
+    "never": "Nunca"
+  },
+  "settings": {
+    "autoSync": "Sincronização Automática",
+    "autoSyncDescription": "Sincronizar alterações automaticamente em segundo plano",
+    "syncInterval": "Intervalo de Sincronização",
+    "syncOnStartup": "Sincronizar ao Iniciar",
+    "syncOnStartupDescription": "Verificar por alterações quando o app abrir",
+    "conflictStrategy": "Resolução de Conflitos",
+    "conflictStrategyDescription": "Como lidar com conflitos entre alterações locais e remotas",
+    "intervalOptions": {
+      "5": "A cada 5 minutos",
+      "15": "A cada 15 minutos",
+      "30": "A cada 30 minutos",
+      "60": "A cada hora"
+    },
+    "conflictOptions": {
+      "ask": "Perguntar",
+      "localWins": "Manter local",
+      "remoteWins": "Manter remoto",
+      "newestWins": "Manter mais recente"
+    }
+  },
+  "status": {
+    "idle": "Ocioso",
+    "connecting": "Conectando...",
+    "syncing": "Sincronizando...",
+    "uploading": "Enviando...",
+    "downloading": "Baixando...",
+    "success": "Sincronizado",
+    "error": "Erro de Sincronização"
+  },
+  "progress": {
+    "connecting": "Conectando ao Google Drive",
+    "analyzing": "Analisando dados locais",
+    "checking": "Verificando dados remotos",
+    "comparing": "Comparando alterações",
+    "uploading": "Enviando",
+    "downloading": "Baixando",
+    "finalizing": "Finalizando",
+    "complete": "Completo",
+    "projects": "projetos",
+    "characters": "personagens",
+    "images": "imagens",
+    "files": "arquivos"
+  },
+  "actions": {
+    "syncNow": "Sincronizar Agora"
+  },
+  "conflict": {
+    "title": "Conflito de Sincronização",
+    "description": "Alterações conflitam com o remoto. Escolha qual versão manter.",
+    "local": "Local",
+    "remote": "Remoto",
+    "modified": "Modificado",
+    "resolution": {
+      "keepLocal": "Manter Local",
+      "keepRemote": "Manter Remoto",
+      "skip": "Pular"
+    },
+    "apply": "Aplicar",
+    "cancel": "Cancelar"
+  },
+  "toast": {
+    "connected": "Google Drive conectado!",
+    "disconnected": "Google Drive desconectado",
+    "syncComplete": "Sincronização concluída!",
+    "syncFailed": "Falha na sincronização",
+    "noChanges": "Tudo atualizado"
+  }
+}

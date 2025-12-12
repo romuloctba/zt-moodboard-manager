@@ -1,0 +1,86 @@
+{
+  "title": "Cloud Sync",
+  "section": {
+    "title": "Google Drive Sync",
+    "description": "Sync your data across devices using Google Drive"
+  },
+  "connect": {
+    "title": "Connect Account",
+    "description": "Sign in with Google to enable sync",
+    "button": "Connect Google Drive"
+  },
+  "account": {
+    "connectedAs": "Connected as",
+    "disconnect": "Disconnect",
+    "lastSync": "Last sync:",
+    "never": "Never"
+  },
+  "settings": {
+    "autoSync": "Auto Sync",
+    "autoSyncDescription": "Automatically sync changes in the background",
+    "syncInterval": "Sync Interval",
+    "syncOnStartup": "Sync on Startup",
+    "syncOnStartupDescription": "Check for changes when the app opens",
+    "conflictStrategy": "Conflict Resolution",
+    "conflictStrategyDescription": "How to handle conflicts between local and remote changes",
+    "intervalOptions": {
+      "5": "Every 5 minutes",
+      "15": "Every 15 minutes",
+      "30": "Every 30 minutes",
+      "60": "Every hour"
+    },
+    "conflictOptions": {
+      "ask": "Ask me",
+      "localWins": "Keep local",
+      "remoteWins": "Keep remote",
+      "newestWins": "Keep newest"
+    }
+  },
+  "status": {
+    "idle": "Idle",
+    "connecting": "Connecting...",
+    "syncing": "Syncing...",
+    "uploading": "Uploading...",
+    "downloading": "Downloading...",
+    "success": "Synced",
+    "error": "Sync Error"
+  },
+  "progress": {
+    "connecting": "Connecting to Google Drive",
+    "analyzing": "Analyzing local data",
+    "checking": "Checking remote data",
+    "comparing": "Comparing changes",
+    "uploading": "Uploading",
+    "downloading": "Downloading",
+    "finalizing": "Finalizing",
+    "complete": "Complete",
+    "projects": "projects",
+    "characters": "characters",
+    "images": "images",
+    "files": "files"
+  },
+  "actions": {
+    "syncNow": "Sync Now"
+  },
+  "conflict": {
+    "title": "Sync Conflict",
+    "description": "Changes conflict with remote. Choose which version to keep.",
+    "local": "Local",
+    "remote": "Remote",
+    "modified": "Modified",
+    "resolution": {
+      "keepLocal": "Keep Local",
+      "keepRemote": "Keep Remote",
+      "skip": "Skip"
+    },
+    "apply": "Apply",
+    "cancel": "Cancel"
+  },
+  "toast": {
+    "connected": "Google Drive connected!",
+    "disconnected": "Google Drive disconnected",
+    "syncComplete": "Sync complete!",
+    "syncFailed": "Sync failed",
+    "noChanges": "Everything up to date"
+  }
+}
