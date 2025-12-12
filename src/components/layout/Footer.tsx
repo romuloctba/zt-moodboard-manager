@@ -1,5 +1,6 @@
 'use client';
 
+import Link from "next/link";
 import { Button } from "../ui/button";
 
 const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || '0.1.0-dev';
@@ -21,6 +22,14 @@ export function Footer() {
             >
               Zoch Tecnologia
             </a>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center">
+            <Link
+              href="/privacy"
+              className="font-medium hover:text-foreground transition-colors"
+            >
+              Política de Privacidade / Privacy Policy
+            </Link>
           </div>
           <div>
             <span className="font-mono">v{APP_VERSION}</span>
