@@ -73,7 +73,8 @@
     "resolution": {
       "keepLocal": "Manter Local",
       "keepRemote": "Manter Remoto",
-      "skip": "Pular"
+      "skip": "Pular",
+      "keepNewest": "Manter Mais Recente"
     },
     "apply": "Aplicar",
     "cancel": "Cancelar"

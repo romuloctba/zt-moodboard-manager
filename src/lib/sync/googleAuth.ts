@@ -286,6 +286,9 @@ class GoogleAuthService {
       return storedToken;
     }
 
+    // Token expired or missing - check if user info exists (was previously connected)
+    const userEmail = this.getUserEmail();
+
     // Token expired or missing - need to re-authenticate
     // GIS doesn't support refresh tokens in browser-only flow
     // We'll prompt silently first, then with consent if needed
@@ -299,16 +302,29 @@ class GoogleAuthService {
       this.pendingAuthResolve = resolve;
       this.pendingAuthReject = reject;
 
-      // Try without prompt first (silent refresh if user already granted)
-      this.tokenClient!.requestAccessToken({ prompt: '' });
+      // If user was previously connected, try silent refresh (no popup)
+      // Otherwise, this will fail gracefully and they'll need to click Connect
+      const prompt = userEmail ? '' : 'select_account';
+
+      debug.info(`[GoogleAuth] Requesting token with prompt: "${prompt}"`);
+      this.tokenClient!.requestAccessToken({ prompt });
     });
   }
 
   /**
-   * Check if user is signed in
+   * Check if user is signed in (has valid token OR was previously connected)
+   * This allows for silent token refresh without requiring re-connection
    */
   isSignedIn(): boolean {
-    return this.getStoredToken() !== null;
+    // If we have a valid token, definitely signed in
+    if (this.getStoredToken() !== null) {
+      return true;
+    }
+
+    // If token expired but we have user info, they were connected
+    // Token will auto-refresh on next API call
+    const userEmail = this.getUserEmail();
+    return userEmail !== null;
   }
 
   /**
