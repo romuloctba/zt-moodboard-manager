@@ -49,9 +49,11 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 - **Color Palette Extraction** - Automatic color palette detection from images
 - **Grid & Canvas Views** - Switch between grid gallery and canvas modes
 
+
 ### Storage & Backup
 - **OPFS Storage** - Fast, persistent browser storage using Origin Private File System (IndexedDB fallback)
 - **Full Backup/Restore** - Export your entire database and images as a ZIP file
+- **Google Drive Auto Sync** - Seamlessly sync your data to Google Drive for backup and cross-device access. Requires setup of a Google API client and configuration of environment variables. See [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) for instructions.
 - **Storage Monitoring** - Visual indicator showing used storage space
 
 ### Internationalization
@@ -63,9 +65,18 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 - **Offline Support** - Works without internet connection via Service Worker
 - **Responsive Design** - Optimized for desktop and tablet. (May also work on mobile)
 
-## 🚀 Getting Started
 
-### Prerequisites
+## ☁️ Google Drive Sync Setup
+
+To enable Google Drive auto sync, you must configure a Google API client and set up the required environment variables in a `.env` file. This is necessary for authentication and secure access to your Google Drive account.
+
+**Setup Steps:**
+1. Follow the instructions in [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) to create a Google API client and obtain your credentials.
+2. Add the required variables (such as `GOOGLE_CLIENT_ID`, etc.) to your `.env` file in the project root.
+3. Restart the app after updating your environment variables.
+
+For detailed, step-by-step guidance, see [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md).
+
 
 - Node.js 20+
 - pnpm (recommended) or npm
@@ -198,9 +209,11 @@ A versão atual permite uso totalmente local, com armazenamento de dados no nave
 - **Extração de Paleta de Cores** - Detecção automática de paleta de cores das imagens
 - **Visualização em Grade & Canvas** - Alterne entre galeria em grade e modo canvas
 
+
 ### Armazenamento & Backup
 - **Armazenamento OPFS** - Armazenamento rápido e persistente no navegador usando Origin Private File System (fallback para IndexedDB)
 - **Backup/Restauro Completo** - Exporte todo o banco de dados e imagens em um arquivo ZIP
+- **Sincronização Automática com Google Drive** - Sincronize seus dados automaticamente com o Google Drive para backup e acesso entre dispositivos. Requer configuração de um cliente Google API e variáveis de ambiente. Veja [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) para instruções.
 - **Monitoramento de Espaço** - Indicador visual mostrando o espaço utilizado
 
 ### Internacionalização
