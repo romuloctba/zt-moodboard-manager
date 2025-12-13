@@ -11,3 +11,4 @@ export { SyncProgressIndicator, type SyncProgressIndicatorProps } from './SyncPr
 export { ConflictDialog, type ConflictDialogProps } from './ConflictDialog';
 export { SyncAccountCard, type SyncAccountCardProps } from './SyncAccountCard';
 export { SyncSettingsCard, type SyncSettingsCardProps } from './SyncSettingsCard';
+export { GlobalSyncIndicator, SyncStatusIcon } from './GlobalSyncIndicator';

@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { characterRepository } from '@/lib/db/repositories';
+import { useSyncTrigger } from '@/components/providers';
 import type { Character, CharacterProfile as CharacterProfileType, CharacterMetadata } from '@/types';
 
 interface CharacterProfileProps {
@@ -30,6 +31,7 @@ interface CharacterProfileProps {
 export function CharacterProfile({ character, onUpdate }: CharacterProfileProps) {
   const t = useTranslations('characters.profile');
   const [saving, setSaving] = useState(false);
+  const triggerSync = useSyncTrigger();
   
   // Form state
   const [name, setName] = useState(character.name);
@@ -85,6 +87,7 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
       const updated = await characterRepository.getById(character.id);
       if (updated) {
         onUpdate(updated);
+        triggerSync();
         toast.success(t('saved'));
       }
     } catch (error) {
@@ -95,7 +98,7 @@ export function CharacterProfile({ character, onUpdate }: CharacterProfileProps)
     }
   }, [
     character, name, description, age, role, backstory, 
-    personality, abilities, archetype, inspirations, customFields, onUpdate
+    personality, abilities, archetype, inspirations, customFields, onUpdate, triggerSync, t
   ]);
 
   const addPersonality = () => {

@@ -21,7 +21,7 @@ import {
 // Hooks
 import { useStorageStats } from '@/hooks/useStorageStats';
 import { useBackupRestore } from '@/hooks/useBackupRestore';
-import { useSync } from '@/hooks/useSync';
+import { useSyncContext } from '@/components/providers';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -30,8 +30,8 @@ export default function SettingsPage() {
   // Storage stats
   const storageStats = useStorageStats();
   
-  // Sync operations (just for status display)
-  const sync = useSync();
+  // Sync operations from global context (just for status display)
+  const sync = useSyncContext();
   
   // Backup and restore operations
   const backupRestore = useBackupRestore({

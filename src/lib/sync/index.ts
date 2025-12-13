@@ -13,6 +13,9 @@ export { googleDrive } from './googleDriveService';
 export { syncManifest } from './syncManifest';
 export { syncService } from './syncService';
 
+// Global sync trigger (for non-React contexts)
+export { triggerGlobalSync, registerSyncTrigger, unregisterSyncTrigger } from './globalSyncTrigger';
+
 // Utilities
 export { getDeviceId, getDeviceName } from './deviceId';
 export { hashObject, hashFile } from './hash';

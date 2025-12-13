@@ -9,23 +9,15 @@ import {
   ConflictDialog,
 } from '@/components/sync';
 
-// Hooks
-import { useSync, useAutoSync } from '@/hooks/useSync';
+// Hooks - use global sync context
+import { useSyncContext } from '@/components/providers';
 
 export default function SyncPage() {
   const t = useTranslations('sync');
   
-  // Sync operations
-  const sync = useSync();
-  
-  // Auto-sync setup
-  useAutoSync(
-    sync.settings?.autoSyncEnabled ?? false,
-    sync.settings?.syncIntervalMinutes ?? 15,
-    sync.settings?.syncOnStartup ?? true,
-    sync.isConnected,
-    sync.sync
-  );
+  // Sync operations from global context
+  // Auto-sync is now handled globally by the SyncProvider
+  const sync = useSyncContext();
 
   return (
     <div className="min-h-screen bg-background">

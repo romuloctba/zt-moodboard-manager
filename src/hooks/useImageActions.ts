@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react';
 import { imageRepository } from '@/lib/db/repositories';
 import { exportSelectedImages } from '@/lib/export/exportService';
+import { useSyncTrigger } from '@/components/providers';
 import type { MoodboardImage } from '@/types';
 import type { ImageWithUrl } from './useImageData';
 
@@ -44,12 +45,16 @@ export function useImageActions(options: UseImageActionsOptions = {}): UseImageA
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
+  // Get sync trigger for auto-syncing on changes
+  const triggerSync = useSyncTrigger();
+
   /** Delete a single image */
   const deleteImage = useCallback(async (imageId: string): Promise<boolean> => {
     try {
       setDeletingId(imageId);
       await imageRepository.delete(imageId);
       onDelete?.(imageId);
+      triggerSync();
       return true;
     } catch (error) {
       console.error('Failed to delete image:', error);
@@ -57,7 +62,7 @@ export function useImageActions(options: UseImageActionsOptions = {}): UseImageA
     } finally {
       setDeletingId(null);
     }
-  }, [onDelete]);
+  }, [onDelete, triggerSync]);
 
   /** Delete multiple images */
   const deleteMany = useCallback(async (ids: string[]): Promise<boolean> => {
@@ -65,6 +70,7 @@ export function useImageActions(options: UseImageActionsOptions = {}): UseImageA
       setIsDeleting(true);
       await imageRepository.deleteMany(ids);
       onDeleteMany?.(ids);
+      triggerSync();
       return true;
     } catch (error) {
       console.error('Failed to delete images:', error);
@@ -72,19 +78,20 @@ export function useImageActions(options: UseImageActionsOptions = {}): UseImageA
     } finally {
       setIsDeleting(false);
     }
-  }, [onDeleteMany]);
+  }, [onDeleteMany, triggerSync]);
 
   /** Update tags for an image */
   const updateTags = useCallback(async (imageId: string, tags: string[]): Promise<boolean> => {
     try {
       await imageRepository.update(imageId, { tags });
       onTagsUpdate?.(imageId, tags);
+      triggerSync();
       return true;
     } catch (error) {
       console.error('Failed to update tags:', error);
       return false;
     }
-  }, [onTagsUpdate]);
+  }, [onTagsUpdate, triggerSync]);
 
   /** Export selected images as a ZIP file */
   const exportImages = useCallback(async (

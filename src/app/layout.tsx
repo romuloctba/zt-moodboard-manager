@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Footer } from "@/components/layout/Footer";
-import { LocaleProvider } from "@/components/providers";
+import { LocaleProvider, SyncProvider } from "@/components/providers";
+import { GlobalSyncIndicator } from "@/components/sync";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -55,11 +56,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <LocaleProvider>
-          <div className="flex-1">
-            {children}
-          </div>
-          <Footer />
-          <Toaster />
+          <SyncProvider>
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+            <Toaster />
+            <GlobalSyncIndicator />
+          </SyncProvider>
         </LocaleProvider>
       </body>
     </html>

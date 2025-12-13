@@ -10,6 +10,7 @@ import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository, projectRepository } from '@/lib/db/repositories';
 import { exportCharacterImages } from '@/lib/export/exportService';
 import { useNotFound } from '@/hooks/use-not-found';
+import { useSyncTrigger } from '@/components/providers';
 import { toast } from 'sonner';
 import { ImageUploader } from '@/components/media/ImageUploader';
 import { ImageGrid } from '@/components/media/ImageGrid';
@@ -109,6 +110,7 @@ function CharacterViewContent() {
   const characterId = searchParams.get('characterId');
   const t = useTranslations('characters');
   const tMedia = useTranslations('media');
+  const triggerSync = useSyncTrigger();
 
   const [character, setCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
@@ -160,16 +162,19 @@ function CharacterViewContent() {
   const handleUploadComplete = useCallback(() => {
     // Trigger a refresh of the image grid
     setRefreshKey(prev => prev + 1);
-  }, []);
+    // Trigger sync after uploading images
+    triggerSync();
+  }, [triggerSync]);
 
   const handleCanvasChange = useCallback(async (canvasState: CanvasState) => {
     if (!character) return;
     try {
       await characterRepository.updateCanvasState(character.id, canvasState);
+      triggerSync();
     } catch (error) {
       console.error('Failed to save canvas state:', error);
     }
-  }, [character]);
+  }, [character, triggerSync]);
 
   const handleExportAll = useCallback(async () => {
     if (!character || exporting) return;

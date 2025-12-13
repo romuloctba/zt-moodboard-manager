@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Project, Character } from '@/types';
 import { projectRepository, characterRepository } from '@/lib/db/repositories';
+import { triggerGlobalSync } from '@/lib/sync/globalSyncTrigger';
 
 interface ProjectState {
   // Data
@@ -55,6 +56,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   createProject: async (name: string, description?: string) => {
     const project = await projectRepository.create(name, description);
     set(state => ({ projects: [project, ...state.projects] }));
+    triggerGlobalSync();
     return project;
   },
 
@@ -79,6 +81,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         ? { ...state.currentProject, name, updatedAt: new Date() }
         : state.currentProject,
     }));
+    triggerGlobalSync();
   },
 
   archiveProject: async (id: string) => {
@@ -87,6 +90,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       projects: state.projects.filter(p => p.id !== id),
       currentProject: state.currentProject?.id === id ? null : state.currentProject,
     }));
+    triggerGlobalSync();
   },
 
   deleteProject: async (id: string) => {
@@ -96,6 +100,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       currentProject: state.currentProject?.id === id ? null : state.currentProject,
       characters: state.currentProject?.id === id ? [] : state.characters,
     }));
+    triggerGlobalSync();
   },
 
   // Character actions
@@ -110,6 +115,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
     const character = await characterRepository.create(currentProject.id, name);
     set(state => ({ characters: [...state.characters, character] }));
+    triggerGlobalSync();
     return character;
   },
 
@@ -132,6 +138,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         ? { ...state.currentCharacter, name, updatedAt: new Date() }
         : state.currentCharacter,
     }));
+    triggerGlobalSync();
   },
 
   deleteCharacter: async (id: string) => {
@@ -140,6 +147,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       characters: state.characters.filter(c => c.id !== id),
       currentCharacter: state.currentCharacter?.id === id ? null : state.currentCharacter,
     }));
+    triggerGlobalSync();
   },
 
   // Reset
