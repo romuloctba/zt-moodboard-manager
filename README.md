@@ -53,7 +53,7 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 ### Storage & Backup
 - **OPFS Storage** - Fast, persistent browser storage using Origin Private File System (IndexedDB fallback)
 - **Full Backup/Restore** - Export your entire database and images as a ZIP file
-- **Google Drive Auto Sync** - Seamlessly sync your data to Google Drive for backup and cross-device access. Requires setup of a Google API client and configuration of environment variables. See [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) for instructions.
+- **Google Drive Auto Sync** - Seamlessly sync your data to Google Drive for backup and cross-device access. Requires setup of a Google API client and configuration of environment variables. See [GOOGLE_DRIVE_SYNC_SETUP.md](./docs/GOOGLE_DRIVE_SYNC_SETUP.md) for instructions.
 - **Storage Monitoring** - Visual indicator showing used storage space
 
 ### Internationalization
@@ -213,7 +213,7 @@ A versão atual permite uso totalmente local, com armazenamento de dados no nave
 ### Armazenamento & Backup
 - **Armazenamento OPFS** - Armazenamento rápido e persistente no navegador usando Origin Private File System (fallback para IndexedDB)
 - **Backup/Restauro Completo** - Exporte todo o banco de dados e imagens em um arquivo ZIP
-- **Sincronização Automática com Google Drive** - Sincronize seus dados automaticamente com o Google Drive para backup e acesso entre dispositivos. Requer configuração de um cliente Google API e variáveis de ambiente. Veja [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) para instruções.
+- **Sincronização Automática com Google Drive** - Sincronize seus dados automaticamente com o Google Drive para backup e acesso entre dispositivos. Requer configuração de um cliente Google API e variáveis de ambiente. Veja [GOOGLE_DRIVE_SYNC_SETUP.md](./docs/GOOGLE_DRIVE_SYNC_SETUP.md) para instruções.
 - **Monitoramento de Espaço** - Indicador visual mostrando o espaço utilizado
 
 ### Internacionalização
