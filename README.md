@@ -71,11 +71,11 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 To enable Google Drive auto sync, you must configure a Google API client and set up the required environment variables in a `.env` file. This is necessary for authentication and secure access to your Google Drive account.
 
 **Setup Steps:**
-1. Follow the instructions in [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md) to create a Google API client and obtain your credentials.
+1. Follow the instructions in [GOOGLE_DRIVE_SYNC_SETUP.md](./docs/GOOGLE_DRIVE_SYNC_SETUP.md) to create a Google API client and obtain your credentials.
 2. Add the required variables (such as `GOOGLE_CLIENT_ID`, etc.) to your `.env` file in the project root.
 3. Restart the app after updating your environment variables.
 
-For detailed, step-by-step guidance, see [GOOGLE_DRIVE_SYNC_SETUP.md](./GOOGLE_DRIVE_SYNC_SETUP.md).
+For detailed, step-by-step guidance, see [GOOGLE_DRIVE_SYNC_SETUP.md](./docs/GOOGLE_DRIVE_SYNC_SETUP.md).
 
 
 - Node.js 20+
