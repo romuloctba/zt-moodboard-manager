@@ -168,21 +168,27 @@ export function SyncProvider({ children }: SyncProviderProps) {
     setIsSyncing(true);
     setProgress(null);
 
+    // Only provide onConflict callback if the strategy is 'ask'
+    // Otherwise, let syncService auto-resolve based on the configured strategy
+    const shouldAskForConflicts = settings?.conflictStrategy === 'ask';
+
     const result = await syncService.performSync({
       force: options?.force,
       onProgress: (p) => {
         setProgress(p);
         setSyncStatus(p.status);
       },
-      onConflict: async (conflicts) => {
-        // Show conflicts to user
-        setPendingConflicts(conflicts);
+      onConflict: shouldAskForConflicts 
+        ? async (conflicts) => {
+            // Show conflicts to user
+            setPendingConflicts(conflicts);
 
-        // Wait for resolution
-        return new Promise((resolve) => {
-          conflictResolveRef.current = resolve;
-        });
-      },
+            // Wait for resolution
+            return new Promise((resolve) => {
+              conflictResolveRef.current = resolve;
+            });
+          }
+        : undefined,
     });
 
     setLastResult(result);

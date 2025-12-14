@@ -85,5 +85,11 @@
     "syncComplete": "Sync complete!",
     "syncFailed": "Sync failed",
     "noChanges": "Everything up to date"
+  },
+  "indicator": {
+    "syncing": "Syncing...",
+    "synced": "Synced",
+    "conflicts": "{count, plural, =1 {# Conflict} other {# Conflicts}}",
+    "failed": "Sync failed"
   }
 }

@@ -85,5 +85,11 @@
     "syncComplete": "Sincronização concluída!",
     "syncFailed": "Falha na sincronização",
     "noChanges": "Tudo atualizado"
+  },
+  "indicator": {
+    "syncing": "Sincronizando...",
+    "synced": "Sincronizado",
+    "conflicts": "{count, plural, =1 {# Conflito} other {# Conflitos}}",
+    "failed": "Falha na sincronização"
   }
 }
