@@ -13,6 +13,7 @@ import enSettings from '@/locales/en/settings.json';
 import enSync from '@/locales/en/sync.json';
 import enMedia from '@/locales/en/media.json';
 import enErrors from '@/locales/en/errors.json';
+import enEditions from '@/locales/en/editions.json';
 
 import ptBRCommon from '@/locales/pt-BR/common.json';
 import ptBRProjects from '@/locales/pt-BR/projects.json';
@@ -21,6 +22,7 @@ import ptBRSettings from '@/locales/pt-BR/settings.json';
 import ptBRSync from '@/locales/pt-BR/sync.json';
 import ptBRMedia from '@/locales/pt-BR/media.json';
 import ptBRErrors from '@/locales/pt-BR/errors.json';
+import ptBREditions from '@/locales/pt-BR/editions.json';
 
 const messages: Record<Locale, AbstractIntlMessages> = {
   en: {
@@ -31,6 +33,7 @@ const messages: Record<Locale, AbstractIntlMessages> = {
     sync: enSync,
     media: enMedia,
     errors: enErrors,
+    editions: enEditions,
   },
   'pt-BR': {
     common: ptBRCommon,
@@ -40,6 +43,7 @@ const messages: Record<Locale, AbstractIntlMessages> = {
     sync: ptBRSync,
     media: ptBRMedia,
     errors: ptBRErrors,
+    editions: ptBREditions,
   },
 };
 

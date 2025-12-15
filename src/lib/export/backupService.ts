@@ -14,7 +14,7 @@ import { db } from '@/lib/db/database';
 import { fileStorage } from '@/lib/storage/fileStorage';
 
 // Backup manifest version - increment when changing backup structure
-const BACKUP_VERSION = 1;
+const BACKUP_VERSION = 2;
 const BACKUP_TYPE = 'moodboard-full-backup';
 
 export interface BackupManifest {
@@ -26,6 +26,9 @@ export interface BackupManifest {
     projects: number;
     characters: number;
     images: number;
+    editions: number;
+    scriptPages: number;
+    panels: number;
     totalFileSize: number;
   };
 }
@@ -62,10 +65,13 @@ export async function createFullBackup(
     message: 'Counting items...',
   });
 
-  const [projects, characters, images] = await Promise.all([
+  const [projects, characters, images, editions, scriptPages, panels] = await Promise.all([
     db.projects.count(),
     db.characters.count(),
     db.images.toArray(),
+    db.editions.count(),
+    db.scriptPages.count(),
+    db.panels.count(),
   ]);
 
   // Phase 2: Export database
@@ -160,6 +166,9 @@ export async function createFullBackup(
       projects,
       characters,
       images: images.length,
+      editions,
+      scriptPages,
+      panels,
       totalFileSize,
     },
   };

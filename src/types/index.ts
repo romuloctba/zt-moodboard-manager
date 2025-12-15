@@ -210,3 +210,109 @@ export const SECTION_COLORS: Record<SectionType, string> = {
   references: '#10b981',   // Green
   custom: '#6b7280',       // Gray
 };
+
+// ===========================================
+// Comic Book Edition Types
+// ===========================================
+
+// Edition (Issue/Volume)
+export interface Edition {
+  id: string;
+  projectId: string;
+  title: string;
+  issueNumber?: number;
+  volume?: number;
+  synopsis?: string;
+  coverDescription?: string;
+  coverImageId?: string;
+  status: EditionStatus;
+  metadata: EditionMetadata;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type EditionStatus = 'draft' | 'in-progress' | 'review' | 'complete';
+
+export interface EditionMetadata {
+  genre?: string;
+  targetAudience?: string;
+  estimatedPageCount?: number;
+  notes?: string;
+}
+
+export const DEFAULT_EDITION_METADATA: EditionMetadata = {
+  genre: undefined,
+  targetAudience: undefined,
+  estimatedPageCount: undefined,
+  notes: undefined,
+};
+
+export const EDITION_STATUS_COLORS: Record<EditionStatus, string> = {
+  draft: '#6b7280',        // Gray
+  'in-progress': '#3b82f6', // Blue
+  review: '#f59e0b',       // Orange
+  complete: '#10b981',     // Green
+};
+
+// Script Page
+export interface ScriptPage {
+  id: string;
+  editionId: string;
+  pageNumber: number;
+  title?: string;
+  goal?: string;
+  setting?: string;
+  timeOfDay?: string;
+  mood?: string;
+  notes?: string;
+  status: PageStatus;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type PageStatus = 'draft' | 'scripted' | 'review' | 'approved';
+
+export const PAGE_STATUS_COLORS: Record<PageStatus, string> = {
+  draft: '#6b7280',        // Gray
+  scripted: '#3b82f6',     // Blue
+  review: '#f59e0b',       // Orange
+  approved: '#10b981',     // Green
+};
+
+// Panel
+export interface Panel {
+  id: string;
+  pageId: string;
+  panelNumber: number;
+  description?: string;
+  cameraAngle?: string;
+  characters?: string[];
+  notes?: string;
+  dialogues: PanelDialogue[];
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PanelDialogue {
+  id: string;
+  characterId?: string;
+  characterName: string;
+  type: DialogueType;
+  text: string;
+  direction?: string;
+  sortOrder: number;
+}
+
+export type DialogueType = 'speech' | 'thought' | 'caption' | 'sfx' | 'narration' | 'whisper';
+
+export const DIALOGUE_TYPE_ICONS: Record<DialogueType, string> = {
+  speech: '💬',
+  thought: '💭',
+  caption: '📝',
+  sfx: '💥',
+  narration: '📖',
+  whisper: '🤫',
+};

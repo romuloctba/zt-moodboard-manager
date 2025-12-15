@@ -1,0 +1,207 @@
+{
+  "header": {
+    "title": "Edições",
+    "newEdition": "Nova Edição",
+    "backToProject": "Voltar ao Projeto"
+  },
+  "tabs": {
+    "characters": "Personagens",
+    "editions": "Edições"
+  },
+  "emptyState": {
+    "title": "Nenhuma edição ainda",
+    "description": "Crie sua primeira edição de quadrinhos para começar a escrever roteiros para sua história.",
+    "action": "Criar Primeira Edição"
+  },
+  "createDialog": {
+    "title": "Criar Nova Edição",
+    "description": "Crie uma nova edição de quadrinhos para organizar seus roteiros.",
+    "titleLabel": "Título da Edição",
+    "titlePlaceholder": "ex: Edição #1 - Origens, Capítulo 1...",
+    "issueNumberLabel": "Número da Edição",
+    "issueNumberPlaceholder": "1",
+    "volumeLabel": "Volume (opcional)",
+    "volumePlaceholder": "1",
+    "synopsisLabel": "Sinopse (opcional)",
+    "synopsisPlaceholder": "Breve descrição da história desta edição...",
+    "submit": "Criar Edição"
+  },
+  "editDialog": {
+    "title": "Editar Edição",
+    "coverTab": "Capa",
+    "infoTab": "Informações",
+    "coverDescriptionLabel": "Descrição da Capa",
+    "coverDescriptionPlaceholder": "Descreva o conceito da arte da capa...",
+    "genreLabel": "Gênero",
+    "genrePlaceholder": "ex: Ação, Drama, Ficção Científica...",
+    "targetAudienceLabel": "Público Alvo",
+    "targetAudiencePlaceholder": "ex: Jovem Adulto, Todas as Idades...",
+    "estimatedPagesLabel": "Páginas Estimadas",
+    "notesLabel": "Notas",
+    "notesPlaceholder": "Notas adicionais sobre esta edição..."
+  },
+  "card": {
+    "issue": "Edição #{number}",
+    "volume": "Vol. {number}",
+    "pages": "{count, plural, =0 {Sem páginas} one {# página} other {# páginas}}",
+    "panels": "{count, plural, =0 {Sem painéis} one {# painel} other {# painéis}}"
+  },
+  "menu": {
+    "edit": "Editar",
+    "duplicate": "Duplicar",
+    "delete": "Excluir"
+  },
+  "status": {
+    "draft": "Rascunho",
+    "in-progress": "Em Progresso",
+    "review": "Revisão",
+    "complete": "Completo"
+  },
+  "confirmDelete": "Tem certeza que deseja excluir esta edição? Todas as páginas e painéis serão perdidos. Esta ação não pode ser desfeita.",
+  "validation": {
+    "titleRequired": "Por favor, insira um título para a edição"
+  },
+  "toast": {
+    "created": "Edição criada com sucesso",
+    "updated": "Edição atualizada",
+    "deleted": "Edição excluída",
+    "duplicated": "Edição duplicada",
+    "createFailed": "Falha ao criar edição",
+    "updateFailed": "Falha ao atualizar edição"
+  },
+  "pages": {
+    "header": {
+      "title": "Páginas",
+      "newPage": "Adicionar Página"
+    },
+    "emptyState": {
+      "title": "Nenhuma página ainda",
+      "description": "Adicione sua primeira página para começar a construir seu roteiro.",
+      "action": "Adicionar Primeira Página"
+    },
+    "createDialog": {
+      "title": "Adicionar Nova Página",
+      "description": "Adicione uma nova página ao roteiro da sua edição.",
+      "titleLabel": "Título da Página (opcional)",
+      "titlePlaceholder": "ex: O Início, Confronto...",
+      "goalLabel": "Objetivo da Página (opcional)",
+      "goalPlaceholder": "O que esta página deve alcançar na história?",
+      "settingLabel": "Cenário (opcional)",
+      "settingPlaceholder": "ex: Telhado da cidade à noite...",
+      "submit": "Adicionar Página"
+    },
+    "editDialog": {
+      "title": "Editar Página",
+      "timeOfDayLabel": "Hora do Dia",
+      "timeOfDayPlaceholder": "ex: Amanhecer, Meio-dia, Anoitecer...",
+      "moodLabel": "Clima",
+      "moodPlaceholder": "ex: Tenso, Pacífico, Ação...",
+      "notesLabel": "Notas do Roteirista",
+      "notesPlaceholder": "Notas para esta página..."
+    },
+    "card": {
+      "page": "Página {number}",
+      "panels": "{count, plural, =0 {Sem painéis} one {# painel} other {# painéis}}",
+      "untitled": "Sem título"
+    },
+    "menu": {
+      "edit": "Editar",
+      "duplicate": "Duplicar",
+      "delete": "Excluir"
+    },
+    "status": {
+      "draft": "Rascunho",
+      "scripted": "Roteirizado",
+      "review": "Revisão",
+      "approved": "Aprovado"
+    },
+    "confirmDelete": "Tem certeza que deseja excluir esta página? Todos os painéis serão perdidos.",
+    "validation": {},
+    "toast": {
+      "created": "Página adicionada",
+      "updated": "Página atualizada",
+      "deleted": "Página excluída",
+      "duplicated": "Página duplicada"
+    }
+  },
+  "panels": {
+    "header": {
+      "title": "Painéis",
+      "newPanel": "Adicionar Painel"
+    },
+    "emptyState": {
+      "title": "Nenhum painel ainda",
+      "description": "Adicione painéis para organizar o roteiro da página.",
+      "action": "Adicionar Primeiro Painel"
+    },
+    "card": {
+      "panel": "Painel {number}",
+      "dialogues": "{count, plural, =0 {Sem diálogo} one {# diálogo} other {# diálogos}}"
+    },
+    "editor": {
+      "descriptionLabel": "Descrição do Painel",
+      "descriptionPlaceholder": "Descreva o que está acontecendo visualmente neste painel...",
+      "cameraAngleLabel": "Ângulo da Câmera",
+      "cameraAnglePlaceholder": "ex: Plano geral, Close-up, Vista aérea...",
+      "charactersLabel": "Personagens no Painel",
+      "notesLabel": "Notas para o Artista",
+      "notesPlaceholder": "Notas para o artista..."
+    },
+    "menu": {
+      "duplicate": "Duplicar",
+      "delete": "Excluir",
+      "moveUp": "Mover Acima",
+      "moveDown": "Mover Abaixo"
+    },
+    "confirmDelete": "Tem certeza que deseja excluir este painel?",
+    "toast": {
+      "created": "Painel adicionado",
+      "updated": "Painel atualizado",
+      "deleted": "Painel excluído",
+      "duplicated": "Painel duplicado"
+    }
+  },
+  "dialogue": {
+    "header": {
+      "title": "Diálogo",
+      "addDialogue": "Adicionar Diálogo"
+    },
+    "emptyState": {
+      "hint": "Adicione diálogos, legendas ou efeitos sonoros"
+    },
+    "editor": {
+      "characterLabel": "Personagem",
+      "characterPlaceholder": "Nome do personagem...",
+      "typeLabel": "Tipo",
+      "textLabel": "Texto",
+      "textPlaceholder": "Digite o diálogo ou texto...",
+      "directionLabel": "Direção (opcional)",
+      "directionPlaceholder": "ex: sussurrando, gritando..."
+    },
+    "types": {
+      "speech": "Fala",
+      "thought": "Pensamento",
+      "caption": "Legenda",
+      "sfx": "Efeito Sonoro",
+      "narration": "Narração",
+      "whisper": "Sussurro"
+    },
+    "menu": {
+      "edit": "Editar",
+      "delete": "Excluir"
+    },
+    "confirmDelete": "Excluir este diálogo?",
+    "toast": {
+      "added": "Diálogo adicionado",
+      "updated": "Diálogo atualizado",
+      "deleted": "Diálogo excluído"
+    }
+  },
+  "scriptPreview": {
+    "title": "Prévia do Roteiro",
+    "exportScript": "Exportar Roteiro",
+    "page": "PÁGINA {number}",
+    "panel": "PAINEL {number}",
+    "emptyScript": "Nenhum conteúdo de roteiro ainda"
+  }
+}

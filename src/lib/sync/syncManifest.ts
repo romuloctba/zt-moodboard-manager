@@ -17,22 +17,28 @@ import {
   EMPTY_MANIFEST,
   SYNC_CONSTANTS,
 } from './types';
-import type { Project, Character, MoodboardImage } from '@/types';
+import type { Project, Character, MoodboardImage, Edition, ScriptPage, Panel } from '@/types';
 
 class SyncManifestService {
   /**
    * Build a manifest from local IndexedDB data
    */
   async buildLocalManifest(): Promise<SyncManifest> {
-    const [projects, characters, images] = await Promise.all([
+    const [projects, characters, images, editions, scriptPages, panels] = await Promise.all([
       db.projects.toArray(),
       db.characters.toArray(),
       db.images.toArray(),
+      db.editions.toArray(),
+      db.scriptPages.toArray(),
+      db.panels.toArray(),
     ]);
 
     const projectMetas = await this.buildItemMetas(projects);
     const characterMetas = await this.buildItemMetas(characters);
     const imageMetas = await this.buildImageMetas(images);
+    const editionMetas = await this.buildItemMetas(editions);
+    const scriptPageMetas = await this.buildItemMetas(scriptPages);
+    const panelMetas = await this.buildPanelMetas(panels);
 
     const now = new Date().toISOString();
 
@@ -45,15 +51,43 @@ class SyncManifestService {
       projects: projectMetas,
       characters: characterMetas,
       images: imageMetas,
+      editions: editionMetas,
+      scriptPages: scriptPageMetas,
+      panels: panelMetas,
       deletedItems: await this.getDeletedItems(),
     };
   }
 
   /**
-   * Build item metas for projects/characters
+   * Build panel metas (panels have nested dialogues)
+   */
+  private async buildPanelMetas(
+    panels: Panel[]
+  ): Promise<Record<string, ItemSyncMeta>> {
+    const metas: Record<string, ItemSyncMeta> = {};
+
+    for (const panel of panels) {
+      const hash = await hashObject({
+        ...panel,
+        dialogues: panel.dialogues,
+      });
+
+      metas[panel.id] = {
+        id: panel.id,
+        hash,
+        updatedAt: panel.updatedAt.toISOString(),
+        version: 1,
+      };
+    }
+
+    return metas;
+  }
+
+  /**
+   * Build item metas for projects/characters/editions/pages
    */
   private async buildItemMetas(
-    items: (Project | Character)[]
+    items: (Project | Character | Edition | ScriptPage)[]
   ): Promise<Record<string, ItemSyncMeta>> {
     const metas: Record<string, ItemSyncMeta> = {};
 
@@ -413,7 +447,10 @@ class SyncManifestService {
       const exists =
         (deletion.type === 'project' && remote.projects[deletion.id]) ||
         (deletion.type === 'character' && remote.characters[deletion.id]) ||
-        (deletion.type === 'image' && remote.images[deletion.id]);
+        (deletion.type === 'image' && remote.images[deletion.id]) ||
+        (deletion.type === 'edition' && remote.editions[deletion.id]) ||
+        (deletion.type === 'scriptPage' && remote.scriptPages[deletion.id]) ||
+        (deletion.type === 'panel' && remote.panels[deletion.id]);
 
       if (exists) {
         delta.toDelete.remote.push(deletion);
@@ -426,7 +463,10 @@ class SyncManifestService {
       const exists =
         (deletion.type === 'project' && local.projects[deletion.id]) ||
         (deletion.type === 'character' && local.characters[deletion.id]) ||
-        (deletion.type === 'image' && local.images[deletion.id]);
+        (deletion.type === 'image' && local.images[deletion.id]) ||
+        (deletion.type === 'edition' && local.editions[deletion.id]) ||
+        (deletion.type === 'scriptPage' && local.scriptPages[deletion.id]) ||
+        (deletion.type === 'panel' && local.panels[deletion.id]);
 
       if (exists) {
         delta.toDelete.local.push(deletion);
@@ -465,6 +505,9 @@ class SyncManifestService {
       projects: { ...local.projects },
       characters: { ...local.characters },
       images: { ...local.images },
+      editions: { ...local.editions },
+      scriptPages: { ...local.scriptPages },
+      panels: { ...local.panels },
       deletedItems: [],
     };
 

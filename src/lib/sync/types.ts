@@ -93,6 +93,9 @@ export interface SyncManifest {
   projects: Record<string, ItemSyncMeta>;
   characters: Record<string, ItemSyncMeta>;
   images: Record<string, ItemSyncMeta>;
+  editions: Record<string, ItemSyncMeta>;
+  scriptPages: Record<string, ItemSyncMeta>;
+  panels: Record<string, ItemSyncMeta>;
 
   // Track deleted items for sync
   deletedItems: DeletedItemRecord[];
@@ -108,20 +111,23 @@ export interface ItemSyncMeta {
 
 export interface DeletedItemRecord {
   id: string;
-  type: 'project' | 'character' | 'image';
+  type: 'project' | 'character' | 'image' | 'edition' | 'scriptPage' | 'panel';
   deletedAt: string;
   deletedByDeviceId: string;
 }
 
 export const EMPTY_MANIFEST: SyncManifest = {
   version: 0,
-  schemaVersion: 1,
+  schemaVersion: 2,
   lastModified: new Date().toISOString(),
   lastModifiedDeviceId: '',
   lastModifiedDeviceName: '',
   projects: {},
   characters: {},
   images: {},
+  editions: {},
+  scriptPages: {},
+  panels: {},
   deletedItems: [],
 };
 
