@@ -18,7 +18,7 @@ export function PanelList({ panels, characters = [] }: PanelListProps) {
   const t = useTranslations('editions.panels');
   const { createPanel } = useEditionStore();
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(
-    new Set(panels.map(p => p.id))
+    new Set([])
   );
 
   const handleAddPanel = async () => {
