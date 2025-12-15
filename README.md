@@ -19,6 +19,7 @@
 - [Contributing](#-contributing)
 
 A visual reference management application for character creators, graphic novel artists, and storytellers. Built with Next.js 16 and designed as a Progressive Web App (PWA) for offline-first usage.
+Now with full comic book edition & script management: create comic editions, add cover info, manage pages, panels, and write your script panel-by-panel!
 
 Current version allows fully local usage, with in-browser data storage, so no expensive/complex infrastructure is actually required to use this.
 
@@ -48,6 +49,16 @@ Current version allows fully local usage, with in-browser data storage, so no ex
 - **Thumbnail Generation** - Fast previews with auto-generated thumbnails
 - **Color Palette Extraction** - Automatic color palette detection from images
 - **Grid & Canvas Views** - Switch between grid gallery and canvas modes
+
+### Comic Book Edition & Script Management
+- **Comic Editions** - Create and organize comic book editions/scripts within your projects
+- **Cover & Edition Info** - Add cover images, edition metadata, and status
+- **Script Pages** - Add pages to each edition, set page goals, and manage page order
+- **Panels & Dialogue** - Break pages into panels, add script dialogue (speech, narration, thought, SFX) per panel
+- **Script Writing Flow** - Write your comic script panel-by-panel, with easy navigation and editing
+- **Localization & Sync** - All edition/script data is included in backup/export/import and Google Drive sync, with full multi-language support
+
+**Tip:** Try the new Editions tab in your project to start writing comics!
 
 
 ### Storage & Backup
@@ -179,6 +190,7 @@ This is a free utility project, courtesy of Zoch Tecnologia. Check [LICENSE](./L
 - [Contribuição](#-contribuição)
 
 Um aplicativo de gerenciamento de referências visuais para criadores de personagens, artistas de quadrinhos e contadores de histórias. Construído com Next.js 16 e projetado como um Progressive Web App (PWA) para uso offline-first.
+Agora com gerenciamento completo de edições de quadrinhos e roteiros: crie edições, adicione capa, gerencie páginas, quadros e escreva o roteiro quadro a quadro!
 
 A versão atual permite uso totalmente local, com armazenamento de dados no navegador, sem necessidade de infraestrutura cara ou complexa.
 
@@ -208,6 +220,16 @@ A versão atual permite uso totalmente local, com armazenamento de dados no nave
 - **Geração de Miniaturas** - Visualizações rápidas com miniaturas automáticas
 - **Extração de Paleta de Cores** - Detecção automática de paleta de cores das imagens
 - **Visualização em Grade & Canvas** - Alterne entre galeria em grade e modo canvas
+
+### Gerenciamento de Edições de Quadrinhos & Roteiros
+- **Edições de Quadrinhos** - Crie e organize edições/roteiros de quadrinhos dentro dos seus projetos
+- **Capa & Informações da Edição** - Adicione imagens de capa, metadados e status da edição
+- **Páginas do Roteiro** - Adicione páginas à edição, defina objetivos e gerencie a ordem das páginas
+- **Quadros & Diálogos** - Divida páginas em quadros, adicione falas (balão, narração, pensamento, SFX) por quadro
+- **Fluxo de Escrita de Roteiro** - Escreva o roteiro quadro a quadro, com navegação e edição facilitadas
+- **Localização & Sincronização** - Todos os dados de edição/roteiro são incluídos no backup/exportação/importação e na sincronização com Google Drive, com suporte total a múltiplos idiomas
+
+**Dica:** Experimente a nova aba Edições no seu projeto para começar a escrever quadrinhos!
 
 
 ### Armazenamento & Backup
