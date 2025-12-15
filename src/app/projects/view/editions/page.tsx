@@ -9,9 +9,10 @@ import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { PageCard, CreatePageDialog, EditEditionDialog, CoverCard } from '@/components/editions';
 import { scriptPageRepository } from '@/lib/db/repositories';
-import { Plus, FileText, Settings, Pencil } from 'lucide-react';
+import { Plus, FileText, Settings, Pencil, FileDown } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import type { Edition } from '@/types';
+import Link from 'next/link';
 
 function EditionViewContent() {
   const router = useRouter();
@@ -20,6 +21,7 @@ function EditionViewContent() {
   const projectId = searchParams.get('projectId');
   const t = useTranslations('editions');
   const tPages = useTranslations('editions.pages');
+  const tExport = useTranslations('editions.export');
 
   const { 
     currentEdition,
@@ -81,6 +83,18 @@ function EditionViewContent() {
   // Define header actions
   const headerActions: HeaderAction[] = useMemo(() => [
     {
+      id: 'export-script',
+      element: (
+        <Link href={`/projects/view/editions/export?editionId=${editionId}&projectId=${projectId}`}>
+          <Button variant="outline" className="w-full md:w-auto gap-2">
+            <FileDown className="w-4 h-4" />
+            <span className="hidden sm:inline">{tExport('exportScript')}</span>
+          </Button>
+        </Link>
+      ),
+      mobilePriority: 0,
+    },
+    {
       id: 'new-page',
       element: (
         <CreatePageDialog>
@@ -107,7 +121,7 @@ function EditionViewContent() {
       ),
       mobilePriority: 2,
     },
-  ], [t, tPages]);
+  ], [t, tPages, tExport, editionId, projectId]);
 
   if (isLoading || !currentEdition) {
     return <EditionDetailSkeleton />;

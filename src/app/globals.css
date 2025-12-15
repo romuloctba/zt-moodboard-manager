@@ -123,3 +123,88 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles for script export */
+@media print {
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 2cm 1.5cm;
+  }
+
+  /* Reset for print */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  /* Hide non-printable elements */
+  [data-print-hidden],
+  .no-print,
+  nav,
+  header:not(.script-content header),
+  footer:not(.script-content footer) {
+    display: none !important;
+  }
+
+  /* Script document styles */
+  .script-document {
+    background: white !important;
+    color: black !important;
+  }
+
+  .script-content {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Page breaks */
+  .break-before-page {
+    break-before: page;
+  }
+
+  .break-after-page {
+    break-after: page;
+  }
+
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+
+  /* Typography adjustments */
+  .script-page header {
+    border-color: black !important;
+  }
+
+  .script-panel {
+    margin-bottom: 1.5em;
+  }
+
+  .script-dialogue {
+    margin-left: 2em;
+  }
+
+  /* Muted colors to grayscale */
+  .text-muted-foreground {
+    color: #666 !important;
+  }
+
+  .bg-muted-print {
+    background-color: #f5f5f5 !important;
+  }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  /* Images */
+  img {
+    max-width: 200px !important;
+  }
+}
+

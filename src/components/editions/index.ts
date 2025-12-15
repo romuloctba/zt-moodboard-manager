@@ -15,3 +15,6 @@ export { EditPageDialog } from './EditPageDialog';
 // Panel Components
 export { PanelEditor } from './PanelEditor';
 export { PanelList } from './PanelList';
+
+// Script Export Components
+export * from './script';
