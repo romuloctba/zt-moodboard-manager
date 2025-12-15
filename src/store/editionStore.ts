@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Edition, ScriptPage, Panel, PanelDialogue, EditionStatus, PageStatus, DialogueType } from '@/types';
 import { editionRepository, scriptPageRepository, panelRepository } from '@/lib/db/repositories';
 import { triggerGlobalSync } from '@/lib/sync/globalSyncTrigger';
+import { syncManifest } from '@/lib/sync/syncManifest';
 
 interface EditionState {
   // Data
@@ -115,7 +116,26 @@ export const useEditionStore = create<EditionState>((set, get) => ({
   },
 
   deleteEdition: async (id: string) => {
+    // Get all pages and panels before deletion to record them for sync
+    const pages = await scriptPageRepository.getByEdition(id);
+    const panelIds: string[] = [];
+    for (const page of pages) {
+      const panels = await panelRepository.getByPage(page.id);
+      panelIds.push(...panels.map(p => p.id));
+    }
+
+    // Delete from database
     await editionRepository.delete(id);
+
+    // Record deletions for sync (order matters: children first)
+    for (const panelId of panelIds) {
+      await syncManifest.recordDeletion(panelId, 'panel');
+    }
+    for (const page of pages) {
+      await syncManifest.recordDeletion(page.id, 'scriptPage');
+    }
+    await syncManifest.recordDeletion(id, 'edition');
+
     set(state => ({
       editions: state.editions.filter(e => e.id !== id),
       currentEdition: state.currentEdition?.id === id ? null : state.currentEdition,
@@ -188,7 +208,17 @@ export const useEditionStore = create<EditionState>((set, get) => ({
   },
 
   deletePage: async (id: string) => {
+    // Get all panels before deletion to record them for sync
+    const panels = await panelRepository.getByPage(id);
+
     await scriptPageRepository.delete(id);
+
+    // Record deletions for sync
+    for (const panel of panels) {
+      await syncManifest.recordDeletion(panel.id, 'panel');
+    }
+    await syncManifest.recordDeletion(id, 'scriptPage');
+
     const { currentEdition } = get();
     if (currentEdition) {
       // Renumber pages after deletion
@@ -240,6 +270,10 @@ export const useEditionStore = create<EditionState>((set, get) => ({
 
   deletePanel: async (id: string) => {
     await panelRepository.delete(id);
+
+    // Record deletion for sync
+    await syncManifest.recordDeletion(id, 'panel');
+
     const { currentPage } = get();
     if (currentPage) {
       await panelRepository.renumber(currentPage.id);

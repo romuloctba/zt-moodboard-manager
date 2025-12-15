@@ -35,7 +35,7 @@ function getSuccessSnapshot() {
  * Includes conflict resolution dialog when conflicts are detected
  */
 export function GlobalSyncIndicator() {
-  const { isConnected, isSyncing, syncStatus, lastResult, pendingConflicts, resolveConflicts } = useSyncContext();
+  const { isConnected, isSyncing, syncStatus, lastResult, lastError, pendingConflicts, resolveConflicts } = useSyncContext();
   const t = useTranslations('sync');
   const prevSyncingRef = useRef(isSyncing);
   
@@ -130,10 +130,10 @@ export function GlobalSyncIndicator() {
         onKeyDown={showConflicts ? (e) => e.key === 'Enter' && handleConflictClick() : undefined}
       >
         {showSyncing && (
-          <>
+          <Link href="/sync" className="flex items-center gap-2 group" title={t('indicator.syncing')} >
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
             <span className="text-sm font-medium text-blue-500">{t('indicator.syncing')}</span>
-          </>
+          </Link>
         )}
         
         {showSuccess && !showSyncing && !showConflicts && (
@@ -153,9 +153,11 @@ export function GlobalSyncIndicator() {
         )}
         
         {showError && (
-          <Link href="/settings/sync">
+          <Link href="/sync" className="flex items-center gap-2 group" title={lastError || t('indicator.failed')}>
             <AlertCircle className="h-4 w-4 text-red-500" />
-            <span className="text-sm font-medium text-red-500">{t('indicator.failed')}</span>
+            <span className="text-sm font-medium text-red-500 max-w-[200px] truncate">
+              {lastError || t('indicator.failed')}
+            </span>
           </Link>
         )}
       </div>

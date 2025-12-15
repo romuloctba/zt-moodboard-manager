@@ -47,10 +47,17 @@ function bufferToHex(buffer: ArrayBuffer): string {
  * - Sorts object keys alphabetically
  * - Handles nested objects and arrays
  * - Excludes certain fields that shouldn't affect hash (like local paths)
+ * - Skips undefined values to match JSON.stringify behavior
  */
 function normalizeForHashing(obj: unknown): unknown {
-  if (obj === null || obj === undefined) {
+  // null stays as null, undefined is skipped (handled at object level)
+  if (obj === null) {
     return null;
+  }
+
+  if (obj === undefined) {
+    // Return a special marker that we'll filter out at the object level
+    return undefined;
   }
 
   if (obj instanceof Date) {
@@ -71,7 +78,18 @@ function normalizeForHashing(obj: unknown): unknown {
       if (isLocalOnlyField(key)) {
         continue;
       }
-      normalized[key] = normalizeForHashing(record[key]);
+
+      const value = record[key];
+      // Skip undefined values - JSON.stringify also skips them
+      if (value === undefined) {
+        continue;
+      }
+
+      const normalizedValue = normalizeForHashing(value);
+      // Also skip if the normalized value is undefined
+      if (normalizedValue !== undefined) {
+        normalized[key] = normalizedValue;
+      }
     }
 
     return normalized;

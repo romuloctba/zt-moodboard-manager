@@ -21,6 +21,7 @@ import {
   type SyncConflict,
   type SyncItemCounts,
   type ConflictStrategy,
+  type DeletedItemRecord,
   DEFAULT_SYNC_SETTINGS,
   SYNC_CONSTANTS,
 } from './types';
@@ -164,18 +165,23 @@ class SyncService {
     const { onProgress, onConflict, force = false } = options;
     const startTime = Date.now();
 
+    console.log('[SyncService] Starting sync...', { force, timestamp: new Date().toISOString() });
+
     // Prevent concurrent syncs
     if (this.isSyncing) {
+      console.warn('[SyncService] Sync blocked: already in progress');
       return this.createErrorResult('Sync already in progress', startTime);
     }
 
     // Rate limiting
     if (!force && Date.now() - this.lastSyncTime < SYNC_CONSTANTS.MIN_SYNC_INTERVAL_MS) {
+      console.warn('[SyncService] Sync blocked: rate limited');
       return this.createErrorResult('Please wait before syncing again', startTime);
     }
 
     // Check connection
     if (!this.isConnected()) {
+      console.warn('[SyncService] Sync blocked: not connected');
       return this.createErrorResult('Not connected to Google Drive', startTime);
     }
 
@@ -183,6 +189,7 @@ class SyncService {
 
     try {
       // Phase 1: Initialize
+      console.log('[SyncService] Phase 1: Initializing Google Drive...');
       onProgress?.({
         status: 'connecting',
         phase: 'connecting',
@@ -193,6 +200,7 @@ class SyncService {
       await googleDrive.initialize();
 
       // Phase 2: Build local manifest
+      console.log('[SyncService] Phase 2: Building local manifest...');
       onProgress?.({
         status: 'checking',
         phase: 'analyzing',
@@ -201,8 +209,18 @@ class SyncService {
       });
 
       const localManifest = await syncManifest.buildLocalManifest();
+      console.log('[SyncService] Local manifest built:', {
+        projects: Object.keys(localManifest.projects).length,
+        characters: Object.keys(localManifest.characters).length,
+        images: Object.keys(localManifest.images).length,
+        editions: Object.keys(localManifest.editions).length,
+        scriptPages: Object.keys(localManifest.scriptPages).length,
+        panels: Object.keys(localManifest.panels).length,
+        deletedItems: localManifest.deletedItems.length,
+      });
 
       // Phase 3: Get remote manifest
+      console.log('[SyncService] Phase 3: Fetching remote manifest...');
       onProgress?.({
         status: 'checking',
         phase: 'checking',
@@ -211,8 +229,17 @@ class SyncService {
       });
 
       const remoteManifest = await googleDrive.getManifest<SyncManifest>();
+      console.log('[SyncService] Remote manifest fetched:', remoteManifest ? {
+        projects: Object.keys(remoteManifest.projects).length,
+        characters: Object.keys(remoteManifest.characters).length,
+        images: Object.keys(remoteManifest.images).length,
+        editions: Object.keys(remoteManifest.editions).length,
+        scriptPages: Object.keys(remoteManifest.scriptPages).length,
+        panels: Object.keys(remoteManifest.panels).length,
+      } : 'No remote manifest (first sync)');
 
       // Phase 4: Compare and get delta
+      console.log('[SyncService] Phase 4: Comparing manifests...');
       onProgress?.({
         status: 'checking',
         phase: 'comparing',
@@ -221,9 +248,34 @@ class SyncService {
       });
 
       const delta = await syncManifest.compareManifests(localManifest, remoteManifest);
+      console.log('[SyncService] Delta calculated:', {
+        hasChanges: delta.hasChanges,
+        toUpload: {
+          projects: delta.toUpload.projects.length,
+          characters: delta.toUpload.characters.length,
+          images: delta.toUpload.images.length,
+          editions: delta.toUpload.editions.length,
+          scriptPages: delta.toUpload.scriptPages.length,
+          panels: delta.toUpload.panels.length,
+        },
+        toDownload: {
+          projects: delta.toDownload.projects.length,
+          characters: delta.toDownload.characters.length,
+          images: delta.toDownload.images.length,
+          editions: delta.toDownload.editions.length,
+          scriptPages: delta.toDownload.scriptPages.length,
+          panels: delta.toDownload.panels.length,
+        },
+        toDelete: {
+          local: delta.toDelete.local.length,
+          remote: delta.toDelete.remote.length,
+        },
+        conflicts: delta.conflicts.length,
+      });
 
       // If no changes, we're done
       if (!delta.hasChanges) {
+        console.log('[SyncService] No changes detected, sync complete');
         this.updateLastSyncTime();
         return this.createSuccessResult('none', startTime, {
           projects: { added: 0, updated: 0, deleted: 0 },
@@ -239,6 +291,7 @@ class SyncService {
       // Phase 5: Handle conflicts
       let resolvedDelta = delta;
       if (delta.conflicts.length > 0) {
+        console.log('[SyncService] Phase 5: Resolving', delta.conflicts.length, 'conflicts...');
         onProgress?.({
           status: 'merging',
           phase: 'comparing',
@@ -257,15 +310,26 @@ class SyncService {
       }
 
       // Phase 6: Upload local changes
+      console.log('[SyncService] Phase 6: Uploading local changes...');
       const uploadCounts = await this.uploadChanges(resolvedDelta, localManifest, onProgress);
+      console.log('[SyncService] Upload complete:', uploadCounts);
 
       // Phase 7: Download remote changes
+      console.log('[SyncService] Phase 7: Downloading remote changes...');
       const downloadCounts = await this.downloadChanges(resolvedDelta, onProgress);
+      console.log('[SyncService] Download complete:', downloadCounts);
 
       // Phase 8: Process deletions
+      console.log('[SyncService] Phase 8: Processing deletions...', {
+        localDeletions: resolvedDelta.toDelete.local.length,
+        remoteDeletions: resolvedDelta.toDelete.remote.length,
+      });
       await this.processDeletions(resolvedDelta);
 
       // Phase 9: Save merged manifest
+      // IMPORTANT: Rebuild manifest from database to get correct hashes
+      // This ensures the manifest reflects actual data, not stale hashes from remote
+      console.log('[SyncService] Phase 9: Rebuilding and saving manifest...');
       onProgress?.({
         status: 'uploading',
         phase: 'finalizing',
@@ -273,15 +337,28 @@ class SyncService {
         total: 100,
       });
 
-      const mergedManifest = syncManifest.mergeManifests(localManifest, remoteManifest, resolvedDelta);
-      await googleDrive.saveManifest(mergedManifest);
-      await syncManifest.updateLocalVersion(mergedManifest.version);
+      // Rebuild manifest from current database state to get correct hashes
+      const freshManifest = await syncManifest.buildLocalManifest();
+      // Preserve deletedItems from both manifests
+      const allDeletions = new Map<string, DeletedItemRecord>();
+      for (const deletion of [...localManifest.deletedItems, ...(remoteManifest?.deletedItems || [])]) {
+        allDeletions.set(deletion.id, deletion);
+      }
+      freshManifest.deletedItems = Array.from(allDeletions.values());
+
+      await googleDrive.saveManifest(freshManifest);
+      await syncManifest.updateLocalVersion(freshManifest.version);
 
       // Update settings with last sync time
       this.updateLastSyncTime();
 
       // Determine sync direction
       const direction = this.determineSyncDirection(uploadCounts, downloadCounts);
+
+      console.log('[SyncService] Sync completed successfully:', {
+        direction,
+        duration: Date.now() - startTime + 'ms',
+      });
 
       onProgress?.({
         status: 'success',
@@ -301,17 +378,23 @@ class SyncService {
       });
 
     } catch (error) {
-      console.error('[SyncService] Sync failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Sync failed';
+      console.error('[SyncService] Sync failed:', {
+        error: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        duration: Date.now() - startTime + 'ms',
+      });
 
       onProgress?.({
         status: 'error',
         phase: 'complete',
         current: 0,
         total: 100,
+        errorMessage,
       });
 
       return this.createErrorResult(
-        error instanceof Error ? error.message : 'Sync failed',
+        errorMessage,
         startTime
       );
     } finally {
@@ -707,58 +790,70 @@ class SyncService {
   ): Promise<void> {
     // Delete local items (from remote deletions)
     for (const deletion of delta.toDelete.local) {
-      switch (deletion.type) {
-        case 'project':
-          await db.projects.delete(deletion.id);
-          break;
-        case 'character':
-          await db.characters.delete(deletion.id);
-          break;
-        case 'image': {
-          const image = await db.images.get(deletion.id);
-          if (image) {
-            // Delete files from storage
-            await fileStorage.deleteImage(image.storagePath);
-            await fileStorage.deleteImage(image.thumbnailPath);
+      console.log(`[SyncService] Deleting local ${deletion.type}:${deletion.id}`);
+      try {
+        switch (deletion.type) {
+          case 'project':
+            await db.projects.delete(deletion.id);
+            break;
+          case 'character':
+            await db.characters.delete(deletion.id);
+            break;
+          case 'image': {
+            const image = await db.images.get(deletion.id);
+            if (image) {
+              // Delete files from storage
+              await fileStorage.deleteImage(image.storagePath);
+              await fileStorage.deleteImage(image.thumbnailPath);
+            }
+            await db.images.delete(deletion.id);
+            break;
           }
-          await db.images.delete(deletion.id);
-          break;
+          case 'edition':
+            await db.editions.delete(deletion.id);
+            break;
+          case 'scriptPage':
+            await db.scriptPages.delete(deletion.id);
+            break;
+          case 'panel':
+            await db.panels.delete(deletion.id);
+            break;
         }
-        case 'edition':
-          await db.editions.delete(deletion.id);
-          break;
-        case 'scriptPage':
-          await db.scriptPages.delete(deletion.id);
-          break;
-        case 'panel':
-          await db.panels.delete(deletion.id);
-          break;
+      } catch (error) {
+        console.error(`[SyncService] Failed to delete local ${deletion.type}:${deletion.id}:`, error);
+        // Continue with other deletions
       }
     }
 
     // Delete remote items (from local deletions)
     for (const deletion of delta.toDelete.remote) {
-      switch (deletion.type) {
-        case 'project':
-          await googleDrive.deleteProject(deletion.id);
-          break;
-        case 'character':
-          await googleDrive.deleteCharacter(deletion.id);
-          break;
-        case 'image':
-          await googleDrive.deleteImageMeta(deletion.id);
-          await googleDrive.deleteImageFile(deletion.id);
-          await googleDrive.deleteThumbnailFile(deletion.id);
-          break;
-        case 'edition':
-          await googleDrive.deleteEdition(deletion.id);
-          break;
-        case 'scriptPage':
-          await googleDrive.deleteScriptPage(deletion.id);
-          break;
-        case 'panel':
-          await googleDrive.deletePanel(deletion.id);
-          break;
+      console.log(`[SyncService] Deleting remote ${deletion.type}:${deletion.id}`);
+      try {
+        switch (deletion.type) {
+          case 'project':
+            await googleDrive.deleteProject(deletion.id);
+            break;
+          case 'character':
+            await googleDrive.deleteCharacter(deletion.id);
+            break;
+          case 'image':
+            await googleDrive.deleteImageMeta(deletion.id);
+            await googleDrive.deleteImageFile(deletion.id);
+            await googleDrive.deleteThumbnailFile(deletion.id);
+            break;
+          case 'edition':
+            await googleDrive.deleteEdition(deletion.id);
+            break;
+          case 'scriptPage':
+            await googleDrive.deleteScriptPage(deletion.id);
+            break;
+          case 'panel':
+            await googleDrive.deletePanel(deletion.id);
+            break;
+        }
+      } catch (error) {
+        console.error(`[SyncService] Failed to delete remote ${deletion.type}:${deletion.id}:`, error);
+        // Continue with other deletions - the item may not exist on remote
       }
     }
 
@@ -767,6 +862,7 @@ class SyncService {
       ...delta.toDelete.local.map(d => d.id),
       ...delta.toDelete.remote.map(d => d.id),
     ];
+    console.log(`[SyncService] Clearing ${processedIds.length} processed deletions from local tracking`);
     await syncManifest.clearProcessedDeletions(processedIds);
   }
 

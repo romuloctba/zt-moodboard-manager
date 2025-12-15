@@ -170,11 +170,19 @@ class SyncManifestService {
    */
   async recordDeletion(
     id: string,
-    type: 'project' | 'character' | 'image'
+    type: 'project' | 'character' | 'image' | 'edition' | 'scriptPage' | 'panel'
   ): Promise<void> {
     if (typeof window === 'undefined') return;
 
     const deletedItems = await this.getDeletedItems();
+
+    // Avoid duplicates
+    if (deletedItems.some(item => item.id === id)) {
+      console.log(`[SyncManifest] Deletion already recorded for ${type}:${id}`);
+      return;
+    }
+
+    console.log(`[SyncManifest] Recording deletion: ${type}:${id}`);
 
     deletedItems.push({
       id,
@@ -588,6 +596,15 @@ class SyncManifestService {
       for (const id of processedDelta.toDownload.images) {
         merged.images[id] = remote.images[id];
       }
+      for (const id of processedDelta.toDownload.editions) {
+        merged.editions[id] = remote.editions[id];
+      }
+      for (const id of processedDelta.toDownload.scriptPages) {
+        merged.scriptPages[id] = remote.scriptPages[id];
+      }
+      for (const id of processedDelta.toDownload.panels) {
+        merged.panels[id] = remote.panels[id];
+      }
     }
 
     // Remove deleted items
@@ -601,6 +618,15 @@ class SyncManifestService {
           break;
         case 'image':
           delete merged.images[deletion.id];
+          break;
+        case 'edition':
+          delete merged.editions[deletion.id];
+          break;
+        case 'scriptPage':
+          delete merged.scriptPages[deletion.id];
+          break;
+        case 'panel':
+          delete merged.panels[deletion.id];
           break;
       }
     }

@@ -32,6 +32,7 @@ interface SyncContextValue {
   settings: SyncSettings | null;
   progress: SyncProgress | null;
   lastResult: SyncResult | null;
+  lastError: string | null;
   pendingConflicts: SyncConflict[];
 
   // Actions
@@ -63,6 +64,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const [settings, setSettings] = useState<SyncSettings | null>(null);
   const [progress, setProgress] = useState<SyncProgress | null>(null);
   const [lastResult, setLastResult] = useState<SyncResult | null>(null);
+  const [lastError, setLastError] = useState<string | null>(null);
   const [pendingConflicts, setPendingConflicts] = useState<SyncConflict[]>([]);
 
   // Refs
@@ -199,10 +201,15 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     if (result.success) {
       setSyncStatus('success');
+      setLastError(null);
       // Reset to idle after a delay
       setTimeout(() => setSyncStatus('idle'), 3000);
     } else {
       setSyncStatus('error');
+      // Extract error message from result
+      const errorMsg = result.errors?.[0]?.message || 'Unknown sync error';
+      setLastError(errorMsg);
+      console.error('[SyncProvider] Sync error:', errorMsg);
     }
 
     setIsSyncing(false);
@@ -397,6 +404,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
     settings,
     progress,
     lastResult,
+    lastError,
     pendingConflicts,
     connect,
     disconnect,

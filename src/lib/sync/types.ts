@@ -162,6 +162,7 @@ export interface SyncProgress {
   current: number;
   total: number;
   itemType?: string; // 'projects', 'characters', 'images', 'files'
+  errorMessage?: string; // Error details when status is 'error'
 }
 
 export interface SyncResult {
