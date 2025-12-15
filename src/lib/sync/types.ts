@@ -175,6 +175,9 @@ export interface SyncResult {
     characters: SyncItemCounts;
     images: SyncItemCounts;
     files: SyncItemCounts;
+    editions: SyncItemCounts;
+    scriptPages: SyncItemCounts;
+    panels: SyncItemCounts;
   };
 
   conflicts?: SyncConflict[];
@@ -200,7 +203,7 @@ export interface SyncError {
 
 export interface SyncConflict {
   id: string;
-  type: 'project' | 'character' | 'image';
+  type: 'project' | 'character' | 'image' | 'edition' | 'scriptPage' | 'panel';
   itemId: string;
   itemName: string;
 
@@ -233,6 +236,9 @@ export interface SyncDelta {
     characters: string[];
     images: string[];       // Image metadata IDs
     files: string[];        // Image file IDs (actual binary)
+    editions: string[];
+    scriptPages: string[];
+    panels: string[];
   };
 
   toDownload: {
@@ -240,6 +246,9 @@ export interface SyncDelta {
     characters: string[];
     images: string[];
     files: string[];
+    editions: string[];
+    scriptPages: string[];
+    panels: string[];
   };
 
   toDelete: {
@@ -305,6 +314,9 @@ export const SYNC_CONSTANTS = {
   CHARACTERS_FOLDER: 'characters',
   IMAGES_FOLDER: 'images',
   FILES_FOLDER: 'files',
+  EDITIONS_FOLDER: 'editions',
+  SCRIPT_PAGES_FOLDER: 'scriptPages',
+  PANELS_FOLDER: 'panels',
 
   // API scopes
   DRIVE_SCOPE: 'https://www.googleapis.com/auth/drive.appdata',

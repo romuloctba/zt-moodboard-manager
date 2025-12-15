@@ -8,6 +8,9 @@ export interface StorageStats {
   projects: number;
   characters: number;
   images: number;
+  editions: number;
+  scriptPages: number;
+  panels: number;
   storageUsed: string;
 }
 

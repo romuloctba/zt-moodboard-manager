@@ -467,12 +467,18 @@ export async function getDatabaseStats(): Promise<{
   projects: number;
   characters: number;
   images: number;
+  editions: number;
+  scriptPages: number;
+  panels: number;
   storageUsed: string;
 }> {
-  const [projects, characters, images] = await Promise.all([
+  const [projects, characters, images, editions, scriptPages, panels] = await Promise.all([
     db.projects.count(),
     db.characters.count(),
     db.images.count(),
+    db.editions.count(),
+    db.scriptPages.count(),
+    db.panels.count(),
   ]);
 
   const storage = await fileStorage.getStorageEstimate();
@@ -481,6 +487,9 @@ export async function getDatabaseStats(): Promise<{
     projects,
     characters,
     images,
+    editions,
+    scriptPages,
+    panels,
     storageUsed: fileStorage.formatBytes(storage.used),
   };
 }
@@ -500,7 +509,10 @@ export async function clearAllData(): Promise<{
   const { totalDeleted } = await fileStorage.clearAllFiles();
 
   // Step 2: Clear all database tables
-  await db.transaction('rw', [db.projects, db.characters, db.images], async () => {
+  await db.transaction('rw', [db.projects, db.characters, db.images, db.editions, db.scriptPages, db.panels], async () => {
+    await db.panels.clear();
+    await db.scriptPages.clear();
+    await db.editions.clear();
     await db.images.clear();
     await db.characters.clear();
     await db.projects.clear();
@@ -509,7 +521,7 @@ export async function clearAllData(): Promise<{
   console.log('[BackupService] All data cleared');
 
   return {
-    tablesCleared: 3,
+    tablesCleared: 6,
     filesDeleted: totalDeleted,
   };
 }

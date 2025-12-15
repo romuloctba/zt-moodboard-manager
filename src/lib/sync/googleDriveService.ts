@@ -74,6 +74,9 @@ class GoogleDriveService {
       this.getOrCreateSubFolder(SYNC_CONSTANTS.CHARACTERS_FOLDER),
       this.getOrCreateSubFolder(SYNC_CONSTANTS.IMAGES_FOLDER),
       this.getOrCreateSubFolder(SYNC_CONSTANTS.FILES_FOLDER),
+      this.getOrCreateSubFolder(SYNC_CONSTANTS.EDITIONS_FOLDER),
+      this.getOrCreateSubFolder(SYNC_CONSTANTS.SCRIPT_PAGES_FOLDER),
+      this.getOrCreateSubFolder(SYNC_CONSTANTS.PANELS_FOLDER),
     ]);
   }
 
@@ -622,6 +625,129 @@ class GoogleDriveService {
     const file = await this.getFileByName(
       `${imageId}_thumb.webp`,
       SYNC_CONSTANTS.FILES_FOLDER
+    );
+    if (file) {
+      await this.deleteFile(file.id);
+    }
+  }
+
+  /**
+   * Get an edition file
+   */
+  async getEdition<T>(editionId: string): Promise<T | null> {
+    const file = await this.getFileByName(
+      `${editionId}.json`,
+      SYNC_CONSTANTS.EDITIONS_FOLDER
+    );
+    if (!file) return null;
+    return this.downloadAsJson<T>(file.id);
+  }
+
+  /**
+   * Save an edition file
+   */
+  async saveEdition(editionId: string, data: unknown): Promise<DriveFileMetadata> {
+    const existingFile = await this.getFileByName(
+      `${editionId}.json`,
+      SYNC_CONSTANTS.EDITIONS_FOLDER
+    );
+    return this.uploadJson(
+      `${editionId}.json`,
+      data,
+      SYNC_CONSTANTS.EDITIONS_FOLDER,
+      existingFile?.id
+    );
+  }
+
+  /**
+   * Delete an edition file
+   */
+  async deleteEdition(editionId: string): Promise<void> {
+    const file = await this.getFileByName(
+      `${editionId}.json`,
+      SYNC_CONSTANTS.EDITIONS_FOLDER
+    );
+    if (file) {
+      await this.deleteFile(file.id);
+    }
+  }
+
+  /**
+   * Get a script page file
+   */
+  async getScriptPage<T>(pageId: string): Promise<T | null> {
+    const file = await this.getFileByName(
+      `${pageId}.json`,
+      SYNC_CONSTANTS.SCRIPT_PAGES_FOLDER
+    );
+    if (!file) return null;
+    return this.downloadAsJson<T>(file.id);
+  }
+
+  /**
+   * Save a script page file
+   */
+  async saveScriptPage(pageId: string, data: unknown): Promise<DriveFileMetadata> {
+    const existingFile = await this.getFileByName(
+      `${pageId}.json`,
+      SYNC_CONSTANTS.SCRIPT_PAGES_FOLDER
+    );
+    return this.uploadJson(
+      `${pageId}.json`,
+      data,
+      SYNC_CONSTANTS.SCRIPT_PAGES_FOLDER,
+      existingFile?.id
+    );
+  }
+
+  /**
+   * Delete a script page file
+   */
+  async deleteScriptPage(pageId: string): Promise<void> {
+    const file = await this.getFileByName(
+      `${pageId}.json`,
+      SYNC_CONSTANTS.SCRIPT_PAGES_FOLDER
+    );
+    if (file) {
+      await this.deleteFile(file.id);
+    }
+  }
+
+  /**
+   * Get a panel file
+   */
+  async getPanel<T>(panelId: string): Promise<T | null> {
+    const file = await this.getFileByName(
+      `${panelId}.json`,
+      SYNC_CONSTANTS.PANELS_FOLDER
+    );
+    if (!file) return null;
+    return this.downloadAsJson<T>(file.id);
+  }
+
+  /**
+   * Save a panel file
+   */
+  async savePanel(panelId: string, data: unknown): Promise<DriveFileMetadata> {
+    const existingFile = await this.getFileByName(
+      `${panelId}.json`,
+      SYNC_CONSTANTS.PANELS_FOLDER
+    );
+    return this.uploadJson(
+      `${panelId}.json`,
+      data,
+      SYNC_CONSTANTS.PANELS_FOLDER,
+      existingFile?.id
+    );
+  }
+
+  /**
+   * Delete a panel file
+   */
+  async deletePanel(panelId: string): Promise<void> {
+    const file = await this.getFileByName(
+      `${panelId}.json`,
+      SYNC_CONSTANTS.PANELS_FOLDER
     );
     if (file) {
       await this.deleteFile(file.id);

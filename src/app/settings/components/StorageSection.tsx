@@ -55,6 +55,18 @@ export function StorageSection({
                 value={stats.images} 
                 label={t('storage.images')} 
               />
+              <StatCard 
+                value={stats.editions} 
+                label={t('storage.editions')} 
+              />
+              <StatCard 
+                value={stats.scriptPages} 
+                label={t('storage.scriptPages')} 
+              />
+              <StatCard 
+                value={stats.panels} 
+                label={t('storage.panels')} 
+              />
             </div>
             
             {storageInfo && (

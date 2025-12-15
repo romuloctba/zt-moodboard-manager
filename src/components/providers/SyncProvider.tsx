@@ -160,6 +160,9 @@ export function SyncProvider({ children }: SyncProviderProps) {
           characters: { added: 0, updated: 0, deleted: 0 },
           images: { added: 0, updated: 0, deleted: 0 },
           files: { added: 0, updated: 0, deleted: 0 },
+          editions: { added: 0, updated: 0, deleted: 0 },
+          scriptPages: { added: 0, updated: 0, deleted: 0 },
+          panels: { added: 0, updated: 0, deleted: 0 },
         },
         errors: [{ type: 'unknown', message: 'Sync already in progress' }],
       };

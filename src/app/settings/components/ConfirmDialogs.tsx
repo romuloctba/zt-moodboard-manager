@@ -60,6 +60,12 @@ export function RestoreConfirmDialog({
               <div>{manifest.stats.characters}</div>
               <div className="text-muted-foreground">{t('backup.confirmRestore.images')}</div>
               <div>{manifest.stats.images}</div>
+              <div className="text-muted-foreground">{t('backup.confirmRestore.editions')}</div>
+              <div>{manifest.stats.editions}</div>
+              <div className="text-muted-foreground">{t('backup.confirmRestore.scriptPages')}</div>
+              <div>{manifest.stats.scriptPages}</div>
+              <div className="text-muted-foreground">{t('backup.confirmRestore.panels')}</div>
+              <div>{manifest.stats.panels}</div>
             </div>
 
             <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
@@ -68,7 +74,10 @@ export function RestoreConfirmDialog({
                 {t('backup.confirmRestore.warning', { 
                   projects: currentStats?.projects || 0, 
                   characters: currentStats?.characters || 0, 
-                  images: currentStats?.images || 0 
+                  images: currentStats?.images || 0,
+                  editions: currentStats?.editions || 0,
+                  scriptPages: currentStats?.scriptPages || 0,
+                  panels: currentStats?.panels || 0
                 })}
               </div>
             </div>
@@ -130,6 +139,9 @@ export function ClearDataConfirmDialog({
                 <li>{t('dangerZone.confirmClear.projects', { count: currentStats?.projects || 0 })}</li>
                 <li>{t('dangerZone.confirmClear.characters', { count: currentStats?.characters || 0 })}</li>
                 <li>{t('dangerZone.confirmClear.images', { count: currentStats?.images || 0 })}</li>
+                <li>{t('dangerZone.confirmClear.editions', { count: currentStats?.editions || 0 })}</li>
+                <li>{t('dangerZone.confirmClear.scriptPages', { count: currentStats?.scriptPages || 0 })}</li>
+                <li>{t('dangerZone.confirmClear.panels', { count: currentStats?.panels || 0 })}</li>
                 <li>{t('dangerZone.confirmClear.files')}</li>
               </ul>
             </div>

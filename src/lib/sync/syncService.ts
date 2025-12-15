@@ -24,7 +24,7 @@ import {
   DEFAULT_SYNC_SETTINGS,
   SYNC_CONSTANTS,
 } from './types';
-import type { Project, Character, MoodboardImage } from '@/types';
+import type { Project, Character, MoodboardImage, Edition, ScriptPage, Panel } from '@/types';
 
 // Storage key for sync settings
 const SYNC_SETTINGS_KEY = 'moodboard-sync-settings';
@@ -230,6 +230,9 @@ class SyncService {
           characters: { added: 0, updated: 0, deleted: 0 },
           images: { added: 0, updated: 0, deleted: 0 },
           files: { added: 0, updated: 0, deleted: 0 },
+          editions: { added: 0, updated: 0, deleted: 0 },
+          scriptPages: { added: 0, updated: 0, deleted: 0 },
+          panels: { added: 0, updated: 0, deleted: 0 },
         });
       }
 
@@ -292,6 +295,9 @@ class SyncService {
         characters: this.mergeCounts(uploadCounts.characters, downloadCounts.characters),
         images: this.mergeCounts(uploadCounts.images, downloadCounts.images),
         files: this.mergeCounts(uploadCounts.files, downloadCounts.files),
+        editions: this.mergeCounts(uploadCounts.editions, downloadCounts.editions),
+        scriptPages: this.mergeCounts(uploadCounts.scriptPages, downloadCounts.scriptPages),
+        panels: this.mergeCounts(uploadCounts.panels, downloadCounts.panels),
       });
 
     } catch (error) {
@@ -325,18 +331,27 @@ class SyncService {
     characters: SyncItemCounts;
     images: SyncItemCounts;
     files: SyncItemCounts;
+    editions: SyncItemCounts;
+    scriptPages: SyncItemCounts;
+    panels: SyncItemCounts;
   }> {
     const counts = {
       projects: { added: 0, updated: 0, deleted: 0 },
       characters: { added: 0, updated: 0, deleted: 0 },
       images: { added: 0, updated: 0, deleted: 0 },
       files: { added: 0, updated: 0, deleted: 0 },
+      editions: { added: 0, updated: 0, deleted: 0 },
+      scriptPages: { added: 0, updated: 0, deleted: 0 },
+      panels: { added: 0, updated: 0, deleted: 0 },
     };
 
     const totalUploads = delta.toUpload.projects.length +
       delta.toUpload.characters.length +
       delta.toUpload.images.length +
-      delta.toUpload.files.length;
+      delta.toUpload.files.length +
+      delta.toUpload.editions.length +
+      delta.toUpload.scriptPages.length +
+      delta.toUpload.panels.length;
 
     let uploaded = 0;
 
@@ -431,6 +446,60 @@ class SyncService {
       uploaded++;
     }
 
+    // Upload editions
+    for (const editionId of delta.toUpload.editions) {
+      onProgress?.({
+        status: 'uploading',
+        phase: 'uploading',
+        current: 40 + Math.floor((uploaded / totalUploads) * 25),
+        total: 100,
+        itemType: 'editions',
+      });
+
+      const edition = await db.editions.get(editionId);
+      if (edition) {
+        await googleDrive.saveEdition(editionId, edition);
+        counts.editions.added++;
+      }
+      uploaded++;
+    }
+
+    // Upload script pages
+    for (const pageId of delta.toUpload.scriptPages) {
+      onProgress?.({
+        status: 'uploading',
+        phase: 'uploading',
+        current: 40 + Math.floor((uploaded / totalUploads) * 25),
+        total: 100,
+        itemType: 'scriptPages',
+      });
+
+      const page = await db.scriptPages.get(pageId);
+      if (page) {
+        await googleDrive.saveScriptPage(pageId, page);
+        counts.scriptPages.added++;
+      }
+      uploaded++;
+    }
+
+    // Upload panels
+    for (const panelId of delta.toUpload.panels) {
+      onProgress?.({
+        status: 'uploading',
+        phase: 'uploading',
+        current: 40 + Math.floor((uploaded / totalUploads) * 25),
+        total: 100,
+        itemType: 'panels',
+      });
+
+      const panel = await db.panels.get(panelId);
+      if (panel) {
+        await googleDrive.savePanel(panelId, panel);
+        counts.panels.added++;
+      }
+      uploaded++;
+    }
+
     return counts;
   }
 
@@ -445,18 +514,27 @@ class SyncService {
     characters: SyncItemCounts;
     images: SyncItemCounts;
     files: SyncItemCounts;
+    editions: SyncItemCounts;
+    scriptPages: SyncItemCounts;
+    panels: SyncItemCounts;
   }> {
     const counts = {
       projects: { added: 0, updated: 0, deleted: 0 },
       characters: { added: 0, updated: 0, deleted: 0 },
       images: { added: 0, updated: 0, deleted: 0 },
       files: { added: 0, updated: 0, deleted: 0 },
+      editions: { added: 0, updated: 0, deleted: 0 },
+      scriptPages: { added: 0, updated: 0, deleted: 0 },
+      panels: { added: 0, updated: 0, deleted: 0 },
     };
 
     const totalDownloads = delta.toDownload.projects.length +
       delta.toDownload.characters.length +
       delta.toDownload.images.length +
-      delta.toDownload.files.length;
+      delta.toDownload.files.length +
+      delta.toDownload.editions.length +
+      delta.toDownload.scriptPages.length +
+      delta.toDownload.panels.length;
 
     let downloaded = 0;
 
@@ -549,6 +627,75 @@ class SyncService {
       downloaded++;
     }
 
+    // Download editions
+    for (const editionId of delta.toDownload.editions) {
+      onProgress?.({
+        status: 'downloading',
+        phase: 'downloading',
+        current: 65 + Math.floor((downloaded / totalDownloads) * 25),
+        total: 100,
+        itemType: 'editions',
+      });
+
+      const edition = await googleDrive.getEdition<Edition>(editionId);
+      if (edition) {
+        const editionWithDates = {
+          ...edition,
+          createdAt: new Date(edition.createdAt),
+          updatedAt: new Date(edition.updatedAt),
+        };
+        await db.editions.put(editionWithDates);
+        counts.editions.added++;
+      }
+      downloaded++;
+    }
+
+    // Download script pages
+    for (const pageId of delta.toDownload.scriptPages) {
+      onProgress?.({
+        status: 'downloading',
+        phase: 'downloading',
+        current: 65 + Math.floor((downloaded / totalDownloads) * 25),
+        total: 100,
+        itemType: 'scriptPages',
+      });
+
+      const page = await googleDrive.getScriptPage<ScriptPage>(pageId);
+      if (page) {
+        const pageWithDates = {
+          ...page,
+          createdAt: new Date(page.createdAt),
+          updatedAt: new Date(page.updatedAt),
+        };
+        await db.scriptPages.put(pageWithDates);
+        counts.scriptPages.added++;
+      }
+      downloaded++;
+    }
+
+    // Download panels
+    for (const panelId of delta.toDownload.panels) {
+      onProgress?.({
+        status: 'downloading',
+        phase: 'downloading',
+        current: 65 + Math.floor((downloaded / totalDownloads) * 25),
+        total: 100,
+        itemType: 'panels',
+      });
+
+      const panel = await googleDrive.getPanel<Panel>(panelId);
+      if (panel) {
+        const panelWithDates = {
+          ...panel,
+          createdAt: new Date(panel.createdAt),
+          updatedAt: new Date(panel.updatedAt),
+        };
+        await db.panels.put(panelWithDates);
+        counts.panels.added++;
+      }
+      downloaded++;
+    }
+
     return counts;
   }
 
@@ -577,6 +724,15 @@ class SyncService {
           await db.images.delete(deletion.id);
           break;
         }
+        case 'edition':
+          await db.editions.delete(deletion.id);
+          break;
+        case 'scriptPage':
+          await db.scriptPages.delete(deletion.id);
+          break;
+        case 'panel':
+          await db.panels.delete(deletion.id);
+          break;
       }
     }
 
@@ -593,6 +749,15 @@ class SyncService {
           await googleDrive.deleteImageMeta(deletion.id);
           await googleDrive.deleteImageFile(deletion.id);
           await googleDrive.deleteThumbnailFile(deletion.id);
+          break;
+        case 'edition':
+          await googleDrive.deleteEdition(deletion.id);
+          break;
+        case 'scriptPage':
+          await googleDrive.deleteScriptPage(deletion.id);
+          break;
+        case 'panel':
+          await googleDrive.deletePanel(deletion.id);
           break;
       }
     }
@@ -616,7 +781,10 @@ class SyncService {
 
     for (const conflict of resolvedConflicts) {
       const key = conflict.type === 'project' ? 'projects' :
-        conflict.type === 'character' ? 'characters' : 'images';
+        conflict.type === 'character' ? 'characters' :
+          conflict.type === 'image' ? 'images' :
+            conflict.type === 'edition' ? 'editions' :
+              conflict.type === 'scriptPage' ? 'scriptPages' : 'panels';
 
       if (conflict.resolution === 'local') {
         // Upload local version
@@ -689,16 +857,20 @@ class SyncService {
    * Determine sync direction from counts
    */
   private determineSyncDirection(
-    uploadCounts: { projects: SyncItemCounts; characters: SyncItemCounts; images: SyncItemCounts; files: SyncItemCounts },
-    downloadCounts: { projects: SyncItemCounts; characters: SyncItemCounts; images: SyncItemCounts; files: SyncItemCounts }
+    uploadCounts: { projects: SyncItemCounts; characters: SyncItemCounts; images: SyncItemCounts; files: SyncItemCounts; editions: SyncItemCounts; scriptPages: SyncItemCounts; panels: SyncItemCounts },
+    downloadCounts: { projects: SyncItemCounts; characters: SyncItemCounts; images: SyncItemCounts; files: SyncItemCounts; editions: SyncItemCounts; scriptPages: SyncItemCounts; panels: SyncItemCounts }
   ): 'push' | 'pull' | 'merge' | 'none' {
     const totalUploads =
       uploadCounts.projects.added + uploadCounts.characters.added +
-      uploadCounts.images.added + uploadCounts.files.added;
+      uploadCounts.images.added + uploadCounts.files.added +
+      uploadCounts.editions.added + uploadCounts.scriptPages.added +
+      uploadCounts.panels.added;
 
     const totalDownloads =
       downloadCounts.projects.added + downloadCounts.characters.added +
-      downloadCounts.images.added + downloadCounts.files.added;
+      downloadCounts.images.added + downloadCounts.files.added +
+      downloadCounts.editions.added + downloadCounts.scriptPages.added +
+      downloadCounts.panels.added;
 
     if (totalUploads > 0 && totalDownloads > 0) return 'merge';
     if (totalUploads > 0) return 'push';
@@ -728,6 +900,9 @@ class SyncService {
       characters: SyncItemCounts;
       images: SyncItemCounts;
       files: SyncItemCounts;
+      editions: SyncItemCounts;
+      scriptPages: SyncItemCounts;
+      panels: SyncItemCounts;
     }
   ): SyncResult {
     return {
@@ -753,6 +928,9 @@ class SyncService {
         characters: { added: 0, updated: 0, deleted: 0 },
         images: { added: 0, updated: 0, deleted: 0 },
         files: { added: 0, updated: 0, deleted: 0 },
+        editions: { added: 0, updated: 0, deleted: 0 },
+        scriptPages: { added: 0, updated: 0, deleted: 0 },
+        panels: { added: 0, updated: 0, deleted: 0 },
       },
       errors: [{ type: 'unknown', message }],
     };

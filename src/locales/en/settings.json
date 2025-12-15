@@ -13,6 +13,9 @@
     "projects": "Projects",
     "characters": "Characters",
     "images": "Images",
+    "editions": "Editions",
+    "scriptPages": "Script Pages",
+    "panels": "Panels",
     "storageUsed": "Storage used",
     "storageFormat": "{used} / {quota}"
   },
@@ -131,7 +134,10 @@
       "projects": "Projects:",
       "characters": "Characters:",
       "images": "Images:",
-      "warning": "Your current {projects} projects, {characters} characters, and {images} images will be deleted.",
+      "editions": "Editions:",
+      "scriptPages": "Script Pages:",
+      "panels": "Panels:",
+      "warning": "Your current {projects} projects, {characters} characters, {images} images, {editions} editions, {scriptPages} script pages, and {panels} panels will be deleted.",
       "confirm": "Restore Backup"
     },
     "toast": {
@@ -158,6 +164,9 @@
       "projects": "{count} projects",
       "characters": "{count} characters",
       "images": "{count} images",
+      "editions": "{count} editions",
+      "scriptPages": "{count} script pages",
+      "panels": "{count} panels",
       "files": "All files in OPFS storage",
       "confirm": "Yes, Delete Everything"
     },

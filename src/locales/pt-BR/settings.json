@@ -13,6 +13,9 @@
     "projects": "Projetos",
     "characters": "Personagens",
     "images": "Imagens",
+    "editions": "Edições",
+    "scriptPages": "Páginas de Roteiro",
+    "panels": "Painéis",
     "storageUsed": "Armazenamento usado",
     "storageFormat": "{used} / {quota}"
   },
@@ -131,7 +134,10 @@
       "projects": "Projetos:",
       "characters": "Personagens:",
       "images": "Imagens:",
-      "warning": "Seus atuais {projects} projetos, {characters} personagens e {images} imagens serão excluídos.",
+      "editions": "Edições:",
+      "scriptPages": "Páginas de Roteiro:",
+      "panels": "Painéis:",
+      "warning": "Seus atuais {projects} projetos, {characters} personagens, {images} imagens, {editions} edições, {scriptPages} páginas de roteiro e {panels} painéis serão excluídos.",
       "confirm": "Restaurar Backup"
     },
     "toast": {
@@ -158,6 +164,9 @@
       "projects": "{count} projetos",
       "characters": "{count} personagens",
       "images": "{count} imagens",
+      "editions": "{count} edições",
+      "scriptPages": "{count} páginas de roteiro",
+      "panels": "{count} painéis",
       "files": "Todos os arquivos no armazenamento OPFS",
       "confirm": "Sim, Excluir Tudo"
     },

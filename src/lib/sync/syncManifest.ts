@@ -228,18 +228,27 @@ class SyncManifestService {
       return {
         hasChanges: Object.keys(local.projects).length > 0 ||
           Object.keys(local.characters).length > 0 ||
-          Object.keys(local.images).length > 0,
+          Object.keys(local.images).length > 0 ||
+          Object.keys(local.editions).length > 0 ||
+          Object.keys(local.scriptPages).length > 0 ||
+          Object.keys(local.panels).length > 0,
         toUpload: {
           projects: Object.keys(local.projects),
           characters: Object.keys(local.characters),
           images: Object.keys(local.images),
           files: Object.keys(local.images), // All image files too
+          editions: Object.keys(local.editions),
+          scriptPages: Object.keys(local.scriptPages),
+          panels: Object.keys(local.panels),
         },
         toDownload: {
           projects: [],
           characters: [],
           images: [],
           files: [],
+          editions: [],
+          scriptPages: [],
+          panels: [],
         },
         toDelete: {
           remote: [],
@@ -251,8 +260,8 @@ class SyncManifestService {
 
     const delta: SyncDelta = {
       hasChanges: false,
-      toUpload: { projects: [], characters: [], images: [], files: [] },
-      toDownload: { projects: [], characters: [], images: [], files: [] },
+      toUpload: { projects: [], characters: [], images: [], files: [], editions: [], scriptPages: [], panels: [] },
+      toDownload: { projects: [], characters: [], images: [], files: [], editions: [], scriptPages: [], panels: [] },
       toDelete: { remote: [], local: [] },
       conflicts: [],
     };
@@ -293,6 +302,42 @@ class SyncManifestService {
       remote.lastModifiedDeviceName
     );
 
+    // Compare editions
+    await this.compareItemCategory(
+      'edition',
+      local.editions,
+      remote.editions,
+      delta,
+      local.lastModifiedDeviceId,
+      local.lastModifiedDeviceName,
+      remote.lastModifiedDeviceId,
+      remote.lastModifiedDeviceName
+    );
+
+    // Compare script pages
+    await this.compareItemCategory(
+      'scriptPage',
+      local.scriptPages,
+      remote.scriptPages,
+      delta,
+      local.lastModifiedDeviceId,
+      local.lastModifiedDeviceName,
+      remote.lastModifiedDeviceId,
+      remote.lastModifiedDeviceName
+    );
+
+    // Compare panels
+    await this.compareItemCategory(
+      'panel',
+      local.panels,
+      remote.panels,
+      delta,
+      local.lastModifiedDeviceId,
+      local.lastModifiedDeviceName,
+      remote.lastModifiedDeviceId,
+      remote.lastModifiedDeviceName
+    );
+
     // Handle deletions
     this.processDeletions(local, remote, delta);
 
@@ -301,9 +346,15 @@ class SyncManifestService {
       delta.toUpload.projects.length > 0 ||
       delta.toUpload.characters.length > 0 ||
       delta.toUpload.images.length > 0 ||
+      delta.toUpload.editions.length > 0 ||
+      delta.toUpload.scriptPages.length > 0 ||
+      delta.toUpload.panels.length > 0 ||
       delta.toDownload.projects.length > 0 ||
       delta.toDownload.characters.length > 0 ||
       delta.toDownload.images.length > 0 ||
+      delta.toDownload.editions.length > 0 ||
+      delta.toDownload.scriptPages.length > 0 ||
+      delta.toDownload.panels.length > 0 ||
       delta.toDelete.remote.length > 0 ||
       delta.toDelete.local.length > 0 ||
       delta.conflicts.length > 0;
@@ -312,10 +363,10 @@ class SyncManifestService {
   }
 
   /**
-   * Compare a category of items (projects, characters, or images)
+   * Compare a category of items (projects, characters, images, editions, scriptPages, or panels)
    */
   private async compareItemCategory(
-    type: 'project' | 'character' | 'image',
+    type: 'project' | 'character' | 'image' | 'edition' | 'scriptPage' | 'panel',
     local: Record<string, ItemSyncMeta>,
     remote: Record<string, ItemSyncMeta>,
     delta: SyncDelta,
@@ -328,7 +379,10 @@ class SyncManifestService {
     const remoteIds = new Set(Object.keys(remote));
 
     const uploadKey = type === 'project' ? 'projects' :
-      type === 'character' ? 'characters' : 'images';
+      type === 'character' ? 'characters' :
+        type === 'image' ? 'images' :
+          type === 'edition' ? 'editions' :
+            type === 'scriptPage' ? 'scriptPages' : 'panels';
     const downloadKey = uploadKey;
 
     // Items only in local → upload
@@ -408,7 +462,7 @@ class SyncManifestService {
    * Get item name for conflict display
    */
   private async getItemName(
-    type: 'project' | 'character' | 'image',
+    type: 'project' | 'character' | 'image' | 'edition' | 'scriptPage' | 'panel',
     id: string
   ): Promise<string> {
     try {
@@ -424,6 +478,18 @@ class SyncManifestService {
         case 'image': {
           const image = await db.images.get(id);
           return image?.originalName || id;
+        }
+        case 'edition': {
+          const edition = await db.editions.get(id);
+          return edition?.title || id;
+        }
+        case 'scriptPage': {
+          const page = await db.scriptPages.get(id);
+          return page?.title || `Page ${page?.pageNumber || id}`;
+        }
+        case 'panel': {
+          const panel = await db.panels.get(id);
+          return `Panel ${panel?.panelNumber || id}`;
         }
         default:
           return id;

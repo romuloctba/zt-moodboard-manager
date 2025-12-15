@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useSyncContext } from '@/components/providers';
 import { cn } from '@/lib/utils';
 import { ConflictDialog } from './ConflictDialog';
+import Link from 'next/link';
 
 // Simple external store for success state (avoids lint issues with setState in effects)
 let showSuccessState = false;
@@ -152,10 +153,10 @@ export function GlobalSyncIndicator() {
         )}
         
         {showError && (
-          <>
+          <Link href="/settings/sync">
             <AlertCircle className="h-4 w-4 text-red-500" />
             <span className="text-sm font-medium text-red-500">{t('indicator.failed')}</span>
-          </>
+          </Link>
         )}
       </div>
 
