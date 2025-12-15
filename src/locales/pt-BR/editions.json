@@ -13,6 +13,26 @@
     "description": "Crie sua primeira edição de quadrinhos para começar a escrever roteiros para sua história.",
     "action": "Criar Primeira Edição"
   },
+  "cover": {
+    "imageLabel": "Imagem da Capa",
+    "currentCover": "Capa atual",
+    "selectCover": "Selecionar Capa",
+    "changeCover": "Alterar Capa",
+    "dialogTitle": "Selecionar Imagem de Capa",
+    "uploadNew": "Enviar Nova",
+    "orSelectBelow": "ou selecione das suas imagens",
+    "noImages": "Nenhuma imagem neste projeto",
+    "noImagesHint": "Adicione imagens aos personagens primeiro, ou envie uma nova capa",
+    "clearSelection": "Limpar Seleção",
+    "coverSet": "Imagem de capa selecionada",
+    "invalidFile": "Por favor, selecione um arquivo de imagem válido",
+    "noCharacters": "Crie um personagem primeiro para enviar imagens",
+    "uploadSuccess": "Imagem enviada com sucesso",
+    "uploadFailed": "Falha ao enviar imagem",
+    "cardTitle": "Capa",
+    "pageZero": "Página 0",
+    "noDescription": "Sem descrição da capa ainda. Clique para adicionar."
+  },
   "createDialog": {
     "title": "Criar Nova Edição",
     "description": "Crie uma nova edição de quadrinhos para organizar seus roteiros.",
@@ -159,6 +179,9 @@
       "updated": "Painel atualizado",
       "deleted": "Painel excluído",
       "duplicated": "Painel duplicado"
+    },
+    "preview": {
+      "empty": "Clique para adicionar conteúdo a este painel"
     }
   },
   "dialogue": {

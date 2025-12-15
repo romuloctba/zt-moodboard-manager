@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { Edition, EditionStatus } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Pencil, Copy, Trash2, BookOpen, FileText } from 'lucide-react';
 import { useEditionStore } from '@/store/editionStore';
+import { imageRepository } from '@/lib/db/repositories';
 import { toast } from 'sonner';
 import { EDITION_STATUS_COLORS } from '@/types';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,23 @@ export function EditionCard({
   const t = useTranslations('editions');
   const locale = useLocale();
   const { deleteEdition, duplicateEdition } = useEditionStore();
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+
+  // Load cover image URL
+  useEffect(() => {
+    async function loadCover() {
+      if (edition.coverImageId) {
+        const image = await imageRepository.getById(edition.coverImageId);
+        if (image) {
+          const url = await imageRepository.getThumbnailUrl(image);
+          setCoverUrl(url);
+        }
+      } else {
+        setCoverUrl(null);
+      }
+    }
+    loadCover();
+  }, [edition.coverImageId]);
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -67,8 +85,21 @@ export function EditionCard({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <BookOpen className="w-5 h-5 text-primary" />
+            {/* Cover image or icon */}
+            <div className={cn(
+              'w-12 h-16 rounded-lg overflow-hidden flex items-center justify-center shrink-0',
+              !coverUrl && 'bg-primary/10'
+            )}>
+              {coverUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={coverUrl}
+                  alt=""
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <BookOpen className="w-5 h-5 text-primary" />
+              )}
             </div>
             <div>
               <CardTitle className="text-lg line-clamp-1">{edition.title}</CardTitle>

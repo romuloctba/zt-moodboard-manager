@@ -122,27 +122,38 @@ export function PanelEditor({
 
   const dialogueTypes: DialogueType[] = ['speech', 'thought', 'caption', 'sfx', 'narration', 'whisper'];
 
+  // Generate collapsed preview data
+  const getCollapsedPreview = () => {
+    const uniqueCharacters = [...new Set(panel.dialogues.map(d => d.characterName))];
+    return {
+      hasDescription: !!panel.description,
+      hasCamera: !!panel.cameraAngle,
+      hasNotes: !!panel.notes,
+      dialogueCount: panel.dialogues.length,
+      characters: uniqueCharacters,
+    };
+  };
+
+  const preview = !isExpanded ? getCollapsedPreview() : null;
+
   return (
     <Card className="border-l-4 border-l-primary/30">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
             <div 
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex-1 min-w-0 cursor-pointer"
               onClick={onToggleExpand}
             >
-              <span className="font-semibold text-sm">
-                {t('card.panel', { number: panel.panelNumber })}
-              </span>
-              {!isExpanded && panel.description && (
-                <span className="text-xs text-muted-foreground line-clamp-1 max-w-[200px]">
-                  — {panel.description}
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm shrink-0">
+                  {t('card.panel', { number: panel.panelNumber })}
                 </span>
-              )}
-              {onToggleExpand && (
-                isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
-              )}
+                {onToggleExpand && (
+                  isExpanded ? <ChevronUp className="w-4 h-4 shrink-0" /> : <ChevronDown className="w-4 h-4 shrink-0" />
+                )}
+              </div>
             </div>
           </div>
           <DropdownMenu>
@@ -168,6 +179,70 @@ export function PanelEditor({
           </DropdownMenu>
         </div>
       </CardHeader>
+
+      {/* Collapsed Preview - shows overview when panel is collapsed */}
+      {!isExpanded && (
+        <div 
+          className="px-6 pb-3 cursor-pointer"
+          onClick={onToggleExpand}
+        >
+          {/* Description preview */}
+          {panel.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+              {panel.description}
+            </p>
+          )}
+
+          {/* Camera angle */}
+          {panel.cameraAngle && (
+            <p className="text-xs text-muted-foreground mb-2">
+              <span className="font-medium">{t('editor.cameraAngleLabel')}:</span> {panel.cameraAngle}
+            </p>
+          )}
+
+          {/* Dialogues preview */}
+          {panel.dialogues.length > 0 && (
+            <div className="space-y-1 mb-2">
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <MessageSquare className="w-3 h-3" />
+                {tDialogue('header.title')} ({panel.dialogues.length})
+              </p>
+              <div className="space-y-1 pl-4 border-l-2 border-muted">
+                {panel.dialogues
+                  .sort((a, b) => a.sortOrder - b.sortOrder)
+                  .map((dialogue) => (
+                    <div 
+                      key={dialogue.id} 
+                      className={cn(
+                        "text-xs py-0.5",
+                        dialogue.type === 'thought' && "text-blue-600 dark:text-blue-400",
+                        dialogue.type === 'caption' && "text-yellow-600 dark:text-yellow-400",
+                        dialogue.type === 'sfx' && "text-red-600 dark:text-red-400",
+                        dialogue.type === 'narration' && "text-purple-600 dark:text-purple-400",
+                      )}
+                    >
+                      <span className="mr-1">{DIALOGUE_TYPE_ICONS[dialogue.type]}</span>
+                      <span className="font-medium">{dialogue.characterName}:</span>{' '}
+                      <span className="text-foreground/80 line-clamp-1">{dialogue.text}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Notes preview */}
+          {panel.notes && (
+            <p className="text-xs text-muted-foreground italic border-t pt-2">
+              <span className="font-medium not-italic">{t('editor.notesLabel')}:</span> {panel.notes}
+            </p>
+          )}
+
+          {/* Empty state indicator */}
+          {!panel.description && !panel.cameraAngle && panel.dialogues.length === 0 && !panel.notes && (
+            <p className="text-xs text-muted-foreground italic">{t('preview.empty')}</p>
+          )}
+        </div>
+      )}
 
       {isExpanded && (
         <CardContent className="space-y-4">

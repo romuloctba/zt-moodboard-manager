@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useEditionStore } from '@/store/editionStore';
+import { CoverImagePicker } from './CoverImagePicker';
 import { toast } from 'sonner';
 
 interface EditEditionDialogProps {
@@ -32,6 +33,7 @@ export function EditEditionDialog({ edition, open, onOpenChange }: EditEditionDi
   const t = useTranslations('editions');
   const tCommon = useTranslations('common');
   const { updateEdition } = useEditionStore();
+  const [coverImageId, setCoverImageId] = useState<string | undefined>();
 
   const [title, setTitle] = useState('');
   const [issueNumber, setIssueNumber] = useState('');
@@ -52,6 +54,7 @@ export function EditEditionDialog({ edition, open, onOpenChange }: EditEditionDi
       setVolume(edition.volume?.toString() ?? '');
       setSynopsis(edition.synopsis ?? '');
       setStatus(edition.status);
+      setCoverImageId(edition.coverImageId);
       setCoverDescription(edition.coverDescription ?? '');
       setGenre(edition.metadata?.genre ?? '');
       setTargetAudience(edition.metadata?.targetAudience ?? '');
@@ -77,6 +80,7 @@ export function EditEditionDialog({ edition, open, onOpenChange }: EditEditionDi
         volume: volume ? parseInt(volume) : undefined,
         synopsis: synopsis.trim() || undefined,
         status,
+        coverImageId,
         coverDescription: coverDescription.trim() || undefined,
         metadata: {
           genre: genre.trim() || undefined,
@@ -168,6 +172,17 @@ export function EditEditionDialog({ edition, open, onOpenChange }: EditEditionDi
             {/* Cover Info Section */}
             <div className="space-y-4 pt-4 border-t">
               <h3 className="font-medium">{t('editDialog.coverTab')}</h3>
+              
+              {/* Cover Image Picker */}
+              {edition && (
+                <CoverImagePicker
+                  projectId={edition.projectId}
+                  currentImageId={coverImageId}
+                  onImageSelect={setCoverImageId}
+                  label={t('cover.imageLabel')}
+                />
+              )}
+
               <div className="grid gap-2">
                 <Label htmlFor="cover-desc">{t('editDialog.coverDescriptionLabel')}</Label>
                 <textarea

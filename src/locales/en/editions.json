@@ -13,6 +13,26 @@
     "description": "Create your first comic edition to start writing scripts for your story.",
     "action": "Create First Edition"
   },
+  "cover": {
+    "imageLabel": "Cover Image",
+    "currentCover": "Current cover",
+    "selectCover": "Select Cover",
+    "changeCover": "Change Cover",
+    "dialogTitle": "Select Cover Image",
+    "uploadNew": "Upload New",
+    "orSelectBelow": "or select from your images",
+    "noImages": "No images in this project",
+    "noImagesHint": "Add images to characters first, or upload a new cover",
+    "clearSelection": "Clear Selection",
+    "coverSet": "Cover image selected",
+    "invalidFile": "Please select a valid image file",
+    "noCharacters": "Create a character first to upload images",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadFailed": "Failed to upload image",
+    "cardTitle": "Cover",
+    "pageZero": "Page 0",
+    "noDescription": "No cover description yet. Click to add one."
+  },
   "createDialog": {
     "title": "Create New Edition",
     "description": "Create a new comic edition to organize your story scripts.",
@@ -159,6 +179,9 @@
       "updated": "Panel updated",
       "deleted": "Panel deleted",
       "duplicated": "Panel duplicated"
+    },
+    "preview": {
+      "empty": "Click to add content to this panel"
     }
   },
   "dialogue": {
