@@ -320,6 +320,8 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
     // Delay startup sync slightly
     const timeout = setTimeout(() => {
+      // Also update visibility ref to prevent duplicate sync from visibility handler
+      lastVisibilitySyncRef.current = Date.now();
       syncRef.current({ force: false });
     }, SYNC_CONSTANTS.STARTUP_SYNC_DELAY_MS);
 
