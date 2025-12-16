@@ -300,17 +300,22 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
   // Auto-sync: Startup sync
   useEffect(() => {
+    // Check flag FIRST before doing anything else
+    if (hasRunStartupSync.current) {
+      return;
+    }
+
     const currentSettings = settings;
     if (
       !currentSettings?.enabled ||
       !currentSettings?.autoSyncEnabled ||
       !currentSettings?.syncOnStartup ||
-      hasRunStartupSync.current ||
       !isConnected
     ) {
       return;
     }
 
+    // Mark as run BEFORE scheduling to prevent race conditions
     hasRunStartupSync.current = true;
 
     // Delay startup sync slightly
