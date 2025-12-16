@@ -21,7 +21,6 @@ import type {
 } from '@/lib/sync/types';
 
 // Debounce time for sync after data changes (ms)
-const SYNC_DEBOUNCE_MS = 5000; // 5 seconds after last change
 
 interface SyncContextValue {
   // State
@@ -279,7 +278,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
     // Set new debounce
     debounceSyncRef.current = setTimeout(() => {
       syncRef.current({ force: false });
-    }, SYNC_DEBOUNCE_MS);
+    }, SYNC_CONSTANTS.SYNC_DEBOUNCE_MS);
   }, []);
 
   // Cleanup debounce on unmount

@@ -6,3 +6,4 @@
 
 export { locales, defaultLocale, localeNames, localeFlags, isValidLocale } from './config';
 export type { Locale } from './config';
+export { getMessage, getSyncMessage } from './getMessages';

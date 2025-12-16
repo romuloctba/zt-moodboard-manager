@@ -39,6 +39,7 @@ interface EditionState {
   updatePanel: (id: string, updates: Partial<Panel>) => Promise<void>;
   deletePanel: (id: string) => Promise<void>;
   duplicatePanel: (id: string) => Promise<Panel | null>;
+  reorderPanels: (panelIds: string[]) => Promise<void>;
 
   // Actions - Dialogues
   addDialogue: (panelId: string, dialogue: { characterName: string; text: string; type?: DialogueType; characterId?: string; direction?: string }) => Promise<PanelDialogue | null>;
@@ -290,6 +291,24 @@ export const useEditionStore = create<EditionState>((set, get) => ({
       triggerGlobalSync();
     }
     return duplicate ?? null;
+  },
+
+  reorderPanels: async (panelIds: string[]) => {
+    const { currentPage } = get();
+    if (!currentPage) return;
+
+    // Update sortOrder for each panel based on new order
+    for (let i = 0; i < panelIds.length; i++) {
+      await panelRepository.reorder(panelIds[i], i);
+    }
+
+    // Renumber to update panelNumber consistently
+    await panelRepository.renumber(currentPage.id);
+
+    // Reload panels to get updated state
+    const panels = await panelRepository.getByPage(currentPage.id);
+    set({ panels });
+    triggerGlobalSync();
   },
 
   // Dialogue actions

@@ -91,5 +91,12 @@
     "synced": "Synced",
     "conflicts": "{count, plural, =1 {# Conflict} other {# Conflicts}}",
     "failed": "Sync failed"
+  },
+  "errors": {
+    "alreadyInProgress": "Sync already in progress",
+    "rateLimited": "Please wait before syncing again",
+    "notConnected": "Not connected to Google Drive",
+    "connectionFailed": "Connection failed",
+    "syncFailed": "Sync failed"
   }
 }

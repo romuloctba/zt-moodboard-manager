@@ -91,5 +91,12 @@
     "synced": "Sincronizado",
     "conflicts": "{count, plural, =1 {# Conflito} other {# Conflitos}}",
     "failed": "Falha na sincronização"
+  },
+  "errors": {
+    "alreadyInProgress": "Sincronização já em andamento",
+    "rateLimited": "Por favor, aguarde antes de sincronizar novamente",
+    "notConnected": "Não conectado ao Google Drive",
+    "connectionFailed": "Falha na conexão",
+    "syncFailed": "Falha na sincronização"
   }
 }

@@ -331,7 +331,8 @@ export const SYNC_CONSTANTS = {
 
   // Auto-sync timing
   STARTUP_SYNC_DELAY_MS: 2_000, // Delay before first sync on startup
-  VISIBILITY_SYNC_DEBOUNCE_MS: 5_000, // Minimum time between visibility-triggered syncs
+  VISIBILITY_SYNC_DEBOUNCE_MS: 5_000 * 60, // Minimum time between visibility-triggered syncs
+  SYNC_DEBOUNCE_MS: 1000 * 25, // 25 seconds after last change
 
   // Retry configuration
   MAX_RETRIES: 3,

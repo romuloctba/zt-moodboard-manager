@@ -8,6 +8,7 @@
 import { db } from '@/lib/db/database';
 import { fileStorage } from '@/lib/storage/fileStorage';
 import { debug } from '@/lib/utils/debug';
+import { getSyncMessage } from '@/i18n/getMessages';
 import { googleAuth } from './googleAuth';
 import { googleDrive } from './googleDriveService';
 import { syncManifest } from './syncManifest';
@@ -119,7 +120,7 @@ class SyncService {
       console.error('[SyncService] Connect failed:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Connection failed',
+        error: error instanceof Error ? error.message : getSyncMessage('errors.connectionFailed'),
       };
     }
   }
@@ -170,19 +171,19 @@ class SyncService {
     // Prevent concurrent syncs
     if (this.isSyncing) {
       console.warn('[SyncService] Sync blocked: already in progress');
-      return this.createErrorResult('Sync already in progress', startTime);
+      return this.createErrorResult(getSyncMessage('errors.alreadyInProgress'), startTime);
     }
 
     // Rate limiting
     if (!force && Date.now() - this.lastSyncTime < SYNC_CONSTANTS.MIN_SYNC_INTERVAL_MS) {
       console.warn('[SyncService] Sync blocked: rate limited');
-      return this.createErrorResult('Please wait before syncing again', startTime);
+      return this.createErrorResult(getSyncMessage('errors.rateLimited'), startTime);
     }
 
     // Check connection
     if (!this.isConnected()) {
       console.warn('[SyncService] Sync blocked: not connected');
-      return this.createErrorResult('Not connected to Google Drive', startTime);
+      return this.createErrorResult(getSyncMessage('errors.notConnected'), startTime);
     }
 
     this.isSyncing = true;
@@ -378,7 +379,7 @@ class SyncService {
       });
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Sync failed';
+      const errorMessage = error instanceof Error ? error.message : getSyncMessage('errors.syncFailed');
       console.error('[SyncService] Sync failed:', {
         error: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,

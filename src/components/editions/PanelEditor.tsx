@@ -35,6 +35,8 @@ import { useEditionStore } from '@/store/editionStore';
 import { toast } from 'sonner';
 import { DIALOGUE_TYPE_ICONS } from '@/types';
 import { cn } from '@/lib/utils';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface PanelEditorProps {
   panel: Panel;
@@ -52,6 +54,22 @@ export function PanelEditor({
   const t = useTranslations('editions.panels');
   const tDialogue = useTranslations('editions.dialogue');
   const { updatePanel, deletePanel, duplicatePanel, addDialogue, updateDialogue, removeDialogue } = useEditionStore();
+
+  // Sortable hook for drag and drop
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: panel.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
 
   const [description, setDescription] = useState(panel.description ?? '');
   const [cameraAngle, setCameraAngle] = useState(panel.cameraAngle ?? '');
@@ -137,11 +155,21 @@ export function PanelEditor({
   const preview = !isExpanded ? getCollapsedPreview() : null;
 
   return (
-    <Card className="border-l-4 border-l-primary/30">
+    <Card 
+      ref={setNodeRef} 
+      style={style}
+      className="border-l-4 border-l-primary/30"
+    >
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 flex-1 min-w-0">
-            <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab shrink-0" />
+            <div 
+              {...attributes} 
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing touch-none"
+            >
+              <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
+            </div>
             <div 
               className="flex-1 min-w-0 cursor-pointer"
               onClick={onToggleExpand}

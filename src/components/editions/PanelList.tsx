@@ -8,6 +8,21 @@ import { Button } from '@/components/ui/button';
 import { Plus, Layers } from 'lucide-react';
 import { useEditionStore } from '@/store/editionStore';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface PanelListProps {
   panels: Panel[];
@@ -16,10 +31,19 @@ interface PanelListProps {
 
 export function PanelList({ panels, characters = [] }: PanelListProps) {
   const t = useTranslations('editions.panels');
-  const { createPanel } = useEditionStore();
+  const { createPanel, reorderPanels } = useEditionStore();
   const [expandedPanels, setExpandedPanels] = useState<Set<string>>(
     new Set([])
   );
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const sortedPanels = [...panels].sort((a, b) => a.sortOrder - b.sortOrder);
 
   const handleAddPanel = async () => {
     const panel = await createPanel();
@@ -47,6 +71,21 @@ export function PanelList({ panels, characters = [] }: PanelListProps) {
 
   const collapseAll = () => {
     setExpandedPanels(new Set());
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = sortedPanels.findIndex((p) => p.id === active.id);
+      const newIndex = sortedPanels.findIndex((p) => p.id === over.id);
+
+      const newOrder = arrayMove(sortedPanels, oldIndex, newIndex);
+      const panelIds = newOrder.map((p) => p.id);
+      
+      // Update the order in the database
+      reorderPanels(panelIds);
+    }
   };
 
   if (panels.length === 0) {
@@ -88,19 +127,28 @@ export function PanelList({ panels, characters = [] }: PanelListProps) {
         </div>
       </div>
 
-      <div className="space-y-3">
-        {panels
-          .sort((a, b) => a.sortOrder - b.sortOrder)
-          .map((panel) => (
-            <PanelEditor
-              key={panel.id}
-              panel={panel}
-              characters={characters}
-              isExpanded={expandedPanels.has(panel.id)}
-              onToggleExpand={() => toggleExpand(panel.id)}
-            />
-          ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={sortedPanels.map(p => p.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-3">
+            {sortedPanels.map((panel) => (
+              <PanelEditor
+                key={panel.id}
+                panel={panel}
+                characters={characters}
+                isExpanded={expandedPanels.has(panel.id)}
+                onToggleExpand={() => toggleExpand(panel.id)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       <Button 
         variant="outline" 
@@ -113,3 +161,4 @@ export function PanelList({ panels, characters = [] }: PanelListProps) {
     </div>
   );
 }
+
