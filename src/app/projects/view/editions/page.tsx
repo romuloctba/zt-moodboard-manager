@@ -7,11 +7,9 @@ import { useEditionStore } from '@/store/editionStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
-import { PageCard, CreatePageDialog, EditEditionDialog, CoverCard } from '@/components/editions';
-import { scriptPageRepository } from '@/lib/db/repositories';
-import { Plus, FileText, Settings, Pencil, FileDown } from 'lucide-react';
+import { CreatePageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
+import { Plus, FileText, Pencil, FileDown } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
-import type { Edition } from '@/types';
 import Link from 'next/link';
 
 function EditionViewContent() {
@@ -34,21 +32,6 @@ function EditionViewContent() {
   const { selectProject, currentProject } = useProjectStore();
   const { triggerNotFound } = useNotFound({ entity: 'Edition' });
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [panelCounts, setPanelCounts] = useState<Record<string, number>>({});
-
-  // Load panel counts for pages
-  useEffect(() => {
-    async function loadPanelCounts() {
-      const counts: Record<string, number> = {};
-      for (const page of pages) {
-        counts[page.id] = await scriptPageRepository.getPanelCount(page.id);
-      }
-      setPanelCounts(counts);
-    }
-    if (pages.length > 0) {
-      loadPanelCounts();
-    }
-  }, [pages]);
 
   useEffect(() => {
     if (!editionId || !projectId) {
@@ -143,30 +126,13 @@ function EditionViewContent() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-8">
-        {/* Grid with Cover + Pages */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {/* Cover Card - first item in the grid */}
-          <CoverCard 
-            edition={currentEdition} 
-            onClick={() => setShowEditDialog(true)}
-          />
-          
-          {/* Pages */}
-          {pages.length === 0 ? (
-            <div className="col-span-full">
-              <EmptyPagesState />
-            </div>
-          ) : (
-            pages.map((page) => (
-              <PageCard
-                key={page.id}
-                page={page}
-                panelCount={panelCounts[page.id] ?? 0}
-                onClick={() => handlePageClick(page)}
-              />
-            ))
-          )}
-        </div>
+        <PagesGrid
+          edition={currentEdition}
+          pages={pages}
+          onPageClick={handlePageClick}
+          onCoverClick={() => setShowEditDialog(true)}
+          emptyState={<EmptyPagesState />}
+        />
       </main>
 
       {/* Edit Edition Dialog */}

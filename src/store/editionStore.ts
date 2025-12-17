@@ -32,6 +32,7 @@ interface EditionState {
   updatePageStatus: (id: string, status: PageStatus) => Promise<void>;
   deletePage: (id: string) => Promise<void>;
   duplicatePage: (id: string) => Promise<ScriptPage | null>;
+  reorderPages: (pageIds: string[]) => Promise<void>;
 
   // Actions - Panels
   loadPanels: (pageId: string) => Promise<void>;
@@ -241,6 +242,24 @@ export const useEditionStore = create<EditionState>((set, get) => ({
       triggerGlobalSync();
     }
     return duplicate ?? null;
+  },
+
+  reorderPages: async (pageIds: string[]) => {
+    const { currentEdition } = get();
+    if (!currentEdition) return;
+
+    // Update sortOrder for each page based on new order
+    for (let i = 0; i < pageIds.length; i++) {
+      await scriptPageRepository.reorder(pageIds[i], i);
+    }
+
+    // Renumber to update pageNumber consistently
+    await scriptPageRepository.renumber(currentEdition.id);
+
+    // Reload pages to get updated state
+    const pages = await scriptPageRepository.getByEdition(currentEdition.id);
+    set({ pages });
+    triggerGlobalSync();
   },
 
   // Panel actions

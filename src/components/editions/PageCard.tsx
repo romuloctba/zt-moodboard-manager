@@ -48,7 +48,7 @@ export function PageCard({ page, panelCount = 0, onClick }: PageCardProps) {
 
   return (
     <Card
-      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/50"
+      className="group cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 h-full"
       onClick={onClick}
     >
       <CardHeader className="pb-2">

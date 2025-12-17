@@ -8,7 +8,7 @@ export { CoverCard } from './CoverCard';
 
 // Page Components
 export { PageCard } from './PageCard';
-export { PageList } from './PageList';
+export { PagesGrid } from './PagesGrid';
 export { CreatePageDialog } from './CreatePageDialog';
 export { EditPageDialog } from './EditPageDialog';
 
