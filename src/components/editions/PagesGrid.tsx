@@ -6,11 +6,13 @@ import { PageCard } from './PageCard';
 import { CoverCard } from './CoverCard';
 import { scriptPageRepository } from '@/lib/db/repositories';
 import { useEditionStore } from '@/store/editionStore';
+import { GripVertical } from 'lucide-react';
 import {
   DndContext,
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   DragEndEvent,
@@ -43,6 +45,7 @@ function SortablePageCard({ page, panelCount, onClick }: SortablePageCardProps) 
     attributes,
     listeners,
     setNodeRef,
+    setActivatorNodeRef,
     transform,
     transition,
     isDragging,
@@ -52,11 +55,23 @@ function SortablePageCard({ page, panelCount, onClick }: SortablePageCardProps) 
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    cursor: 'grab',
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className="relative group/sortable">
+      {/* Drag Handle - positioned on the left edge */}
+      <button
+        ref={setActivatorNodeRef}
+        {...attributes}
+        {...listeners}
+        type="button"
+        className="absolute left-0 top-0 bottom-0 w-6 z-10 flex items-center justify-center cursor-grab active:cursor-grabbing touch-none bg-gradient-to-r from-muted/80 to-transparent opacity-0 group-hover/sortable:opacity-100 transition-opacity rounded-l-lg md:w-5"
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="w-4 h-4 text-muted-foreground" />
+      </button>
+      {/* Always visible drag indicator on mobile */}
+      <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-muted-foreground/20 rounded-l-lg md:hidden" />
       <PageCard
         page={page}
         panelCount={panelCount}
@@ -79,7 +94,13 @@ export function PagesGrid({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Require 8px movement before starting drag
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {

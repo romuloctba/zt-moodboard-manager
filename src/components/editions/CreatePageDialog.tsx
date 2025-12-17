@@ -65,7 +65,23 @@ export function CreatePageDialog({ children }: CreatePageDialogProps) {
       <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent 
+        className="sm:max-w-[500px]"
+        onInteractOutside={(e) => {
+          // Prevent closing when interacting with virtual keyboard or focusing inputs
+          const target = e.target as HTMLElement;
+          if (target?.closest('[data-slot="dialog-content"]')) {
+            e.preventDefault();
+          }
+        }}
+        onPointerDownOutside={(e) => {
+          // Prevent closing on pointer events that might be triggered by mobile keyboard
+          const target = e.target as HTMLElement;
+          if (target?.closest('[data-slot="dialog-content"]')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('createDialog.title')}</DialogTitle>
