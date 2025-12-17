@@ -45,7 +45,8 @@
     "uploading": "Uploading...",
     "downloading": "Downloading...",
     "success": "Synced",
-    "error": "Sync Error"
+    "error": "Sync Error",
+    "offline": "Offline"
   },
   "progress": {
     "connecting": "Connecting to Google Drive",
@@ -62,7 +63,8 @@
     "files": "files"
   },
   "actions": {
-    "syncNow": "Sync Now"
+    "syncNow": "Sync Now",
+    "retry": "Retry"
   },
   "conflict": {
     "title": "Sync Conflict",
@@ -77,20 +79,27 @@
       "skip": "Skip"
     },
     "apply": "Apply",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "timeout": "Auto-resolving in {seconds}s",
+    "timedOut": "Conflicts auto-resolved (timed out)"
   },
   "toast": {
     "connected": "Google Drive connected!",
     "disconnected": "Google Drive disconnected",
     "syncComplete": "Sync complete!",
     "syncFailed": "Sync failed",
-    "noChanges": "Everything up to date"
+    "noChanges": "Everything up to date",
+    "offline": "You're offline. Changes will sync when back online.",
+    "backOnline": "Back online! Syncing...",
+    "conflictTimedOut": "Conflicts auto-resolved after timeout"
   },
   "indicator": {
     "syncing": "Syncing...",
     "synced": "Synced",
     "conflicts": "{count, plural, =1 {# Conflict} other {# Conflicts}}",
-    "failed": "Sync failed"
+    "failed": "Sync failed",
+    "offline": "Offline",
+    "pendingSync": "Pending sync"
   },
   "errors": {
     "alreadyInProgress": "Sync already in progress",

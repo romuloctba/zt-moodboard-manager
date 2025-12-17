@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Cloud, CloudOff, Check, AlertCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Cloud, CloudOff, Check, AlertCircle, Loader2, AlertTriangle, WifiOff } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useSyncContext } from '@/components/providers';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,19 @@ function getSuccessSnapshot() {
  * Includes conflict resolution dialog when conflicts are detected
  */
 export function GlobalSyncIndicator() {
-  const { isConnected, isSyncing, syncStatus, lastResult, lastError, pendingConflicts, resolveConflicts } = useSyncContext();
+  const { 
+    isConnected, 
+    isSyncing, 
+    isOnline,
+    hasPendingSync,
+    syncStatus, 
+    lastResult, 
+    lastError, 
+    pendingConflicts, 
+    conflictTimeoutSeconds,
+    resolveConflicts,
+    cancelConflicts,
+  } = useSyncContext();
   const t = useTranslations('sync');
   const prevSyncingRef = useRef(isSyncing);
   
@@ -90,9 +102,11 @@ export function GlobalSyncIndicator() {
   const showSyncing = isSyncing;
   const showConflicts = hasConflicts;
   const showError = syncStatus === 'error' && !isSyncing && !showSuccess && !showConflicts;
+  const showOffline = !isOnline && isConnected;
+  const showPending = hasPendingSync && !showOffline && !showSyncing;
 
   // Hide completely when idle and nothing to show
-  if (!showSyncing && !showSuccess && !showError && !showConflicts) {
+  if (!showSyncing && !showSuccess && !showError && !showConflicts && !showOffline && !showPending) {
     return null;
   }
 
@@ -109,8 +123,8 @@ export function GlobalSyncIndicator() {
   };
 
   const handleCancel = () => {
-    // User dismissed without resolving - mark this set of conflicts as dismissed
-    setDismissedConflictKey(currentConflictKey);
+    // User dismissed - cancel conflicts (will skip all)
+    cancelConflicts();
   };
 
   return (
@@ -123,12 +137,30 @@ export function GlobalSyncIndicator() {
           showSyncing && 'border-blue-500/50 bg-blue-500/10',
           showSuccess && 'border-green-500/50 bg-green-500/10',
           showConflicts && 'border-amber-500/50 bg-amber-500/10 cursor-pointer hover:bg-amber-500/20',
-          showError && 'border-red-500/50 bg-red-500/10'
+          showError && 'border-red-500/50 bg-red-500/10',
+          showOffline && 'border-slate-500/50 bg-slate-500/10',
+          showPending && 'border-yellow-500/50 bg-yellow-500/10'
         )}
         role={showConflicts ? 'button' : undefined}
         tabIndex={showConflicts ? 0 : undefined}
         onKeyDown={showConflicts ? (e) => e.key === 'Enter' && handleConflictClick() : undefined}
       >
+        {/* Offline indicator - highest priority */}
+        {showOffline && !showSyncing && (
+          <>
+            <WifiOff className="h-4 w-4 text-slate-500" />
+            <span className="text-sm font-medium text-slate-500">{t('indicator.offline')}</span>
+          </>
+        )}
+
+        {/* Pending sync indicator */}
+        {showPending && !showOffline && !showSyncing && (
+          <>
+            <Cloud className="h-4 w-4 text-yellow-500" />
+            <span className="text-sm font-medium text-yellow-500">{t('indicator.pendingSync')}</span>
+          </>
+        )}
+
         {showSyncing && (
           <Link href="/sync" className="flex items-center gap-2 group" title={t('indicator.syncing')} >
             <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
@@ -168,6 +200,7 @@ export function GlobalSyncIndicator() {
         conflicts={pendingConflicts}
         onResolve={handleResolve}
         onCancel={handleCancel}
+        timeoutSeconds={conflictTimeoutSeconds}
         labels={{
           title: t('conflict.title'),
           description: t('conflict.description'),
@@ -183,6 +216,7 @@ export function GlobalSyncIndicator() {
           keepAllLocal: t('conflict.resolution.keepLocal'),
           keepAllRemote: t('conflict.resolution.keepRemote'),
           keepNewest: t('conflict.resolution.keepNewest'),
+          timeout: t('conflict.timeout'),
         }}
       />
     </>
@@ -194,13 +228,22 @@ export function GlobalSyncIndicator() {
  * Shows connection and sync status in a compact form
  */
 export function SyncStatusIcon({ className }: { className?: string }) {
-  const { isConnected, isSyncing, syncStatus, pendingConflicts } = useSyncContext();
+  const { isConnected, isSyncing, isOnline, syncStatus, pendingConflicts } = useSyncContext();
 
   if (!isConnected) {
     return (
       <CloudOff 
         className={cn('h-4 w-4 text-muted-foreground/50', className)} 
         aria-label="Not connected to sync"
+      />
+    );
+  }
+
+  if (!isOnline) {
+    return (
+      <WifiOff 
+        className={cn('h-4 w-4 text-slate-500', className)} 
+        aria-label="Offline"
       />
     );
   }

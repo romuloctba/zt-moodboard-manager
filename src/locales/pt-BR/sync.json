@@ -45,7 +45,8 @@
     "uploading": "Enviando...",
     "downloading": "Baixando...",
     "success": "Sincronizado",
-    "error": "Erro de Sincronização"
+    "error": "Erro de Sincronização",
+    "offline": "Offline"
   },
   "progress": {
     "connecting": "Conectando ao Google Drive",
@@ -62,7 +63,8 @@
     "files": "arquivos"
   },
   "actions": {
-    "syncNow": "Sincronizar Agora"
+    "syncNow": "Sincronizar Agora",
+    "retry": "Tentar Novamente"
   },
   "conflict": {
     "title": "Conflito de Sincronização",
@@ -77,20 +79,27 @@
       "keepNewest": "Manter Mais Recente"
     },
     "apply": "Aplicar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "timeout": "Auto-resolvendo em {seconds}s",
+    "timedOut": "Conflitos auto-resolvidos (tempo esgotado)"
   },
   "toast": {
     "connected": "Google Drive conectado!",
     "disconnected": "Google Drive desconectado",
     "syncComplete": "Sincronização concluída!",
     "syncFailed": "Falha na sincronização",
-    "noChanges": "Tudo atualizado"
+    "noChanges": "Tudo atualizado",
+    "offline": "Você está offline. Alterações serão sincronizadas quando voltar online.",
+    "backOnline": "De volta online! Sincronizando...",
+    "conflictTimedOut": "Conflitos auto-resolvidos após tempo limite"
   },
   "indicator": {
     "syncing": "Sincronizando...",
     "synced": "Sincronizado",
     "conflicts": "{count, plural, =1 {# Conflito} other {# Conflitos}}",
-    "failed": "Falha na sincronização"
+    "failed": "Falha na sincronização",
+    "offline": "Offline",
+    "pendingSync": "Sincronização pendente"
   },
   "errors": {
     "alreadyInProgress": "Sincronização já em andamento",

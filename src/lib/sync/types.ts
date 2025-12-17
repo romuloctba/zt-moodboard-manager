@@ -68,6 +68,9 @@ export type SyncInterval = 5 | 15 | 30 | 60;
 export type ConflictStrategy = 'ask' | 'local-wins' | 'remote-wins' | 'newest-wins';
 export type SyncDirection = 'push' | 'pull' | 'merge';
 
+/** Source that triggered the sync operation */
+export type SyncTriggerSource = 'manual' | 'startup' | 'interval' | 'visibility' | 'data-change' | 'online-recovery';
+
 export const DEFAULT_SYNC_SETTINGS: Omit<SyncSettings, 'deviceId' | 'deviceName'> = {
   id: 'sync-settings',
   enabled: false,
@@ -337,4 +340,14 @@ export const SYNC_CONSTANTS = {
   // Retry configuration
   MAX_RETRIES: 3,
   RETRY_BASE_DELAY_MS: 1_000, // Base delay for exponential backoff
+
+  // Conflict resolution
+  CONFLICT_TIMEOUT_MS: 5 * 60 * 1000, // 5 minutes before auto-resolving conflicts
+
+  // Offline handling
+  ONLINE_SYNC_DELAY_MS: 2_000, // Delay before syncing after coming back online
+  MIN_TIME_SINCE_LAST_SYNC_MS: 60_000, // Minimum time (60s) since last sync before allowing online-recovery sync
+
+  // Local storage keys
+  LAST_SYNC_TIMESTAMP_KEY: 'sync:lastSyncTimestamp',
 } as const;

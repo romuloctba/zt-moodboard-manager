@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { Clock } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,8 @@ export interface ConflictDialogProps {
   conflicts: SyncConflict[];
   onResolve: (resolvedConflicts: SyncConflict[]) => void;
   onCancel: () => void;
+  /** Countdown seconds until auto-resolution (null if no timeout) */
+  timeoutSeconds?: number | null;
   // i18n
   labels: {
     title: string;
@@ -36,6 +39,7 @@ export interface ConflictDialogProps {
     keepAllLocal: string;
     keepAllRemote: string;
     keepNewest: string;
+    timeout?: string; // "Auto-resolving in {seconds}s"
   };
 }
 
@@ -47,6 +51,7 @@ export function ConflictDialog({
   conflicts,
   onResolve,
   onCancel,
+  timeoutSeconds,
   labels,
 }: ConflictDialogProps) {
   // Generate a key based on conflict IDs to reset state when conflicts change
@@ -108,6 +113,17 @@ export function ConflictDialog({
           <AlertDialogDescription>
             {labels.description}
           </AlertDialogDescription>
+          {/* Timeout countdown indicator */}
+          {timeoutSeconds !== null && timeoutSeconds !== undefined && timeoutSeconds > 0 && (
+            <div className="flex items-center gap-2 mt-2 text-sm text-amber-600 dark:text-amber-400">
+              <Clock className="h-4 w-4 animate-pulse" />
+              <span>
+                {labels.timeout 
+                  ? labels.timeout.replace('{seconds}', String(timeoutSeconds))
+                  : `Auto-resolving in ${timeoutSeconds}s`}
+              </span>
+            </div>
+          )}
         </AlertDialogHeader>
         
         {/* Quick Actions */}
