@@ -64,11 +64,11 @@ export function ScriptPageSection({ page, panels }: ScriptPageSectionProps) {
 
       {/* Writer Notes */}
       {page.notes && (
-        <div className="mb-4 p-3 bg-muted/20 rounded border-l-4 border-muted-foreground/30 text-sm print:bg-gray-50">
-          <span className="font-semibold uppercase text-muted-foreground">
+        <div className="mb-4 p-3 bg-muted/10 rounded border-l-4 border-muted-foreground/30 text-sm print:bg-gray-20">
+          <span className="font-semibold uppercase text-primary">
             {t('writerNotes')}:
           </span>{' '}
-          <span className="text-muted-foreground">{page.notes}</span>
+          <span className="text-primary">{page.notes}</span>
         </div>
       )}
 

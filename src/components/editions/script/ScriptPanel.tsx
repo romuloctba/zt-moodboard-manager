@@ -52,11 +52,11 @@ export function ScriptPanel({ panel, showPanelNumber = true }: ScriptPanelProps)
 
       {/* Artist Notes */}
       {panel.notes && (
-        <div className="mt-3 p-2 bg-muted/30 rounded text-xs border-l-2 border-muted-foreground/30 print:bg-gray-100">
-          <span className="font-semibold uppercase text-muted-foreground">
+        <div className="mt-3 p-2 bg-card/10 rounded text-xs border-l-2 border-muted-foreground/30 print:bg-gray-100">
+          <span className="font-semibold uppercase text-primary-foreground">
             {t('artistNotes')}:
           </span>{' '}
-          <span className="text-muted-foreground">{panel.notes}</span>
+          <span className="text-primary-foreground">{panel.notes}</span>
         </div>
       )}
     </div>

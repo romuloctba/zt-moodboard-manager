@@ -76,15 +76,15 @@ export function ScriptDocument({
           <div className="grid grid-cols-3 gap-4 text-center mb-6">
             <div className="p-4 bg-muted/20 rounded print:bg-gray-50">
               <p className="text-2xl font-bold">{pages.length}</p>
-              <p className="text-sm text-muted-foreground">{t('totalPages')}</p>
+              <p className="text-sm text-primary-foreground">{t('totalPages')}</p>
             </div>
             <div className="p-4 bg-muted/20 rounded print:bg-gray-50">
               <p className="text-2xl font-bold">{totalPanels}</p>
-              <p className="text-sm text-muted-foreground">{t('totalPanels')}</p>
+              <p className="text-sm text-primary-foreground">{t('totalPanels')}</p>
             </div>
             <div className="p-4 bg-muted/20 rounded print:bg-gray-50">
               <p className="text-2xl font-bold">{totalDialogues}</p>
-              <p className="text-sm text-muted-foreground">{t('totalDialogues')}</p>
+              <p className="text-sm text-primary-foreground">{t('totalDialogues')}</p>
             </div>
           </div>
 
