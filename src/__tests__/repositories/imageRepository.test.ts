@@ -620,6 +620,10 @@ describe('ImageRepository', () => {
       expect(remaining?.originalName).toBe('keep.jpg')
     })
 
+    // TODO: Review error handling behavior - currently if fileStorage fails, DB record is kept.
+    // This could leave orphaned DB records if OPFS files are manually deleted or corrupted.
+    // Consider: wrap storage deletion in try/catch and delete DB record regardless,
+    // or at minimum ignore "file not found" errors during deletion.
     it('should propagate error when fileStorage.deleteImage fails (DB record not deleted)', async () => {
       const { character } = await createTestCharacter()
       const image = await createMockImageRecord(character.id)
