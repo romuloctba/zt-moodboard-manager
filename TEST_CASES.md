@@ -552,6 +552,11 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 | SM-045 | updateLocalVersion | Should store version in localStorage | Medium |
 | SM-046 | getLocalVersion - stored | Should return stored version number | Medium |
 | SM-047 | getLocalVersion - not stored | Should return 0 when no version stored | Medium |
+| **Hash Integrity (Critical)** |
+| SM-048 | project content change | Content change should produce different hash | Critical |
+| SM-049 | character content change | Content change should produce different hash | Critical |
+| SM-050 | image metadata change | Metadata change should produce different hash | Critical |
+| SM-051 | identical content deterministic | Identical content should produce identical hash; rebuilding manifest should be stable | High |
 
 **Testing Notes:**
 - Requires mocking IndexedDB (via fake-indexeddb or Dexie mock)
