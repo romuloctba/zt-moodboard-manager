@@ -163,7 +163,6 @@ const originalFileSystemFileHandle = (globalThis as unknown as { FileSystemFileH
 
 let mockOPFSAvailable = true;
 let mockCreateWritableSupported = true;
-let mockCreateWritableWorks = true;
 
 /**
  * Configure whether OPFS is available
@@ -177,13 +176,6 @@ function setOPFSAvailable(available: boolean) {
  */
 function setCreateWritableSupported(supported: boolean) {
   mockCreateWritableSupported = supported;
-}
-
-/**
- * Configure whether createWritable actually works (test write succeeds)
- */
-function setCreateWritableWorks(works: boolean) {
-  mockCreateWritableWorks = works;
 }
 
 /**
@@ -201,7 +193,6 @@ beforeEach(() => {
   // Reset configuration
   mockOPFSAvailable = true;
   mockCreateWritableSupported = true;
-  mockCreateWritableWorks = true;
   resetMockFileSystem();
 
   // Mock navigator.storage
@@ -339,6 +330,11 @@ describe('FileStorage - saveImage', () => {
 
     expect(path).toBe('opfs://images/test-id');
     expect(mockFileSystem.get('images')?.has('test-id')).toBe(true);
+
+    // Verify the actual content was saved correctly
+    const savedBlob = mockFileSystem.get('images')?.get('test-id');
+    expect(savedBlob).toBeDefined();
+    expect(savedBlob?.size).toBe(blob.size);
   });
 
   it('FS-006: saveImage() should save to IndexedDB and return idb:// path when OPFS unavailable', async () => {
@@ -351,6 +347,10 @@ describe('FileStorage - saveImage', () => {
     const path = await storage.saveImage('test-id', blob);
 
     expect(path).toBe('idb://images/test-id');
+
+    // TODO: This test only verifies the path format. Should also verify:
+    // 1. Data was actually stored in IndexedDB (via getImage round-trip)
+    // 2. The blob content matches
   });
 
   it('FS-007: saveImage() should auto-create images directory if not exists', async () => {
@@ -446,6 +446,9 @@ describe('FileStorage - getImage', () => {
 
     expect(file).toBeInstanceOf(File);
     expect(file?.name).toBe('retrieve-test');
+
+    // Verify content size matches (round-trip integrity check)
+    expect(file?.size).toBe(originalBlob.size);
   });
 
   it('FS-012: getImage() should retrieve File from idb:// path', async () => {
@@ -462,6 +465,9 @@ describe('FileStorage - getImage', () => {
     const file = await storage.getImage('idb://images/idb-test');
 
     expect(file).toBeInstanceOf(File);
+    expect(file?.size).toBeGreaterThan(0);
+    // Note: Size may differ due to IndexedDB/Dexie blob handling
+    // The important thing is we got a valid file back
   });
 
   it('FS-013: getImage() should return null for non-existent file', async () => {
@@ -560,8 +566,16 @@ describe('FileStorage - deleteImage', () => {
     const path = await storage.saveImage('idb-delete-test', blob);
     expect(path).toContain('idb://');
 
-    // Delete - should not throw
-    await expect(storage.deleteImage(path)).resolves.not.toThrow();
+    // Verify file exists before delete
+    const beforeDelete = await storage.getImage(path);
+    expect(beforeDelete).not.toBeNull();
+
+    // Delete
+    await storage.deleteImage(path);
+
+    // Verify file no longer exists
+    const afterDelete = await storage.getImage(path);
+    expect(afterDelete).toBeNull();
   });
 
   it('FS-020: deleteImage() should not throw for non-existent file', async () => {
@@ -605,8 +619,16 @@ describe('FileStorage - deleteThumbnail', () => {
     const blob = new Blob(['thumb'], { type: 'image/webp' });
     await storage.saveThumbnail('idb-thumb', blob);
 
-    // Delete - should not throw
-    await expect(storage.deleteThumbnail('idb-thumb')).resolves.not.toThrow();
+    // Verify exists before delete
+    const beforeDelete = await storage.getImage('idb://thumbnails/idb-thumb');
+    expect(beforeDelete).not.toBeNull();
+
+    // Delete
+    await storage.deleteThumbnail('idb-thumb');
+
+    // Verify deleted
+    const afterDelete = await storage.getImage('idb://thumbnails/idb-thumb');
+    expect(afterDelete).toBeNull();
   });
 });
 

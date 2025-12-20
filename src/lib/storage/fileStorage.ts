@@ -149,6 +149,9 @@ export class FileStorage {
         });
         return `idb://images/${id}`;
       }
+      // TODO: This blob URL is NOT persistent across page reloads.
+      // The caller has no way to know the data wasn't actually saved.
+      // Consider throwing an error or returning a special status.
       // Last resort: return a blob URL (not persistent)
       return URL.createObjectURL(file);
     }
@@ -187,6 +190,8 @@ export class FileStorage {
         });
         return `idb://thumbnails/${id}`;
       }
+      // TODO: This blob URL is NOT persistent across page reloads.
+      // The caller has no way to know the data wasn't actually saved.
       return URL.createObjectURL(blob);
     }
 
@@ -207,6 +212,10 @@ export class FileStorage {
 
   /**
    * Get an image file from OPFS
+   *
+   * TODO: Distinguish between "file not found" and actual OPFS errors.
+   * Currently returns null for both cases, which makes debugging harder.
+   * Consider throwing on unexpected errors or returning a Result type.
    */
   async getImage(path: string): Promise<File | null> {
     await this.ensureInitialized();
@@ -237,6 +246,7 @@ export class FileStorage {
       const fileHandle = await directory.getFileHandle(filename);
       return await fileHandle.getFile();
     } catch {
+      // TODO: Check error type - NotFoundError is expected, others should be logged/thrown
       console.warn('[FileStorage] File not found:', path);
       return null;
     }
@@ -260,6 +270,10 @@ export class FileStorage {
 
   /**
    * Delete an image from OPFS
+   *
+   * TODO: This silently swallows all errors (disk errors, permission errors).
+   * Consider distinguishing "file not found" (acceptable) from actual errors.
+   * Could return a boolean indicating success, or throw on unexpected errors.
    */
   async deleteImage(path: string): Promise<void> {
     await this.ensureInitialized();
@@ -290,6 +304,7 @@ export class FileStorage {
 
       console.log(`[FileStorage] Successfully deleted: ${path}`);
     } catch (error) {
+      // TODO: NotFoundError is acceptable, but disk/permission errors should propagate
       console.warn('[FileStorage] Failed to delete:', path, error);
     }
   }
