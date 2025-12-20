@@ -195,17 +195,106 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| ES-001 | Initial state | Store should initialize with empty editions | High |
-| ES-002 | Load editions for project | Should fetch and update state | High |
-| ES-003 | Set current edition | Should update currentEdition | High |
-| ES-004 | Create edition via store | Should add to state with optimistic update | High |
-| ES-005 | Update edition status | Should update in state immediately | High |
-| ES-006 | Load pages for edition | Should fetch pages with panel counts | High |
-| ES-007 | Reorder pages via store | Should update local state optimistically | High |
-| ES-008 | Set current page | Should update currentPage | High |
-| ES-009 | Add panel via store | Should append to current page's panels | High |
-| ES-010 | Update panel dialogues | Should update specific panel in state | High |
-| ES-011 | Duplicate page via store | Should add duplicated page to state | Medium |
+| **Initial State** |
+| ES-001 | Initial state values | Store initializes with empty editions[], null currentEdition, empty pages[], null currentPage, empty panels[], isLoading=false | High |
+| **loadEditions** |
+| ES-002 | loadEditions success | Should fetch editions by projectId and update state | High |
+| ES-003 | loadEditions sets isLoading | Should set isLoading=true before fetch, false after | High |
+| ES-004 | loadEditions error handling | Should set isLoading=false on error, log error, not throw | Medium |
+| **createEdition** |
+| ES-005 | createEdition success | Should add edition to end of editions array | High |
+| ES-006 | createEdition with options | Should pass issueNumber, volume, synopsis to repository | High |
+| ES-007 | createEdition triggers sync | Should call triggerGlobalSync after creation | Medium |
+| **selectEdition** |
+| ES-008 | selectEdition success | Should set currentEdition and return true | High |
+| ES-009 | selectEdition clears page state | Should set currentPage to null and panels to [] | High |
+| ES-010 | selectEdition auto-loads pages | Should call loadPages after successful selection | High |
+| ES-011 | selectEdition non-existent | Should return false for non-existent ID | High |
+| **updateEdition** |
+| ES-012 | updateEdition updates array | Should update edition in editions array | High |
+| ES-013 | updateEdition updates currentEdition | Should update currentEdition if updating current | High |
+| ES-014 | updateEdition triggers sync | Should call triggerGlobalSync after update | Medium |
+| **updateEditionStatus** |
+| ES-015 | updateEditionStatus updates array | Should update status in editions array | High |
+| ES-016 | updateEditionStatus updates currentEdition | Should update currentEdition if updating current | High |
+| ES-017 | updateEditionStatus triggers sync | Should call triggerGlobalSync after update | Medium |
+| **deleteEdition** |
+| ES-018 | deleteEdition removes from list | Should remove edition from editions array | High |
+| ES-019 | deleteEdition clears current state | Should clear currentEdition, pages, currentPage, panels if deleting current | High |
+| ES-020 | deleteEdition records sync deletions | Should call syncManifest.recordDeletion for edition, pages, and panels | High |
+| ES-021 | deleteEdition triggers sync | Should call triggerGlobalSync after delete | Medium |
+| **duplicateEdition** |
+| ES-022 | duplicateEdition success | Should add duplicated edition to editions array | High |
+| ES-023 | duplicateEdition returns null | Should return null if original not found | Medium |
+| ES-024 | duplicateEdition triggers sync | Should call triggerGlobalSync after duplication | Medium |
+| **loadPages** |
+| ES-025 | loadPages success | Should fetch pages by editionId and update state | High |
+| **createPage** |
+| ES-026 | createPage success | Should add page to end of pages array | High |
+| ES-027 | createPage returns null | Should return null if no currentEdition | High |
+| ES-028 | createPage triggers sync | Should call triggerGlobalSync after creation | Medium |
+| **selectPage** |
+| ES-029 | selectPage success | Should set currentPage and return true | High |
+| ES-030 | selectPage auto-loads panels | Should call loadPanels after successful selection | High |
+| ES-031 | selectPage non-existent | Should return false for non-existent ID | High |
+| **updatePage** |
+| ES-032 | updatePage updates array | Should update page in pages array | High |
+| ES-033 | updatePage updates currentPage | Should update currentPage if updating current | High |
+| ES-034 | updatePage triggers sync | Should call triggerGlobalSync after update | Medium |
+| **updatePageStatus** |
+| ES-035 | updatePageStatus updates array | Should update status in pages array | High |
+| ES-036 | updatePageStatus updates currentPage | Should update currentPage if updating current | High |
+| ES-037 | updatePageStatus triggers sync | Should call triggerGlobalSync after update | Medium |
+| **deletePage** |
+| ES-038 | deletePage removes and renumbers | Should remove page, renumber remaining, and reload | High |
+| ES-039 | deletePage clears current state | Should clear currentPage and panels if deleting current | High |
+| ES-040 | deletePage records sync deletions | Should call syncManifest.recordDeletion for page and its panels | High |
+| ES-041 | deletePage triggers sync | Should call triggerGlobalSync after delete | Medium |
+| **duplicatePage** |
+| ES-042 | duplicatePage success | Should add duplicated page to pages array | High |
+| ES-043 | duplicatePage returns null | Should return null if original not found | Medium |
+| ES-044 | duplicatePage triggers sync | Should call triggerGlobalSync after duplication | Medium |
+| **reorderPages** |
+| ES-045 | reorderPages success | Should reorder, renumber, and reload pages | High |
+| ES-046 | reorderPages no currentEdition | Should do nothing if no currentEdition | Medium |
+| ES-047 | reorderPages triggers sync | Should call triggerGlobalSync after reorder | Medium |
+| **loadPanels** |
+| ES-048 | loadPanels success | Should fetch panels by pageId and update state | High |
+| **createPanel** |
+| ES-049 | createPanel success | Should add panel to end of panels array | High |
+| ES-050 | createPanel returns null | Should return null if no currentPage | High |
+| ES-051 | createPanel triggers sync | Should call triggerGlobalSync after creation | Medium |
+| **updatePanel** |
+| ES-052 | updatePanel updates array | Should update panel in panels array | High |
+| ES-053 | updatePanel triggers sync | Should call triggerGlobalSync after update | Medium |
+| **deletePanel** |
+| ES-054 | deletePanel removes and renumbers | Should remove panel, renumber remaining, and reload | High |
+| ES-055 | deletePanel records sync deletion | Should call syncManifest.recordDeletion for panel | High |
+| ES-056 | deletePanel triggers sync | Should call triggerGlobalSync after delete | Medium |
+| **duplicatePanel** |
+| ES-057 | duplicatePanel success | Should add duplicated panel to panels array | High |
+| ES-058 | duplicatePanel returns null | Should return null if original not found | Medium |
+| ES-059 | duplicatePanel triggers sync | Should call triggerGlobalSync after duplication | Medium |
+| **reorderPanels** |
+| ES-060 | reorderPanels success | Should reorder, renumber, and reload panels | High |
+| ES-061 | reorderPanels no currentPage | Should do nothing if no currentPage | Medium |
+| ES-062 | reorderPanels triggers sync | Should call triggerGlobalSync after reorder | Medium |
+| **addDialogue** |
+| ES-063 | addDialogue success | Should refresh panel in panels array | High |
+| ES-064 | addDialogue error handling | Should return null and log error on failure | Medium |
+| ES-065 | addDialogue triggers sync | Should call triggerGlobalSync after addition | Medium |
+| **updateDialogue** |
+| ES-066 | updateDialogue success | Should refresh panel in panels array | High |
+| ES-067 | updateDialogue triggers sync | Should call triggerGlobalSync after update | Medium |
+| **removeDialogue** |
+| ES-068 | removeDialogue success | Should refresh panel in panels array | High |
+| ES-069 | removeDialogue triggers sync | Should call triggerGlobalSync after removal | Medium |
+| **Reset Actions** |
+| ES-070 | clearCurrentEdition | Should clear currentEdition, pages, currentPage, and panels | High |
+| ES-071 | clearCurrentPage | Should clear currentPage and panels only | High |
+| ES-072 | clearAll | Should clear all state and reset isLoading | High |
+| **Edge Cases** |
+| ES-073 | Actions on non-existent IDs | update/delete should not throw for non-existent IDs | Medium |
 
 #### LocaleStore (`src/store/localeStore.ts`)
 
