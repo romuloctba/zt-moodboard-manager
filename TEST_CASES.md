@@ -139,17 +139,57 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| PS-001 | Initial state | Store should initialize with empty projects and null currentProject | High |
-| PS-002 | Load projects action | Should fetch projects from repository and update state | High |
-| PS-003 | Load projects - error handling | Should handle repository errors gracefully | Medium |
-| PS-004 | Set current project | Should update currentProject and persist selection | High |
-| PS-005 | Create project via store | Should add new project to state without refetch | High |
-| PS-006 | Rename project via store | Should update project name in state | High |
-| PS-007 | Archive project via store | Should remove from active projects list | High |
-| PS-008 | Delete project via store | Should remove from state and clear if current | High |
-| PS-009 | Load characters for project | Should fetch and cache characters | High |
-| PS-010 | Create character via store | Should add to current project's characters | High |
-| PS-011 | Store state persistence | Should survive page navigation (not refresh) | Medium |
+| **Initial State** |
+| PS-001 | Initial state values | Store initializes with empty projects[], null currentProject, empty characters[], null currentCharacter, isLoading=false | High |
+| **loadProjects** |
+| PS-002 | loadProjects success | Should fetch projects from repository and update state | High |
+| PS-003 | loadProjects sets isLoading | Should set isLoading=true before fetch, false after | High |
+| PS-004 | loadProjects error handling | Should set isLoading=false on error, log error, not throw | Medium |
+| **selectProject** |
+| PS-005 | selectProject success | Should set currentProject from repository and return true | High |
+| PS-006 | selectProject clears character | Should set currentCharacter to null when selecting project | High |
+| PS-007 | selectProject auto-loads characters | Should call loadCharacters after successful selection | High |
+| PS-008 | selectProject non-existent | Should return false and set isLoading=false for non-existent ID | High |
+| **createProject** |
+| PS-009 | createProject adds to front | Should add new project to beginning of projects array (not end) | High |
+| PS-010 | createProject returns project | Should return created project from repository | High |
+| PS-011 | createProject triggers sync | Should call triggerGlobalSync after creation | Medium |
+| **renameProject** |
+| PS-012 | renameProject updates array | Should update project name in projects array | High |
+| PS-013 | renameProject updates currentProject | Should update currentProject if renaming current project | High |
+| PS-014 | renameProject updates updatedAt | Should update updatedAt timestamp in state | Medium |
+| PS-015 | renameProject triggers sync | Should call triggerGlobalSync after rename | Medium |
+| **archiveProject** |
+| PS-016 | archiveProject removes from list | Should remove project from projects array | High |
+| PS-017 | archiveProject clears current | Should set currentProject to null if archiving current | High |
+| PS-018 | archiveProject triggers sync | Should call triggerGlobalSync after archive | Medium |
+| **deleteProject** |
+| PS-019 | deleteProject removes from list | Should remove project from projects array | High |
+| PS-020 | deleteProject clears current | Should set currentProject to null if deleting current | High |
+| PS-021 | deleteProject clears characters | Should clear characters array if deleting current project | High |
+| PS-022 | deleteProject triggers sync | Should call triggerGlobalSync after delete | Medium |
+| **loadCharacters** |
+| PS-023 | loadCharacters success | Should fetch characters and update state | High |
+| **createCharacter** |
+| PS-024 | createCharacter success | Should add character to characters array | High |
+| PS-025 | createCharacter returns null | Should return null if no currentProject | High |
+| PS-026 | createCharacter triggers sync | Should call triggerGlobalSync after creation | Medium |
+| **selectCharacter** |
+| PS-027 | selectCharacter success | Should set currentCharacter and return true | High |
+| PS-028 | selectCharacter non-existent | Should return false for non-existent ID | High |
+| **renameCharacter** |
+| PS-029 | renameCharacter updates array | Should update character name in characters array | High |
+| PS-030 | renameCharacter updates currentCharacter | Should update currentCharacter if renaming current | High |
+| PS-031 | renameCharacter triggers sync | Should call triggerGlobalSync after rename | Medium |
+| **deleteCharacter** |
+| PS-032 | deleteCharacter removes from list | Should remove character from characters array | High |
+| PS-033 | deleteCharacter clears current | Should set currentCharacter to null if deleting current | High |
+| PS-034 | deleteCharacter triggers sync | Should call triggerGlobalSync after delete | Medium |
+| **Reset Actions** |
+| PS-035 | clearCurrentProject | Should set currentProject to null, clear characters and currentCharacter | High |
+| PS-036 | clearCurrentCharacter | Should set currentCharacter to null only | High |
+| **Edge Cases** |
+| PS-037 | Actions on non-existent IDs | rename/archive/delete should not throw for non-existent IDs | Medium |
 
 #### EditionStore (`src/store/editionStore.ts`)
 
