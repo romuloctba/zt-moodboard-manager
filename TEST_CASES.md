@@ -423,15 +423,70 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 #### Google Auth (`src/lib/sync/googleAuth.ts`)
 
+**Architecture Note:** This uses Google Identity Services (GIS) library with implicit grant flow (no backend). GIS handles OAuth popup and token exchange internally. There's no refresh token support in browser-only GIS flow - expired tokens require re-authentication (silent or with popup). This is a fully static/client-side app - no SSR.
+
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| GA-001 | Generate auth URL | Should create valid OAuth2 URL with correct scopes | High |
-| GA-002 | Exchange code for tokens | Should return access and refresh tokens | High |
-| GA-003 | Refresh expired token | Should use refresh token to get new access token | Critical |
-| GA-004 | Get user info | Should fetch email and name from Google | Medium |
-| GA-005 | Handle invalid code | Should throw appropriate error | Medium |
-| GA-006 | Handle revoked token | Should clear auth state and require re-auth | High |
-| GA-007 | Token expiration check | Should correctly identify expired tokens | High |
+| **Initialization** |
+| GA-001 | initialize() - first call | Should load GIS script and create tokenClient | High |
+| GA-002 | initialize() - idempotent | Should not re-initialize if already initialized | Medium |
+| GA-003 | initialize() - concurrent calls | Should return same promise for concurrent calls | Medium |
+| GA-004 | getClientId() - missing env var | Should throw error with helpful message if NEXT_PUBLIC_GOOGLE_CLIENT_ID missing | High |
+| GA-005 | loadGISScript() - already loaded | Should resolve immediately if window.google.accounts.oauth2 exists | Medium |
+| GA-006 | loadGISScript() - script in DOM | Should wait for existing script if already in DOM | Low |
+| GA-007 | loadGISScript() - script error | Should reject with "Failed to load Google Identity Services" | Medium |
+| **Sign In Flow** |
+| GA-008 | signIn() - success | Should open popup, return access token, store credentials | Critical |
+| GA-009 | signIn() - user cancels | Should reject promise when user closes popup | High |
+| GA-010 | signIn() - error from Google | Should reject with error description from response | High |
+| GA-011 | signIn() - stores token with expiry | Should call storeToken with correct expiry calculation | High |
+| GA-012 | signIn() - fetches user info | Should call fetchUserInfo after successful auth | Medium |
+| GA-013 | signIn() - auto-initializes | Should call initialize() if not already initialized | Medium |
+| **Sign Out** |
+| GA-014 | signOut() - with valid token | Should revoke token via GIS and clear all stored credentials | High |
+| GA-015 | signOut() - without token | Should just clear stored credentials (no revoke call) | Medium |
+| GA-016 | signOut() - clears all storage keys | Should remove ACCESS_TOKEN, TOKEN_EXPIRY, USER_EMAIL, USER_ID | High |
+| **Token Management** |
+| GA-017 | getStoredToken() - valid token | Should return token if not expired | Critical |
+| GA-018 | getStoredToken() - expired token | Should return null if past expiry time | Critical |
+| GA-019 | getStoredToken() - expiry buffer | Should return null if within 5 minutes of expiry | High |
+| GA-020 | getStoredToken() - no token | Should return null if no token in localStorage | High |
+| GA-021 | storeToken() - stores correctly | Should store token and expiry in localStorage | High |
+| **getAccessToken() - Token Refresh Flow** |
+| GA-022 | getAccessToken() - valid stored | Should return stored token without re-auth | Critical |
+| GA-023 | getAccessToken() - expired, has userEmail | Should attempt silent refresh (prompt='') | Critical |
+| GA-024 | getAccessToken() - expired, no userEmail | Should prompt with 'select_account' | High |
+| GA-025 | getAccessToken() - silent refresh success | Should return new token without popup | High |
+| GA-026 | getAccessToken() - silent refresh fails | Should reject (user must click Connect again) | High |
+| **isSignedIn()** |
+| GA-027 | isSignedIn() - valid token | Should return true | High |
+| GA-028 | isSignedIn() - expired token, has email | Should return true (allows silent refresh) | High |
+| GA-029 | isSignedIn() - no token, no email | Should return false | High |
+| **User Info** |
+| GA-030 | fetchUserInfo() - success | Should fetch from Google API and store email/id | High |
+| GA-031 | fetchUserInfo() - API error | Should throw "Failed to fetch user info" | Medium |
+| GA-032 | getUserEmail() - stored | Should return email from localStorage | Medium |
+| GA-033 | getUserEmail() - not stored | Should return null | Medium |
+| GA-034 | getUserId() - stored | Should return user ID from localStorage | Medium |
+| GA-035 | getUserId() - not stored | Should return null | Medium |
+| GA-036 | getTokenExpiry() - stored | Should return Date from parsed timestamp | Low |
+| GA-037 | getTokenExpiry() - not stored | Should return null | Low |
+| **Error Handling** |
+| GA-038 | handleTokenResponse() - error in response | Should reject pending promise with error_description | High |
+| GA-039 | handleAuthError() - popup closed | Should reject with formatted error message | High |
+| GA-040 | handleAuthError() - clears pending state | Should null out pendingAuthResolve/Reject | Medium |
+| **Edge Cases** |
+| GA-041 | Singleton pattern | Module exports single googleAuth instance | Low |
+| GA-042 | Concurrent signIn calls | Second call while popup open - behavior undefined (TODO: should queue or reject) | Medium |
+
+**Testing Notes:**
+- GIS library (`window.google`) must be mocked
+- localStorage must be mocked (fake or spy)
+- `fetch` must be mocked for userinfo endpoint
+- Tests requiring actual popup interaction are best done in E2E
+- Silent refresh (GA-023, GA-025, GA-026) depends on browser session cookies with Google - hard to unit test
+- Consider using `vi.useFakeTimers()` for expiry tests
+- Note: Code has `typeof window === 'undefined'` guards but these are dead code in static builds - skip testing them
 
 #### Sync Manifest (`src/lib/sync/syncManifest.ts`)
 
