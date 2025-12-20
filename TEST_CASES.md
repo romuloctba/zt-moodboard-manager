@@ -598,19 +598,35 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
+| **retryWithBackoff** |
 | RT-001 | Success on first try | Should return result without retry | High |
 | RT-002 | Success after retry | Should retry and return result on eventual success | High |
-| RT-003 | Max retries exceeded | Should throw after max attempts (3) | High |
-| RT-004 | Exponential backoff | Should increase delay between retries | Medium |
-| RT-005 | Non-retryable error | Should not retry certain error types | Medium |
+| RT-003 | Max retries exceeded | Should throw after max attempts (default: 3) | High |
+| RT-004 | Exponential backoff | Should increase delay between retries (delay = baseDelay * 2^attempt) | Medium |
+| RT-005 | Non-retryable SyncException | Should not retry AUTH_FAILED, INVALID_DATA, STORAGE_FULL errors | High |
+| RT-006 | Custom maxRetries option | Should respect custom maxRetries value | Medium |
+| RT-007 | Custom baseDelay option | Should respect custom baseDelay for backoff calculation | Medium |
+| RT-008 | Custom nonRetryableErrors | Should respect custom list of non-retryable error codes | Medium |
+| **isNetworkError** |
+| RT-009 | TypeError with fetch | Should detect TypeError containing 'fetch' as network error | Medium |
+| RT-010 | TypeError with network | Should detect TypeError containing 'network' as network error | Medium |
+| RT-011 | Error with network keywords | Should detect errors containing 'timeout', 'connection', 'fetch' | Medium |
+| RT-012 | Non-network error | Should return false for unrelated errors | Medium |
 
 #### Debug Utility (`src/lib/utils/debug.ts`)
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DB-001 | Debug enabled | Should log when DEBUG=true | Low |
-| DB-002 | Debug disabled | Should not log when DEBUG=false | Low |
-| DB-003 | Log levels | Should support different log levels | Low |
+| **Development mode (NODE_ENV=development)** |
+| DB-001 | debug.log in dev | Should call console.log in development mode | Low |
+| DB-002 | debug.warn in dev | Should call console.warn in development mode | Low |
+| DB-003 | debug.info in dev | Should call console.info in development mode | Low |
+| DB-004 | debug.error in dev | Should call console.error in development mode | Low |
+| **Production mode (NODE_ENV=production)** |
+| DB-005 | debug.log in prod | Should NOT call console.log in production mode | Low |
+| DB-006 | debug.warn in prod | Should NOT call console.warn in production mode | Low |
+| DB-007 | debug.info in prod | Should NOT call console.info in production mode | Low |
+| DB-008 | debug.error in prod | Should ALWAYS call console.error (even in production) | Medium |
 
 ---
 
