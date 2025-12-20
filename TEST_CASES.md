@@ -319,19 +319,53 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| IP-001 | Process JPEG image | Should convert to WebP (or keep JPEG if unsupported) | High |
-| IP-002 | Process PNG image | Should convert to WebP with transparency | High |
-| IP-003 | Process WebP image | Should pass through without re-encoding | Medium |
-| IP-004 | Process GIF image | Should convert first frame to WebP | Low |
-| IP-005 | Resize large image | Should cap at 2000px longest side | High |
-| IP-006 | Preserve small image dimensions | Should not upscale images smaller than limit | High |
-| IP-007 | Generate thumbnail | Should create 300px thumbnail | High |
-| IP-008 | Extract color palette | Should return dominant, vibrant, muted colors | Medium |
-| IP-009 | WebP support detection | Should correctly detect browser WebP support | High |
-| IP-010 | Handle corrupted image | Should throw meaningful error for invalid image data | Medium |
-| IP-011 | Handle oversized image | Should process images up to reasonable memory limits | Medium |
-| IP-012 | Maintain aspect ratio | Should preserve original aspect ratio when resizing | High |
-| IP-013 | Quality settings | Should use 0.92 for full, 0.85 for thumbnail | Low |
+| **processImage - Core Processing** |
+| IP-001 | Process JPEG to WebP | Should convert JPEG to WebP format when browser supports WebP encoding | High |
+| IP-002 | Process PNG to WebP | Should convert PNG to WebP format (no special transparency handling) | High |
+| IP-003 | Process WebP input | Should re-encode WebP input (no passthrough optimization exists) | Medium |
+| IP-004 | WebP detection caching | WebP support detection is cached at module level for all subsequent calls | Medium |
+| IP-036 | Process GIF input | Should convert GIF to static WebP/JPEG (animation not preserved) | Medium |
+| IP-037 | Process AVIF input | Should accept and process AVIF input format | Medium |
+| IP-005 | Return ProcessedImage structure | Should return { original, thumbnail, width, height, palette, format } | High |
+| **processImage - Dimension Handling** |
+| IP-006 | Cap large landscape image | Should resize 4000x3000 image to 2000x1500 (capped at maxWidthOrHeight) | High |
+| IP-007 | Cap large portrait image | Should resize 3000x4000 image to 1500x2000 (capped at maxWidthOrHeight) | High |
+| IP-008 | Preserve small image | Should NOT upscale image smaller than maxWidthOrHeight limit | High |
+| IP-009 | Maintain aspect ratio | Should preserve original aspect ratio when resizing | High |
+| IP-010 | MIN_DIMENSION enforcement | Should not downscale below 500px minimum dimension (unless original was smaller) | Medium |
+| **processImage - Thumbnail Generation** |
+| IP-011 | Generate thumbnail | Should create thumbnail capped at 300px (default thumbnailSize) | High |
+| IP-012 | Thumbnail aspect ratio | Should preserve aspect ratio in thumbnail | High |
+| IP-013 | Thumbnail quality | Should use 0.85 quality for thumbnail (thumbnailQuality default) | Low |
+| IP-033 | Custom thumbnailSize option | Should accept custom thumbnailSize parameter | Medium |
+| IP-034 | Custom thumbnailQuality option | Should accept custom thumbnailQuality parameter | Medium |
+| **processImage - Color Palette** |
+| IP-014 | Extract color palette | Should extract 6-color palette as hex strings (#RRGGBB format) | Medium |
+| IP-015 | Palette extraction optional | Should skip palette when extractPalette=false | Medium |
+| IP-016 | Palette failure graceful | Should return empty array on palette extraction failure | Medium |
+| IP-035 | extractColorPalette error handling | Should return [] when image load fails (graceful degradation) | Medium |
+| **calculateDimensions (internal)** |
+| IP-017 | Landscape resize calculation | Width > height: cap width at maxSize, calculate proportional height | High |
+| IP-018 | Portrait resize calculation | Height > width: cap height at maxSize, calculate proportional width | High |
+| IP-019 | Square resize calculation | Square images should cap both dimensions at maxSize | Medium |
+| IP-020 | No resize needed | Images within limits should keep original dimensions | High |
+| **WebP Support Detection** |
+| IP-021 | WebP encoding detection | Should detect browser WebP canvas.toBlob support | High |
+| **Utility Functions** |
+| IP-023 | isValidImageType - valid types | Should accept jpeg, jpg, png, webp, gif, avif | High |
+| IP-024 | isValidImageType - invalid types | Should reject non-image MIME types | High |
+| IP-025 | formatFileSize - various sizes | Should format bytes to human-readable (B, KB, MB, GB) | Low |
+| IP-026 | formatFileSize - zero | Should return "0 B" for zero bytes | Low |
+| IP-027 | getImageDimensions | Should return { width, height } from Blob | Medium |
+| **Error Handling** |
+| IP-028 | Handle corrupted image | Should throw "Failed to load image" for invalid image data | Medium |
+| IP-029 | Handle blob conversion failure | Should throw error if canvas.toBlob fails | Medium |
+| **Options & Configuration** |
+| IP-030 | Custom maxWidthOrHeight | Should use provided maxWidthOrHeight option | Medium |
+| IP-031 | Custom quality | Should use provided quality option | Medium |
+| IP-032 | QUALITY_TIERS export | Should export free tier settings (maxWidthOrHeight: 2000, quality: 0.92) | Low |
+
+**Note:** The image processor re-encodes ALL formats (no passthrough). WebP is preferred with JPEG fallback for older Safari. The `stepDownResize` function uses progressive 50% downscaling for high-quality results. ColorThief is used for palette extraction. Tests require mocking canvas APIs and Image loading.
 
 ---
 
