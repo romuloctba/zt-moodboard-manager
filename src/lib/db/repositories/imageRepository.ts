@@ -12,7 +12,15 @@ export const imageRepository = {
 
     // Save files to OPFS
     const storagePath = await fileStorage.saveImage(id, processed.original);
-    const thumbnailPath = await fileStorage.saveThumbnail(id, processed.thumbnail);
+
+    let thumbnailPath: string;
+    try {
+      thumbnailPath = await fileStorage.saveThumbnail(id, processed.thumbnail);
+    } catch (error) {
+      // Clean up orphaned image before re-throwing
+      await fileStorage.deleteImage(storagePath);
+      throw error;
+    }
 
     // Build palette object
     const palette: ColorPalette | undefined = processed.palette?.length
@@ -44,7 +52,15 @@ export const imageRepository = {
       createdAt: new Date(),
     };
 
-    await db.images.add(image);
+    try {
+      await db.images.add(image);
+    } catch (error) {
+      // Clean up orphaned files before re-throwing
+      await fileStorage.deleteImage(storagePath);
+      await fileStorage.deleteThumbnail(id);
+      throw error;
+    }
+
     return image;
   },
 
