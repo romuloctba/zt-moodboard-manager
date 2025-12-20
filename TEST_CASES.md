@@ -300,10 +300,18 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| LS-001 | Initial locale detection | Should detect browser locale or default to 'en' | High |
-| LS-002 | Change locale | Should update state and persist to localStorage | High |
-| LS-003 | Persist across sessions | Should restore locale from localStorage on init | High |
-| LS-004 | Unsupported locale fallback | Should fallback to 'en' for unsupported locales | Medium |
+| **Initial State** |
+| LS-001 | Initial state values | Store initializes with locale='en' (defaultLocale) and isHydrated=false | High |
+| **setLocale** |
+| LS-002 | setLocale with valid locale | Should update locale state for valid locales ('en', 'pt-BR') | High |
+| LS-003 | setLocale with invalid locale | Should NOT update locale state for invalid locales (validation) | High |
+| LS-004 | setLocale updates DOM | Should set document.documentElement.lang when document exists | Medium |
+| **setHydrated** |
+| LS-005 | setHydrated | Should set isHydrated to true | High |
+| **Persist Middleware** |
+| LS-006 | Persist storage name | Store uses 'locale-storage' as persist key | Medium |
+
+**Note:** The LocaleStore is minimal (~40 lines) with most complexity in persist middleware (zustand). Integration tests for locale switching in the UI provide more value than extensive unit tests here. DOM side effects (document.documentElement.lang) are best tested in E2E.
 
 ---
 
