@@ -122,6 +122,17 @@ describe('PanelRepository', () => {
       expect(panel.dialogues).toEqual([])
       expect(Array.isArray(panel.dialogues)).toBe(true)
     })
+
+    it('should allow creation with non-existent pageId (no FK validation)', async () => {
+      // NOTE: Repository does NOT validate pageId exists - this is by design.
+      // IndexedDB has no foreign key constraints.
+      const panel = await panelRepository.create('non-existent-page')
+
+      expect(panel).toBeDefined()
+      expect(panel.pageId).toBe('non-existent-page')
+      expect(panel.panelNumber).toBe(1)
+      expect(panel.sortOrder).toBe(0)
+    })
   })
 
   describe('getById', () => {
@@ -543,6 +554,42 @@ describe('PanelRepository', () => {
       const updated = await panelRepository.getById(panel.id)
       expect(updated?.dialogues).toHaveLength(1)
     })
+
+    it('should preserve sortOrder values (with gaps) after removal', async () => {
+      const { page } = await createTestPage()
+      const panel = await panelRepository.create(page.id)
+
+      const d1 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'First',
+        type: 'speech',
+        text: 'A',
+      })
+
+      const d2 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'Second',
+        type: 'speech',
+        text: 'B',
+      })
+
+      const d3 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'Third',
+        type: 'speech',
+        text: 'C',
+      })
+
+      // Remove the middle dialogue
+      await panelRepository.removeDialogue(panel.id, d2.id)
+
+      const updated = await panelRepository.getById(panel.id)
+      expect(updated?.dialogues).toHaveLength(2)
+
+      // sortOrder should be preserved with a gap (0 and 2, not 0 and 1)
+      const firstDialogue = updated?.dialogues.find((d) => d.id === d1.id)
+      const thirdDialogue = updated?.dialogues.find((d) => d.id === d3.id)
+
+      expect(firstDialogue?.sortOrder).toBe(0)
+      expect(thirdDialogue?.sortOrder).toBe(2) // Gap preserved, NOT auto-compacted to 1
+    })
   })
 
   describe('reorderDialogues', () => {
@@ -596,6 +643,43 @@ describe('PanelRepository', () => {
       const updated = await panelRepository.getById(panel.id)
       expect(updated?.dialogues).toHaveLength(1)
       expect(updated?.dialogues[0].characterName).toBe('Keep')
+    })
+
+    it('should DELETE dialogues not included in dialogueIds array (data loss behavior)', async () => {
+      // WARNING: This documents potentially dangerous behavior!
+      // If you call reorderDialogues with a partial list, missing dialogues are permanently deleted.
+      const { page } = await createTestPage()
+      const panel = await panelRepository.create(page.id)
+
+      const d1 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'First',
+        type: 'speech',
+        text: 'A',
+      })
+
+      const d2 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'Second',
+        type: 'speech',
+        text: 'B',
+      })
+
+      const d3 = await panelRepository.addDialogue(panel.id, {
+        characterName: 'Third',
+        type: 'speech',
+        text: 'C',
+      })
+
+      // Only include d1 and d3 - d2 will be DELETED (not just excluded from reorder)
+      await panelRepository.reorderDialogues(panel.id, [d3.id, d1.id])
+
+      const updated = await panelRepository.getById(panel.id)
+
+      // d2 is permanently gone - this is the current implementation behavior
+      expect(updated?.dialogues).toHaveLength(2)
+      expect(updated?.dialogues.map((d) => d.characterName)).toEqual(['Third', 'First'])
+
+      // d2 is not recoverable
+      expect(updated?.dialogues.find((d) => d.id === d2.id)).toBeUndefined()
     })
 
     it('should do nothing when panel does not exist', async () => {
@@ -852,7 +936,12 @@ describe('PanelRepository', () => {
 
       const duplicated = await panelRepository.duplicate(original.id)
 
+      // Verify the duplicated dialogue has a different ID than the original dialogue
       expect(duplicated?.dialogues[0].id).not.toBe(originalDialogue.id)
+
+      // Also verify against the persisted original to be thorough
+      const originalPanel = await panelRepository.getById(original.id)
+      expect(duplicated?.dialogues[0].id).not.toBe(originalPanel?.dialogues[0].id)
     })
   })
 
