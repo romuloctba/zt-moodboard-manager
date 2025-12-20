@@ -257,10 +257,15 @@ describe('CharacterRepository', () => {
       expect(updated?.createdAt.getTime()).toBe(originalCreatedAt.getTime())
     })
 
-    it('should not throw when updating non-existent character', async () => {
+    it('should not throw when updating non-existent character and not create garbage', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(
         characterRepository.update('non-existent', { name: 'Test' })
       ).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
   })
 
@@ -359,10 +364,15 @@ describe('CharacterRepository', () => {
       expect(updated?.profile.customFields?.height).toBeUndefined()
     })
 
-    it('should do nothing when character does not exist', async () => {
+    it('should do nothing when character does not exist and not create garbage', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(
         characterRepository.updateProfile('non-existent', { age: '25' })
       ).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
 
     it('CH-013: should handle character with minimal/empty profile', async () => {
@@ -417,10 +427,15 @@ describe('CharacterRepository', () => {
       expect(updated?.metadata.version).toBe('1.5')
     })
 
-    it('should do nothing when character does not exist', async () => {
+    it('should do nothing when character does not exist and not create garbage', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(
         characterRepository.updateMetadata('non-existent', { archetype: 'Test' })
       ).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
   })
 
@@ -507,16 +522,20 @@ describe('CharacterRepository', () => {
     })
 
     it('should do nothing when updating canvas state for non-existent character', async () => {
+      const countBefore = await db.characters.count()
+
       const canvasState: CanvasState = {
         viewport: { x: 0, y: 0, zoom: 1 },
         items: [],
         updatedAt: new Date(),
       }
 
-      // Should not throw - Dexie update on non-existent ID silently does nothing
       await expect(
         characterRepository.updateCanvasState('non-existent', canvasState)
       ).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
   })
 
@@ -581,11 +600,21 @@ describe('CharacterRepository', () => {
     })
 
     it('should do nothing when adding tag to non-existent character', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(characterRepository.addTag('non-existent', 'tag')).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
 
     it('should do nothing when removing tag from non-existent character', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(characterRepository.removeTag('non-existent', 'tag')).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
   })
 
@@ -793,7 +822,12 @@ describe('CharacterRepository', () => {
     })
 
     it('should not throw when deleting non-existent character', async () => {
+      const countBefore = await db.characters.count()
+
       await expect(characterRepository.delete('non-existent')).resolves.not.toThrow()
+
+      const countAfter = await db.characters.count()
+      expect(countAfter).toBe(countBefore)
     })
 
     it('should not affect other characters in the same project', async () => {
