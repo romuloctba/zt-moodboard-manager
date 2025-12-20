@@ -202,6 +202,26 @@ describe('EditionStore', () => {
 
       consoleError.mockRestore()
     })
+
+    it('should replace editions array (not merge) when loading', async () => {
+      // This tests that loadEditions REPLACES the editions, not merges
+      const oldEdition = createMockEdition({ id: 'old', title: 'Old' })
+      useEditionStore.setState({ editions: [oldEdition] })
+
+      const newEditions = [
+        createMockEdition({ id: 'new1', title: 'New 1' }),
+        createMockEdition({ id: 'new2', title: 'New 2' }),
+      ]
+      vi.mocked(editionRepository.getByProject).mockResolvedValue(newEditions)
+
+      await useEditionStore.getState().loadEditions('project-1')
+
+      const state = useEditionStore.getState()
+      // Old edition should be gone - replaced, not merged
+      expect(state.editions).toHaveLength(2)
+      expect(state.editions.find(e => e.id === 'old')).toBeUndefined()
+      expect(state.editions[0].title).toBe('New 1')
+    })
   })
 
   // ===========================================
@@ -305,6 +325,16 @@ describe('EditionStore', () => {
       expect(result).toBe(false)
       expect(useEditionStore.getState().currentEdition).toBeNull()
     })
+
+    it('should NOT call loadPages when edition not found', async () => {
+      // This verifies the conditional logic - pages are only loaded if edition exists
+      vi.mocked(editionRepository.getById).mockResolvedValue(undefined)
+
+      await useEditionStore.getState().selectEdition('non-existent')
+
+      // loadPages (scriptPageRepository.getByEdition) should NOT be called
+      expect(scriptPageRepository.getByEdition).not.toHaveBeenCalled()
+    })
   })
 
   // ===========================================
@@ -312,13 +342,17 @@ describe('EditionStore', () => {
   // ===========================================
   describe('updateEdition', () => {
     it('ES-012: should update edition in editions array', async () => {
-      const edition = createMockEdition({ id: 'e1', title: 'Old Title' })
+      const oldDate = new Date('2020-01-01')
+      const edition = createMockEdition({ id: 'e1', title: 'Old Title', updatedAt: oldDate })
       useEditionStore.setState({ editions: [edition] })
       vi.mocked(editionRepository.update).mockResolvedValue()
 
       await useEditionStore.getState().updateEdition('e1', { title: 'New Title' })
 
-      expect(useEditionStore.getState().editions[0].title).toBe('New Title')
+      const updated = useEditionStore.getState().editions[0]
+      expect(updated.title).toBe('New Title')
+      // Verify updatedAt was set to a new Date (not the old one)
+      expect(updated.updatedAt.getTime()).toBeGreaterThan(oldDate.getTime())
     })
 
     it('ES-013: should update currentEdition if updating current', async () => {
@@ -351,6 +385,41 @@ describe('EditionStore', () => {
 
       expect(useEditionStore.getState().currentEdition?.title).toBe('Edition 1')
       expect(useEditionStore.getState().editions[1].title).toBe('Updated')
+    })
+
+    it('should call repository BEFORE updating state (repo-first pattern)', async () => {
+      // This tests that we don't update state optimistically before repo confirms
+      const edition = createMockEdition({ id: 'e1', title: 'Original' })
+      useEditionStore.setState({ editions: [edition] })
+
+      let stateAtRepoCall: string | undefined
+      vi.mocked(editionRepository.update).mockImplementation(async () => {
+        // Capture state DURING repository call
+        stateAtRepoCall = useEditionStore.getState().editions[0].title
+      })
+
+      await useEditionStore.getState().updateEdition('e1', { title: 'New' })
+
+      // State should NOT have been updated yet when repository was called
+      expect(stateAtRepoCall).toBe('Original')
+      // But after the call completes, state IS updated
+      expect(useEditionStore.getState().editions[0].title).toBe('New')
+    })
+
+    it('should NOT update state if repository throws', async () => {
+      // This verifies the repo-first pattern protects against failed updates
+      const edition = createMockEdition({ id: 'e1', title: 'Original' })
+      useEditionStore.setState({ editions: [edition] })
+      vi.mocked(editionRepository.update).mockRejectedValue(new Error('DB Error'))
+
+      await expect(
+        useEditionStore.getState().updateEdition('e1', { title: 'New' })
+      ).rejects.toThrow('DB Error')
+
+      // State should remain unchanged
+      expect(useEditionStore.getState().editions[0].title).toBe('Original')
+      // triggerGlobalSync should NOT have been called
+      expect(triggerGlobalSync).not.toHaveBeenCalled()
     })
   })
 
@@ -435,7 +504,7 @@ describe('EditionStore', () => {
       expect(state.panels).toEqual([])
     })
 
-    it('ES-020: should call syncManifest.recordDeletion for edition, pages, and panels', async () => {
+    it('ES-020: should call syncManifest.recordDeletion for edition, pages, and panels IN ORDER', async () => {
       const edition = createMockEdition({ id: 'e1' })
       const page = createMockPage({ id: 'p1', editionId: 'e1' })
       const panel = createMockPanel({ id: 'panel1', pageId: 'p1' })
@@ -444,14 +513,18 @@ describe('EditionStore', () => {
       vi.mocked(scriptPageRepository.getByEdition).mockResolvedValue([page])
       vi.mocked(panelRepository.getByPage).mockResolvedValue([panel])
       vi.mocked(editionRepository.delete).mockResolvedValue()
-      vi.mocked(syncManifest.recordDeletion).mockResolvedValue()
+
+      // Track call order
+      const callOrder: string[] = []
+      vi.mocked(syncManifest.recordDeletion).mockImplementation(async (id) => {
+        callOrder.push(id)
+      })
 
       await useEditionStore.getState().deleteEdition('e1')
 
-      // Should record deletions in order: panels first, then pages, then edition
-      expect(syncManifest.recordDeletion).toHaveBeenCalledWith('panel1', 'panel')
-      expect(syncManifest.recordDeletion).toHaveBeenCalledWith('p1', 'scriptPage')
-      expect(syncManifest.recordDeletion).toHaveBeenCalledWith('e1', 'edition')
+      // CRITICAL: Order matters for sync - children must be deleted before parents
+      // This verifies the actual implementation order at lines 133-139 of editionStore.ts
+      expect(callOrder).toEqual(['panel1', 'p1', 'e1'])
       expect(syncManifest.recordDeletion).toHaveBeenCalledTimes(3)
     })
 
