@@ -632,18 +632,64 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 ## 2. Integration Tests
 
+> **Note:** Integration tests use real database operations (via fake-indexeddb) and test
+> cross-repository interactions. They verify that multiple repositories work together correctly,
+> especially cascade operations and file storage cleanup.
+
 ### 2.1 Database Layer Integration
+
+#### Cascade Delete Operations
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-001 | Project → Character cascade delete | Deleting project should delete all characters | Critical |
-| DI-002 | Character → Image cascade delete | Deleting character should delete all images | Critical |
-| DI-003 | Edition → Page → Panel cascade | Deleting edition should cascade through pages and panels | Critical |
-| DI-004 | Project duplicate with relations | Should duplicate project with all characters and images | High |
-| DI-005 | Edition duplicate with script | Should duplicate edition with all pages, panels, dialogues | High |
-| DI-006 | Database version migration | Should migrate from v1 to v2 schema preserving data | Critical |
-| DI-007 | Concurrent database operations | Should handle multiple simultaneous reads/writes | Medium |
-| DI-008 | Transaction rollback | Should rollback on partial failure | High |
+| DI-001 | Project → Character cascade | Deleting project should delete all its characters | Critical |
+| DI-002 | Project → Character → Image cascade | Deleting project should cascade delete through characters to images | Critical |
+| DI-003 | Project → Character → Sections cascade | Deleting project should cascade delete character sections | Critical |
+| DI-004 | Project → Character → CanvasItems cascade | Deleting project should cascade delete canvas items via sections | Critical |
+| DI-005 | Character → Image cascade | Deleting character should delete all its images | Critical |
+| DI-006 | Character → Section cascade | Deleting character should delete all its sections | Critical |
+| DI-007 | Character → CanvasItem cascade | Deleting character should delete canvas items via sections | Critical |
+| DI-008 | Edition → Page cascade | Deleting edition should delete all its pages | Critical |
+| DI-009 | Edition → Page → Panel cascade | Deleting edition should cascade delete through pages to panels | Critical |
+| DI-010 | ScriptPage → Panel cascade | Deleting page should delete all its panels | Critical |
+
+#### File Storage Cleanup (via cascade)
+
+| ID | Test Case | Description | Priority |
+|----|-----------|-------------|----------|
+| DI-011 | Image delete cleans OPFS | Deleting image should remove files from fileStorage | Critical |
+| DI-012 | Character delete cleans all OPFS | Deleting character should clean up all image files | Critical |
+| DI-013 | Project delete cleans all OPFS | Deleting project should clean up all image files (deep cascade) | Critical |
+
+#### Duplicate Operations
+
+| ID | Test Case | Description | Priority |
+|----|-----------|-------------|----------|
+| DI-014 | Project duplicate basic | Duplicating project creates new project with same metadata | High |
+| DI-015 | Project duplicate with characters | Duplicating project copies all characters with new IDs | High |
+| DI-016 | Character duplicate basic | Duplicating character copies profile/metadata | High |
+| DI-017 | Character duplicate preserves images | Duplicating character should NOT duplicate images (by design) | High |
+| DI-018 | Edition duplicate basic | Duplicating edition creates new edition with same metadata | High |
+| DI-019 | Edition duplicate with pages | Duplicating edition copies all pages with new IDs | High |
+| DI-020 | Edition duplicate with pages and panels | Duplicating edition cascades through pages to panels | High |
+| DI-021 | ScriptPage duplicate with panels | Duplicating page copies all panels with dialogues | High |
+| DI-022 | Panel duplicate preserves dialogues | Duplicating panel copies all nested dialogues | High |
+
+#### Cross-Repository Consistency
+
+| ID | Test Case | Description | Priority |
+|----|-----------|-------------|----------|
+| DI-023 | Orphan prevention - character | Creating character for non-existent project should work (no FK) | Medium |
+| DI-024 | Orphan cleanup check | After project delete, no orphaned characters should exist | High |
+| DI-025 | sortOrder consistency after delete | Deleting middle item should not break sortOrder queries | Medium |
+| DI-026 | Concurrent reads during write | Reading during bulk delete should return consistent data | Medium |
+
+#### Database Version Migration (if applicable)
+
+| ID | Test Case | Description | Priority |
+|----|-----------|-------------|----------|
+| DI-027 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
+| DI-028 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
 
 ### 2.2 Storage Layer Integration
 
@@ -659,16 +705,18 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| SY-001 | Full sync cycle | Local changes → Upload → Download → Merge | Critical |
-| SY-002 | Multi-device sync | Changes on Device A appear on Device B | Critical |
-| SY-003 | Conflict detection | Simultaneous edits detected as conflict | High |
-| SY-004 | Conflict resolution flow | User can choose resolution strategy | High |
-| SY-005 | Deleted item sync | Deletion propagates to other devices | High |
-| SY-006 | Large image sync | Should handle images up to 10MB | Medium |
-| SY-007 | Batch upload | Should upload multiple items efficiently | Medium |
-| SY-008 | Offline queue | Changes queued when offline, synced when online | High |
-| SY-009 | Auth token refresh during sync | Should refresh token mid-sync if needed | High |
-| SY-010 | Sync interruption recovery | Should resume after browser crash/close | Medium |
+| SY-001 | Full sync cycle | Local changes → Manifest → Upload → Download → Merge | Critical |
+| SY-002 | Multi-device sync simulation | Changes on "Device A" manifest appear in "Device B" delta | Critical |
+| SY-003 | Conflict detection | Simultaneous edits to same entity detected as conflict | High |
+| SY-004 | Conflict resolution flow | Conflicts resolved using chosen strategy (local/remote/merge) | High |
+| SY-005 | Deleted item sync | Deletion recorded in manifest propagates to delta | High |
+| SY-006 | Large image sync | Should handle images up to 10MB (mock file transfer) | Medium |
+| SY-007 | Batch upload | Should batch multiple items efficiently | Medium |
+| SY-008 | Offline queue | Changes queued when offline, sync triggered when online | High |
+| SY-009 | Auth token refresh during sync | Should use retryWithBackoff for token refresh | High |
+| SY-010 | Sync interruption recovery | Partial sync state should be recoverable | Medium |
+| SY-011 | Hash consistency local↔remote | Same content should produce same hash on both sides | Critical |
+| SY-012 | Deleted items retention | Deleted items should be pruned after retention period | Medium |
 
 ---
 
