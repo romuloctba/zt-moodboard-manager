@@ -91,14 +91,6 @@ const createMockTokenClient = () => ({
 let mockTokenClient = createMockTokenClient();
 
 /**
- * Get the current mockTokenClient reference.
- * This is needed because initTokenClient may be called multiple times.
- */
-function getCurrentTokenClient() {
-  return mockTokenClient;
-}
-
-/**
  * Mock GIS oauth2 API
  */
 const mockOauth2 = {
@@ -223,9 +215,6 @@ const mockFetch = vi.fn();
 const originalLocalStorage = globalThis.localStorage;
 const originalFetch = globalThis.fetch;
 
-// Track if GIS is "loaded"
-let gisLoaded = false;
-
 beforeEach(() => {
   // Reset all mocks
   vi.clearAllMocks();
@@ -236,7 +225,6 @@ beforeEach(() => {
   mockScriptOnLoad = null;
   mockScriptOnError = null;
   scriptsAppended = [];
-  gisLoaded = false;
   mockTokenClient = createMockTokenClient();
 
   // Mock localStorage
@@ -312,7 +300,6 @@ afterEach(() => {
  * This sets window.google AND triggers the onload callback
  */
 function loadGIS() {
-  gisLoaded = true;
   // Set on both globalThis and window to ensure coverage
   (globalThis as unknown as { google: typeof mockGoogle }).google = mockGoogle;
   if (typeof window !== 'undefined') {
@@ -334,12 +321,10 @@ function failGISLoad() {
 }
 
 /**
- * Get a fresh googleAuth singleton instance for testing.
- * We use vi.resetModules() to clear the module cache, which forces
- * the module to re-execute and create a new singleton instance.
+ * Reset modules and re-apply all standard mocks.
+ * Used when we need a fresh module import but with custom configuration.
  */
-async function createFreshAuthService() {
-  // Clear the module cache to get a fresh singleton instance
+function resetModuleAndMocks() {
   vi.resetModules();
 
   // Reset mock state
@@ -349,10 +334,9 @@ async function createFreshAuthService() {
   mockTokenClientCallback = null;
   mockTokenClientErrorCallback = null;
   mockRequestAccessTokenCalls = [];
-  // Clear the mock function but keep the same reference
   mockTokenClient.requestAccessToken.mockClear();
 
-  // Re-apply mocks after module reset since resetModules clears everything
+  // Re-apply mocks after module reset
   Object.defineProperty(globalThis, 'localStorage', {
     value: mockLocalStorage,
     writable: true,
@@ -361,16 +345,11 @@ async function createFreshAuthService() {
 
   globalThis.fetch = mockFetch;
 
-  // Mock document.createElement for script loading
   vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-    if (tagName === 'script') {
-      return createMockScriptElement();
-    }
-    // Call the real implementation for non-script elements
+    if (tagName === 'script') return createMockScriptElement();
     return Object.getPrototypeOf(document).createElement.call(document, tagName);
   });
 
-  // Mock document.head.appendChild
   vi.spyOn(document.head, 'appendChild').mockImplementation((node: Node) => {
     if ((node as HTMLScriptElement).src?.includes('accounts.google.com')) {
       scriptsAppended.push(node as HTMLScriptElement);
@@ -378,13 +357,16 @@ async function createFreshAuthService() {
     return node;
   });
 
-  // Mock document.querySelector for existing script check
-  vi.spyOn(document, 'querySelector').mockImplementation((selector: string) => {
-    if (selector.includes('accounts.google.com/gsi/client')) {
-      return null;
-    }
-    return null;
-  });
+  vi.spyOn(document, 'querySelector').mockReturnValue(null);
+}
+
+/**
+ * Get a fresh googleAuth singleton instance for testing.
+ * We use vi.resetModules() to clear the module cache, which forces
+ * the module to re-execute and create a new singleton instance.
+ */
+async function createFreshAuthService() {
+  resetModuleAndMocks();
 
   // Mock process.env
   vi.stubEnv('NEXT_PUBLIC_GOOGLE_CLIENT_ID', 'test-client-id');
@@ -483,36 +465,7 @@ describe('GoogleAuth - Initialization', () => {
   });
 
   it('GA-004: getClientId() should throw if NEXT_PUBLIC_GOOGLE_CLIENT_ID missing', async () => {
-    // Reset modules to get fresh singleton
-    vi.resetModules();
-
-    // Reset mock state
-    mockScriptOnLoad = null;
-    mockScriptOnError = null;
-    scriptsAppended = [];
-    mockTokenClientCallback = null;
-    mockTokenClientErrorCallback = null;
-    mockRequestAccessTokenCalls = [];
-    mockTokenClient.requestAccessToken.mockClear();
-
-    // Set up mocks
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: mockLocalStorage,
-      writable: true,
-      configurable: true,
-    });
-    globalThis.fetch = mockFetch;
-    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      if (tagName === 'script') return createMockScriptElement();
-      return Object.getPrototypeOf(document).createElement.call(document, tagName);
-    });
-    vi.spyOn(document.head, 'appendChild').mockImplementation((node: Node) => {
-      if ((node as HTMLScriptElement).src?.includes('accounts.google.com')) {
-        scriptsAppended.push(node as HTMLScriptElement);
-      }
-      return node;
-    });
-    vi.spyOn(document, 'querySelector').mockReturnValue(null);
+    resetModuleAndMocks();
 
     // Set EMPTY client ID (the key difference from createFreshAuthService)
     vi.unstubAllEnvs();
@@ -527,40 +480,12 @@ describe('GoogleAuth - Initialization', () => {
   });
 
   it('GA-005: loadGISScript() should resolve immediately if window.google.accounts.oauth2 exists', async () => {
-    // Reset modules first
-    vi.resetModules();
-
-    // Reset mock state
-    mockScriptOnLoad = null;
-    mockScriptOnError = null;
-    scriptsAppended = [];
-    mockTokenClientCallback = null;
-    mockTokenClientErrorCallback = null;
-    mockRequestAccessTokenCalls = [];
-    mockTokenClient.requestAccessToken.mockClear();
+    resetModuleAndMocks();
 
     // Pre-load GIS BEFORE importing the module
     (globalThis as unknown as { google: typeof mockGoogle }).google = mockGoogle;
     (window as unknown as { google: typeof mockGoogle }).google = mockGoogle;
 
-    // Set up other mocks
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: mockLocalStorage,
-      writable: true,
-      configurable: true,
-    });
-    globalThis.fetch = mockFetch;
-    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      if (tagName === 'script') return createMockScriptElement();
-      return Object.getPrototypeOf(document).createElement.call(document, tagName);
-    });
-    vi.spyOn(document.head, 'appendChild').mockImplementation((node: Node) => {
-      if ((node as HTMLScriptElement).src?.includes('accounts.google.com')) {
-        scriptsAppended.push(node as HTMLScriptElement);
-      }
-      return node;
-    });
-    vi.spyOn(document, 'querySelector').mockReturnValue(null);
     vi.stubEnv('NEXT_PUBLIC_GOOGLE_CLIENT_ID', 'test-client-id');
 
     const { googleAuth: auth } = await import('@/lib/sync/googleAuth');
@@ -572,17 +497,7 @@ describe('GoogleAuth - Initialization', () => {
   });
 
   it('GA-006: loadGISScript() should wait for existing script if already in DOM', async () => {
-    // Reset modules first
-    vi.resetModules();
-
-    // Reset mock state
-    mockScriptOnLoad = null;
-    mockScriptOnError = null;
-    scriptsAppended = [];
-    mockTokenClientCallback = null;
-    mockTokenClientErrorCallback = null;
-    mockRequestAccessTokenCalls = [];
-    mockTokenClient.requestAccessToken.mockClear();
+    resetModuleAndMocks();
 
     // Mock that script exists but hasn't loaded yet
     const existingScript = {
@@ -598,25 +513,7 @@ describe('GoogleAuth - Initialization', () => {
       }),
     };
 
-    // Set up mocks
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: mockLocalStorage,
-      writable: true,
-      configurable: true,
-    });
-    globalThis.fetch = mockFetch;
-    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
-      if (tagName === 'script') return createMockScriptElement();
-      return Object.getPrototypeOf(document).createElement.call(document, tagName);
-    });
-    vi.spyOn(document.head, 'appendChild').mockImplementation((node: Node) => {
-      if ((node as HTMLScriptElement).src?.includes('accounts.google.com')) {
-        scriptsAppended.push(node as HTMLScriptElement);
-      }
-      return node;
-    });
-
-    // Return the existing script for querySelector
+    // Return the existing script for querySelector (override the default mock)
     vi.spyOn(document, 'querySelector').mockImplementation((selector: string) => {
       if (selector.includes('accounts.google.com/gsi/client')) {
         return existingScript as unknown as Element;
@@ -1143,7 +1040,7 @@ describe('GoogleAuth - User Info', () => {
     });
   });
 
-  it('GA-031: fetchUserInfo() should throw on API error', async () => {
+  it('GA-031: fetchUserInfo() API error should not crash signIn (error is caught internally)', async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -1157,11 +1054,12 @@ describe('GoogleAuth - User Info', () => {
     const signInPromise = auth.signIn();
     await Promise.resolve();
     simulateTokenSuccess('token');
+
+    // signIn should complete successfully even if fetchUserInfo fails
+    // because fetchUserInfo is called async with .catch(console.error)
     await signInPromise;
 
-    // fetchUserInfo is called async and errors are caught
-    // The error is logged but not thrown to the caller of signIn
-    // This is the current behavior - verify it doesn't crash
+    // Give time for async fetchUserInfo to complete (and fail gracefully)
     await new Promise((r) => setTimeout(r, 10));
   });
 
