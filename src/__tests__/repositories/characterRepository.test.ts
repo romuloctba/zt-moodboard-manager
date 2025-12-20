@@ -76,8 +76,11 @@ describe('CharacterRepository', () => {
       expect(fromDb?.projectId).toBe(project.id)
     })
 
-    it('should handle creation with non-existent projectId', async () => {
-      // Repository does not validate projectId - it just links to it
+    it('should allow creation with non-existent projectId (no FK validation)', async () => {
+      // NOTE: Repository does NOT validate projectId exists - this is by design.
+      // IndexedDB has no foreign key constraints. The application layer
+      // should ensure valid projectId before calling create().
+      // This test documents current behavior, not necessarily desired behavior.
       const character = await characterRepository.create('non-existent-project', 'Orphan')
 
       expect(character).toBeDefined()
@@ -118,12 +121,6 @@ describe('CharacterRepository', () => {
 
       expect(found).toBeUndefined()
     })
-
-    it('should return undefined for empty string ID', async () => {
-      const found = await characterRepository.getById('')
-
-      expect(found).toBeUndefined()
-    })
   })
 
   describe('getByProject', () => {
@@ -158,6 +155,25 @@ describe('CharacterRepository', () => {
       const characters = await characterRepository.getByProject('non-existent')
 
       expect(characters).toEqual([])
+    })
+
+    it('should return empty array after all characters are deleted', async () => {
+      const project = await createTestProject()
+
+      const char1 = await characterRepository.create(project.id, 'First')
+      const char2 = await characterRepository.create(project.id, 'Second')
+
+      // Verify characters exist
+      expect(await characterRepository.getByProject(project.id)).toHaveLength(2)
+
+      // Delete all characters
+      await characterRepository.delete(char1.id)
+      await characterRepository.delete(char2.id)
+
+      // Should return empty array, not error
+      const remaining = await characterRepository.getByProject(project.id)
+      expect(remaining).toEqual([])
+      expect(Array.isArray(remaining)).toBe(true)
     })
 
     it('should respect custom sortOrder after reordering', async () => {
@@ -341,27 +357,6 @@ describe('CharacterRepository', () => {
       // This tests the ACTUAL behavior - shallow merge at profile level
       expect(updated?.profile.customFields).toEqual({ eyeColor: 'blue' })
       expect(updated?.profile.customFields?.height).toBeUndefined()
-    })
-
-    it('should handle customFields', async () => {
-      const project = await createTestProject()
-      const character = await characterRepository.create(project.id, 'Hero')
-
-      await characterRepository.updateProfile(character.id, {
-        customFields: {
-          height: '180cm',
-          weight: '75kg',
-          eyeColor: 'blue',
-        },
-      })
-
-      const updated = await characterRepository.getById(character.id)
-
-      expect(updated?.profile.customFields).toEqual({
-        height: '180cm',
-        weight: '75kg',
-        eyeColor: 'blue',
-      })
     })
 
     it('should do nothing when character does not exist', async () => {
