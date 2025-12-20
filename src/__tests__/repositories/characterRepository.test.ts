@@ -834,7 +834,7 @@ describe('CharacterRepository', () => {
       expect(characters[1].sortOrder).toBe(2) // Gap preserved
     })
 
-    it('should NOT cascade delete images (images must be deleted separately)', async () => {
+    it('should cascade delete images when deleting character', async () => {
       const project = await createTestProject()
       const character = await characterRepository.create(project.id, 'With Images')
 
@@ -848,14 +848,30 @@ describe('CharacterRepository', () => {
         size: 1000,
         width: 100,
         height: 100,
-        storagePath: '/images/test.webp',
-        thumbnailPath: '/thumbnails/test.webp',
+        storagePath: 'opfs://images/img-1',
+        thumbnailPath: 'opfs://thumbnails/img-1',
         tags: [],
         createdAt: new Date(),
       })
 
-      // Verify image exists
+      await db.images.add({
+        id: 'img-2',
+        characterId: character.id,
+        filename: 'test2.webp',
+        originalName: 'test2.jpg',
+        mimeType: 'image/webp',
+        size: 2000,
+        width: 200,
+        height: 200,
+        storagePath: 'opfs://images/img-2',
+        thumbnailPath: 'opfs://thumbnails/img-2',
+        tags: [],
+        createdAt: new Date(),
+      })
+
+      // Verify images exist
       expect(await db.images.get('img-1')).toBeDefined()
+      expect(await db.images.get('img-2')).toBeDefined()
 
       // Delete character
       await characterRepository.delete(character.id)
@@ -863,12 +879,9 @@ describe('CharacterRepository', () => {
       // Character is deleted
       expect(await characterRepository.getById(character.id)).toBeUndefined()
 
-      // IMPORTANT: Images are NOT deleted by characterRepository.delete()
-      // This is by design - images should be deleted separately to allow cleanup of OPFS files
-      // The application layer should handle image cleanup before/after character deletion
-      const orphanedImage = await db.images.get('img-1')
-      expect(orphanedImage).toBeDefined()
-      expect(orphanedImage?.characterId).toBe(character.id)
+      // Images should also be cascade deleted
+      expect(await db.images.get('img-1')).toBeUndefined()
+      expect(await db.images.get('img-2')).toBeUndefined()
     })
   })
 

@@ -1,6 +1,7 @@
 import { db, generateId } from '../database';
 import type { Project, ProjectSettings } from '@/types';
 import { DEFAULT_PROJECT_SETTINGS } from '@/types';
+import { characterRepository } from './characterRepository';
 
 export const projectRepository = {
   async create(name: string, description?: string): Promise<Project> {
@@ -67,19 +68,12 @@ export const projectRepository = {
   },
 
   async delete(id: string): Promise<void> {
-    // Delete all related data
+    // Delete all characters (cascades to images, sections, canvas items)
     const characters = await db.characters.where('projectId').equals(id).toArray();
-
     for (const character of characters) {
-      // Delete sections and canvas items for each character
-      const sections = await db.sections.where('characterId').equals(character.id).toArray();
-      for (const section of sections) {
-        await db.canvasItems.where('sectionId').equals(section.id).delete();
-      }
-      await db.sections.where('characterId').equals(character.id).delete();
+      await characterRepository.delete(character.id);
     }
 
-    await db.characters.where('projectId').equals(id).delete();
     await db.projects.delete(id);
   },
 

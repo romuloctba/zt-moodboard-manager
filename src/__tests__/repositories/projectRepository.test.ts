@@ -139,6 +139,27 @@ describe('ProjectRepository', () => {
 
       expect(projects).toEqual([])
     })
+
+    it('should return archived projects in consistent order', async () => {
+      const p1 = await projectRepository.create('First')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      const p2 = await projectRepository.create('Second')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      const p3 = await projectRepository.create('Third')
+
+      await projectRepository.archive(p1.id)
+      await projectRepository.archive(p2.id)
+      await projectRepository.archive(p3.id)
+
+      const archived = await projectRepository.getArchived()
+
+      expect(archived).toHaveLength(3)
+      // Note: getArchived doesn't guarantee order, but should be consistent
+      const names = archived.map((p) => p.name)
+      expect(names).toContain('First')
+      expect(names).toContain('Second')
+      expect(names).toContain('Third')
+    })
   })
 
   describe('getAllIncludingArchived', () => {
@@ -211,11 +232,17 @@ describe('ProjectRepository', () => {
       expect(updated?.createdAt.getTime()).toBe(originalCreatedAt.getTime())
     })
 
-    it('should not throw when updating non-existent project', async () => {
+    it('should not throw when updating non-existent project and should not create garbage', async () => {
       // Dexie's update on non-existent ID silently does nothing
+      const countBefore = await db.projects.count()
+
       await expect(
         projectRepository.update('non-existent', { description: 'Test' })
       ).resolves.not.toThrow()
+
+      // Verify no garbage was created
+      const countAfter = await db.projects.count()
+      expect(countAfter).toBe(countBefore)
     })
   })
 
@@ -297,11 +324,16 @@ describe('ProjectRepository', () => {
       expect(updated?.settings.canvasBackground).toBe(DEFAULT_PROJECT_SETTINGS.canvasBackground)
     })
 
-    it('should do nothing when project does not exist', async () => {
-      // Should not throw, just silently do nothing
+    it('should do nothing when project does not exist and not create garbage', async () => {
+      const countBefore = await db.projects.count()
+
       await expect(
         projectRepository.updateSettings('non-existent', { gridColumns: 10 })
       ).resolves.not.toThrow()
+
+      // Verify no garbage was created
+      const countAfter = await db.projects.count()
+      expect(countAfter).toBe(countBefore)
     })
 
     it('should update only specified settings', async () => {
@@ -420,7 +452,53 @@ describe('ProjectRepository', () => {
     })
 
     it('should not throw when deleting non-existent project', async () => {
+      const countBefore = await db.projects.count()
+
       await expect(projectRepository.delete('non-existent')).resolves.not.toThrow()
+
+      // Verify nothing was affected
+      const countAfter = await db.projects.count()
+      expect(countAfter).toBe(countBefore)
+    })
+
+    it('should cascade delete images when deleting project', async () => {
+      const project = await projectRepository.create('Project with Images')
+
+      await db.characters.add({
+        id: 'char-with-images',
+        projectId: project.id,
+        name: 'Character',
+        description: '',
+        tags: [],
+        profile: {},
+        metadata: {},
+        sortOrder: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      // Add image associated with character
+      await db.images.add({
+        id: 'orphaned-image',
+        characterId: 'char-with-images',
+        filename: 'test.webp',
+        originalName: 'test.jpg',
+        mimeType: 'image/webp',
+        size: 1000,
+        width: 100,
+        height: 100,
+        storagePath: 'opfs://images/orphaned-image',
+        thumbnailPath: 'opfs://thumbnails/orphaned-image',
+        tags: [],
+        createdAt: new Date(),
+      })
+
+      expect(await db.images.get('orphaned-image')).toBeDefined()
+
+      await projectRepository.delete(project.id)
+
+      // Images should be cascade deleted along with the character
+      expect(await db.images.get('orphaned-image')).toBeUndefined()
     })
   })
 
@@ -485,6 +563,35 @@ describe('ProjectRepository', () => {
       const duplicated = await projectRepository.duplicate(original.id, 'Copy')
 
       expect(duplicated?.isArchived).toBe(false)
+    })
+
+    it('should not copy characters, sections, or canvas items from original', async () => {
+      const original = await projectRepository.create('Original with Children')
+
+      // Add character to original project
+      await db.characters.add({
+        id: 'original-char',
+        projectId: original.id,
+        name: 'Original Character',
+        description: '',
+        tags: [],
+        profile: {},
+        metadata: {},
+        sortOrder: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      // Duplicate the project
+      const duplicated = await projectRepository.duplicate(original.id, 'Copy')
+
+      // Verify original still has the character
+      const originalChars = await db.characters.where('projectId').equals(original.id).toArray()
+      expect(originalChars).toHaveLength(1)
+
+      // Verify duplicated project has NO characters (shallow copy only)
+      const duplicatedChars = await db.characters.where('projectId').equals(duplicated!.id).toArray()
+      expect(duplicatedChars).toHaveLength(0)
     })
   })
 

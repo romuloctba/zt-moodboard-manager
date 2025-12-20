@@ -1,5 +1,6 @@
 import { db, generateId } from '../database';
 import type { Character, CharacterProfile, CharacterMetadata, CanvasState } from '@/types';
+import { imageRepository } from './imageRepository';
 
 export const characterRepository = {
   async create(projectId: string, name: string): Promise<Character> {
@@ -88,6 +89,12 @@ export const characterRepository = {
   },
 
   async delete(id: string): Promise<void> {
+    // Delete all images (also cleans up OPFS files)
+    const images = await db.images.where('characterId').equals(id).toArray();
+    for (const image of images) {
+      await imageRepository.delete(image.id);
+    }
+
     // Delete all sections and canvas items
     const sections = await db.sections.where('characterId').equals(id).toArray();
     for (const section of sections) {
