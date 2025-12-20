@@ -77,6 +77,9 @@ export const projectRepository = {
     await db.projects.delete(id);
   },
 
+  // TODO: Consider adding option to deep-duplicate (cascade to characters, editions).
+  // Currently this is a shallow copy - only project metadata is duplicated.
+  // Characters, editions, and their children are NOT copied.
   async duplicate(id: string, newName: string): Promise<Project | undefined> {
     const original = await this.getById(id);
     if (!original) return undefined;

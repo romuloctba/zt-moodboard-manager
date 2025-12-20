@@ -104,6 +104,9 @@ export const characterRepository = {
     await db.characters.delete(id);
   },
 
+  // TODO: Consider adding option to deep-duplicate (cascade to images, sections, canvasItems).
+  // Currently this is a shallow copy - only character metadata is duplicated.
+  // Images, sections, and canvas items are NOT copied.
   async duplicate(id: string, newName: string): Promise<Character | undefined> {
     const original = await this.getById(id);
     if (!original) return undefined;
