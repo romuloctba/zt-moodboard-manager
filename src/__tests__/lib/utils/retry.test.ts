@@ -92,10 +92,20 @@ describe('Retry Utility', () => {
 
       await resultPromise
 
-      // Check setTimeout was called with exponential delays
+      // Extract only the retry delays (setTimeout is called for each retry)
       const delays = setTimeoutSpy.mock.calls.map((call) => call[1])
-      expect(delays).toContain(100) // First retry: 100 * 2^0 = 100
-      expect(delays).toContain(200) // Second retry: 100 * 2^1 = 200
+
+      // Verify exponential backoff: delays should be 100, 200 (not linear like 100, 100)
+      // Find the first two non-zero delays
+      const retryDelays = delays.filter((d) => d && d > 0)
+      expect(retryDelays.length).toBeGreaterThanOrEqual(2)
+
+      // Verify exponential pattern: second delay should be double the first
+      expect(retryDelays[0]).toBe(100) // First retry: 100 * 2^0 = 100
+      expect(retryDelays[1]).toBe(200) // Second retry: 100 * 2^1 = 200
+
+      // Verify it's exponential, not linear
+      expect(retryDelays[1]).toBe(retryDelays[0]! * 2)
     })
 
     it('RT-005: should not retry AUTH_FAILED, INVALID_DATA, STORAGE_FULL errors', async () => {
@@ -211,6 +221,51 @@ describe('Retry Utility', () => {
       const result = await resultPromise
       expect(result).toBe('success')
       expect(operation).toHaveBeenCalledTimes(2)
+    })
+
+    it('RT-NEW-001: maxRetries=0 should throw immediately on first failure', async () => {
+      const error = new Error('immediate failure')
+      const operation = vi.fn().mockRejectedValue(error)
+
+      const resultPromise = retryWithBackoff(operation, { maxRetries: 0 })
+
+      await expect(resultPromise).rejects.toThrow('immediate failure')
+      // Only 1 call - no retries allowed
+      expect(operation).toHaveBeenCalledTimes(1)
+    })
+
+    it('RT-NEW-002: regular Error (not SyncException) should be retried', async () => {
+      // Regular Error is NOT in nonRetryableErrors list, so should be retried
+      const regularError = new Error('transient error')
+      const operation = vi
+        .fn()
+        .mockRejectedValueOnce(regularError)
+        .mockResolvedValue('recovered')
+
+      const resultPromise = retryWithBackoff(operation)
+
+      await vi.advanceTimersByTimeAsync(1000)
+
+      const result = await resultPromise
+      expect(result).toBe('recovered')
+      expect(operation).toHaveBeenCalledTimes(2)
+    })
+
+    it('RT-NEW-003: should use default SYNC_CONSTANTS values when no options provided', async () => {
+      // This tests that defaults from SYNC_CONSTANTS are used
+      // Default maxRetries is 3, default baseDelay is 1000ms
+      const error = new Error('failure')
+      const operation = vi.fn().mockRejectedValue(error)
+
+      const resultPromise = retryWithBackoff(operation)
+      const expectation = expect(resultPromise).rejects.toThrow()
+
+      // Default delays: 1000 + 2000 + 4000 = 7000ms total
+      await vi.advanceTimersByTimeAsync(7000)
+
+      await expectation
+      // Default maxRetries=3 means 4 total attempts (initial + 3 retries)
+      expect(operation).toHaveBeenCalledTimes(4)
     })
   })
 
