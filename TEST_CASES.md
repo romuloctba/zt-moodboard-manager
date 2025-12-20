@@ -373,16 +373,49 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| FS-001 | Save blob to OPFS | Should store blob and return path | High |
-| FS-002 | Read blob from OPFS | Should retrieve stored blob | High |
-| FS-003 | Delete file from OPFS | Should remove file and return success | High |
-| FS-004 | List files in directory | Should return file list with metadata | Medium |
-| FS-005 | Calculate storage size | Should return accurate byte count | Medium |
-| FS-006 | Create nested directories | Should handle deep path creation | Medium |
-| FS-007 | Handle OPFS unavailable | Should fallback to IndexedDB storage | High |
-| FS-008 | Handle storage quota exceeded | Should throw meaningful error | Medium |
-| FS-009 | Concurrent file operations | Should handle multiple simultaneous writes | Medium |
-| FS-010 | Clean up orphaned files | Should remove files not in database | Low |
+| **Initialization** |
+| FS-001 | initialize() - OPFS available | Should set useOPFS=true and root handle | High |
+| FS-002 | initialize() - OPFS unavailable | Should set useOPFS=false and create fallbackDb | High |
+| FS-003 | initialize() - createWritable not supported | Should detect Safari/WebKit and use IndexedDB fallback | High |
+| FS-004 | initialize() - idempotent | Should not re-initialize if already initialized | Medium |
+| **saveImage** |
+| FS-005 | saveImage() - OPFS success | Should save to OPFS and return `opfs://images/{id}` path | High |
+| FS-006 | saveImage() - IndexedDB fallback | Should save to IndexedDB and return `idb://images/{id}` path | High |
+| FS-007 | saveImage() - creates images directory | Should auto-create 'images' directory if not exists | Medium |
+| FS-008 | saveImage() - error propagation | Should throw if OPFS write fails | Medium |
+| **saveThumbnail** |
+| FS-009 | saveThumbnail() - OPFS success | Should save to OPFS and return `opfs://thumbnails/{id}` path | High |
+| FS-010 | saveThumbnail() - IndexedDB fallback | Should save to IndexedDB and return `idb://thumbnails/{id}` path | High |
+| **getImage** |
+| FS-011 | getImage() - OPFS path | Should retrieve File from `opfs://` path | High |
+| FS-012 | getImage() - IndexedDB path | Should retrieve File from `idb://` path | High |
+| FS-013 | getImage() - not found | Should return null for non-existent file | High |
+| FS-014 | getImage() - parse path formats | Should handle both `opfs://images/id` and `images/id` | Medium |
+| **getImageUrl** |
+| FS-015 | getImageUrl() - returns blob URL | Should create and return blob:// URL from file | High |
+| FS-016 | getImageUrl() - passthrough blob URLs | Should return existing blob:// URLs unchanged | Medium |
+| FS-017 | getImageUrl() - not found | Should return null for non-existent file | Medium |
+| **deleteImage** |
+| FS-018 | deleteImage() - OPFS path | Should remove file from OPFS | High |
+| FS-019 | deleteImage() - IndexedDB path | Should remove file from IndexedDB fallback | High |
+| FS-020 | deleteImage() - not found | Should not throw for non-existent file | Medium |
+| **deleteThumbnail** |
+| FS-021 | deleteThumbnail() - OPFS | Should delete from thumbnails directory | Medium |
+| FS-022 | deleteThumbnail() - IndexedDB fallback | Should delete from fallback database | Medium |
+| **Storage Info** |
+| FS-023 | getStorageEstimate() | Should return {used, quota, percentage} from navigator.storage | Medium |
+| FS-024 | getStorageEstimate() - API unavailable | Should return zeros if storage API unavailable | Low |
+| FS-025 | formatBytes() | Should format 0, B, KB, MB, GB correctly | Low |
+| FS-026 | isUsingOPFS() | Should return true/false based on storage backend | Medium |
+| FS-027 | getStorageBackend() | Should return 'opfs', 'indexeddb', or 'memory' | Medium |
+| **Clear Operations** |
+| FS-028 | clearAllFiles() - OPFS | Should clear images, thumbnails, exports, backups directories | Medium |
+| FS-029 | clearAllFiles() - IndexedDB | Should clear all files from fallback database | Medium |
+| FS-030 | clearAllFiles() - return counts | Should return {imagesDeleted, thumbnailsDeleted, totalDeleted} | Low |
+| FS-031 | clearAllAndReset() - OPFS | Should remove directories entirely | Low |
+| FS-032 | clearAllAndReset() - IndexedDB | Should clear fallback database | Low |
+
+**Note:** FileStorage uses OPFS (Origin Private File System) for modern browsers with `createWritable` support. Falls back to IndexedDB for Safari/WebKit and older browsers. The class is a singleton exported as `fileStorage`. Testing requires mocking `navigator.storage.getDirectory()`, `FileSystemDirectoryHandle`, and `FileSystemFileHandle` APIs. IndexedDB fallback uses Dexie.js with a `FileStorageFallback` database.
 
 ---
 
