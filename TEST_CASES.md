@@ -490,16 +490,76 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 #### Sync Manifest (`src/lib/sync/syncManifest.ts`)
 
+**Architecture Note:** SyncManifestService builds manifests from local IndexedDB data, compares them with remote manifests, and produces SyncDelta objects describing what needs to be uploaded/downloaded. Uses SHA-256 hashing via `hash.ts` for content comparison. Device identification via `deviceId.ts` for conflict attribution.
+
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| SM-001 | Generate content hash | Should produce consistent SHA-256 hash | High |
-| SM-002 | Hash different content | Different content should produce different hashes | High |
-| SM-003 | Track item version | Should increment version on each update | High |
-| SM-004 | Mark item deleted | Should add to deletedItems with timestamp | High |
-| SM-005 | Prune old deleted items | Should remove items older than 30 days | Medium |
-| SM-006 | Device attribution | Should track which device made changes | Medium |
-| SM-007 | Serialize manifest | Should produce valid JSON for storage | High |
-| SM-008 | Deserialize manifest | Should reconstruct manifest from JSON | High |
+| **buildLocalManifest** |
+| SM-001 | buildLocalManifest - empty database | Should return manifest with empty collections | High |
+| SM-002 | buildLocalManifest - with projects | Should include all projects with correct hashes | High |
+| SM-003 | buildLocalManifest - with characters | Should include all characters with correct hashes | High |
+| SM-004 | buildLocalManifest - with images | Should exclude local-only fields (storagePath, thumbnailPath) from hash | High |
+| SM-005 | buildLocalManifest - with editions | Should include editions with correct hashes | Medium |
+| SM-006 | buildLocalManifest - with scriptPages | Should include script pages with correct hashes | Medium |
+| SM-007 | buildLocalManifest - with panels | Should include panels with nested dialogues in hash | Medium |
+| SM-008 | buildLocalManifest - version increment | Should increment version from stored local version | High |
+| SM-009 | buildLocalManifest - device attribution | Should include current deviceId and deviceName | High |
+| SM-010 | buildLocalManifest - timestamp | Should set lastModified to current ISO timestamp | Medium |
+| **recordDeletion / getDeletedItems** |
+| SM-011 | recordDeletion - new item | Should add deletion record to localStorage | High |
+| SM-012 | recordDeletion - duplicate | Should not add duplicate deletion records | Medium |
+| SM-013 | recordDeletion - device attribution | Should record deletedByDeviceId | Medium |
+| SM-014 | getDeletedItems - prune old | Should filter out items older than 30 days | High |
+| SM-015 | getDeletedItems - empty storage | Should return empty array when no deletions stored | Medium |
+| SM-016 | getDeletedItems - invalid JSON | Should return empty array on parse error | Low |
+| SM-017 | clearProcessedDeletions | Should remove specified IDs from deleted items | Medium |
+| **compareManifests - No remote** |
+| SM-018 | compareManifests - null remote | Should mark all local items for upload | Critical |
+| SM-019 | compareManifests - empty local | Should return hasChanges=false for empty local | Medium |
+| **compareManifests - Items only in local** |
+| SM-020 | compareManifests - local-only project | Should add to toUpload.projects | High |
+| SM-021 | compareManifests - local-only character | Should add to toUpload.characters | High |
+| SM-022 | compareManifests - local-only image | Should add to both toUpload.images and toUpload.files | High |
+| **compareManifests - Items only in remote** |
+| SM-023 | compareManifests - remote-only project | Should add to toDownload.projects | High |
+| SM-024 | compareManifests - remote-only character | Should add to toDownload.characters | High |
+| SM-025 | compareManifests - remote-only image | Should add to both toDownload.images and toDownload.files | High |
+| **compareManifests - Hash comparison** |
+| SM-026 | compareManifests - matching hashes | Should not add to upload or download | High |
+| SM-027 | compareManifests - different hashes, same device | Should use newer timestamp (local newer → upload) | High |
+| SM-028 | compareManifests - different hashes, same device | Should use newer timestamp (remote newer → download) | High |
+| SM-029 | compareManifests - different hashes, different devices | Should create conflict record | Critical |
+| SM-030 | compareManifests - conflict contains item name | Should look up item name from database | Medium |
+| **compareManifests - Deletions** |
+| SM-031 | processDeletions - local deletion exists in remote | Should add to toDelete.remote | High |
+| SM-032 | processDeletions - remote deletion exists in local | Should add to toDelete.local | High |
+| SM-033 | processDeletions - deletion for non-existent item | Should not add to toDelete | Medium |
+| **compareManifests - hasChanges flag** |
+| SM-034 | hasChanges - uploads pending | Should return true when toUpload has items | High |
+| SM-035 | hasChanges - downloads pending | Should return true when toDownload has items | High |
+| SM-036 | hasChanges - deletions pending | Should return true when toDelete has items | High |
+| SM-037 | hasChanges - conflicts pending | Should return true when conflicts exist | High |
+| SM-038 | hasChanges - no changes | Should return false when nothing to sync | High |
+| **mergeManifests** |
+| SM-039 | mergeManifests - version calculation | Should use max(local, remote) + 1 | High |
+| SM-040 | mergeManifests - add downloaded items | Should include items from toDownload | High |
+| SM-041 | mergeManifests - remove deleted items | Should remove items from toDelete.local and toDelete.remote | High |
+| SM-042 | mergeManifests - merge deletedItems lists | Should deduplicate deletions from both manifests | Medium |
+| SM-043 | mergeManifests - device attribution | Should set current device as lastModified | Medium |
+| **createEmptyManifest** |
+| SM-044 | createEmptyManifest | Should return manifest with empty collections and current device | Medium |
+| **updateLocalVersion** |
+| SM-045 | updateLocalVersion | Should store version in localStorage | Medium |
+| SM-046 | getLocalVersion - stored | Should return stored version number | Medium |
+| SM-047 | getLocalVersion - not stored | Should return 0 when no version stored | Medium |
+
+**Testing Notes:**
+- Requires mocking IndexedDB (via fake-indexeddb or Dexie mock)
+- Requires mocking localStorage for deleted items and version storage
+- `hashObject` from `hash.ts` uses crypto.subtle - requires JSDOM or polyfill
+- Device ID/name functions should be mocked to return predictable values
+- For conflict tests, need to set up manifests with different deviceIds
+- The `getItemName` method queries the database - mock db.projects.get, etc.
 
 #### Sync Service (`src/lib/sync/syncService.ts`)
 
