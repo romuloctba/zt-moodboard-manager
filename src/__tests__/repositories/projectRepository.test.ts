@@ -5,13 +5,13 @@
  * Reference: TEST_CASES.md - Section 1.1 ProjectRepository (PR-001 to PR-018)
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { projectRepository } from '@/lib/db/repositories/projectRepository'
 import { db } from '@/lib/db/database'
 import { DEFAULT_PROJECT_SETTINGS } from '@/types'
 
 describe('ProjectRepository', () => {
-  // Database is automatically reset before each test via setup.ts
+  // Database is automatically cleaned after each test via setup.ts
 
   describe('create', () => {
     it('PR-001: should create a project with all required fields and return valid ID', async () => {
@@ -42,6 +42,15 @@ describe('ProjectRepository', () => {
       expect(project.settings).toEqual(DEFAULT_PROJECT_SETTINGS)
       expect(project.isArchived).toBe(false)
     })
+
+    it('should persist project to database', async () => {
+      const project = await projectRepository.create('Persisted Project')
+
+      // Verify it's actually in the database
+      const fromDb = await db.projects.get(project.id)
+      expect(fromDb).toBeDefined()
+      expect(fromDb?.name).toBe('Persisted Project')
+    })
   })
 
   describe('getById', () => {
@@ -53,10 +62,19 @@ describe('ProjectRepository', () => {
       expect(found?.id).toBe(created.id)
       expect(found?.name).toBe('Findable Project')
       expect(found?.description).toBe('Description')
+      expect(found?.settings).toEqual(DEFAULT_PROJECT_SETTINGS)
+      expect(found?.createdAt).toBeInstanceOf(Date)
+      expect(found?.updatedAt).toBeInstanceOf(Date)
     })
 
     it('PR-004: should return undefined for non-existing ID', async () => {
       const found = await projectRepository.getById('non-existent-id')
+
+      expect(found).toBeUndefined()
+    })
+
+    it('should return undefined for empty string ID', async () => {
+      const found = await projectRepository.getById('')
 
       expect(found).toBeUndefined()
     })
@@ -67,11 +85,12 @@ describe('ProjectRepository', () => {
       const projects = await projectRepository.getAll()
 
       expect(projects).toEqual([])
+      expect(Array.isArray(projects)).toBe(true)
     })
 
     it('PR-006: should return only non-archived projects by default', async () => {
-      const active1 = await projectRepository.create('Active 1')
-      const active2 = await projectRepository.create('Active 2')
+      await projectRepository.create('Active 1')
+      await projectRepository.create('Active 2')
       const archived = await projectRepository.create('Archived')
       await projectRepository.archive(archived.id)
 
@@ -81,6 +100,21 @@ describe('ProjectRepository', () => {
       expect(projects.map((p) => p.name)).toContain('Active 1')
       expect(projects.map((p) => p.name)).toContain('Active 2')
       expect(projects.map((p) => p.name)).not.toContain('Archived')
+    })
+
+    it('should return projects ordered by createdAt descending (newest first)', async () => {
+      await projectRepository.create('First')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      await projectRepository.create('Second')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      await projectRepository.create('Third')
+
+      const projects = await projectRepository.getAll()
+
+      expect(projects).toHaveLength(3)
+      expect(projects[0].name).toBe('Third')
+      expect(projects[1].name).toBe('Second')
+      expect(projects[2].name).toBe('First')
     })
   })
 
@@ -96,6 +130,15 @@ describe('ProjectRepository', () => {
       expect(projects[0].name).toBe('Archived')
       expect(projects[0].isArchived).toBe(true)
     })
+
+    it('should return empty array when no archived projects exist', async () => {
+      await projectRepository.create('Active 1')
+      await projectRepository.create('Active 2')
+
+      const projects = await projectRepository.getArchived()
+
+      expect(projects).toEqual([])
+    })
   })
 
   describe('getAllIncludingArchived', () => {
@@ -110,6 +153,17 @@ describe('ProjectRepository', () => {
       const names = projects.map((p) => p.name)
       expect(names).toContain('Active')
       expect(names).toContain('Archived')
+    })
+
+    it('should return projects ordered by createdAt descending', async () => {
+      await projectRepository.create('First')
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      await projectRepository.create('Second')
+
+      const projects = await projectRepository.getAllIncludingArchived()
+
+      expect(projects[0].name).toBe('Second')
+      expect(projects[1].name).toBe('First')
     })
   })
 
@@ -144,6 +198,25 @@ describe('ProjectRepository', () => {
 
       expect(updated?.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime())
     })
+
+    it('should preserve createdAt when updating', async () => {
+      const project = await projectRepository.create('Test')
+      const originalCreatedAt = project.createdAt
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      await projectRepository.update(project.id, { description: 'Changed' })
+
+      const updated = await projectRepository.getById(project.id)
+
+      expect(updated?.createdAt.getTime()).toBe(originalCreatedAt.getTime())
+    })
+
+    it('should not throw when updating non-existent project', async () => {
+      // Dexie's update on non-existent ID silently does nothing
+      await expect(
+        projectRepository.update('non-existent', { description: 'Test' })
+      ).resolves.not.toThrow()
+    })
   })
 
   describe('rename', () => {
@@ -158,6 +231,19 @@ describe('ProjectRepository', () => {
 
       expect(updated?.name).toBe('New Name')
       expect(updated?.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime())
+    })
+
+    it('should preserve other fields when renaming', async () => {
+      const project = await projectRepository.create('Original', 'Description')
+      await projectRepository.update(project.id, { genre: 'Fantasy' })
+
+      await projectRepository.rename(project.id, 'Renamed')
+
+      const updated = await projectRepository.getById(project.id)
+
+      expect(updated?.name).toBe('Renamed')
+      expect(updated?.description).toBe('Description')
+      expect(updated?.genre).toBe('Fantasy')
     })
   })
 
@@ -180,6 +266,18 @@ describe('ProjectRepository', () => {
 
       expect(unarchived?.isArchived).toBe(false)
     })
+
+    it('archive should update updatedAt', async () => {
+      const project = await projectRepository.create('Test')
+      const originalUpdatedAt = project.updatedAt
+
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      await projectRepository.archive(project.id)
+
+      const archived = await projectRepository.getById(project.id)
+
+      expect(archived?.updatedAt.getTime()).toBeGreaterThan(originalUpdatedAt.getTime())
+    })
   })
 
   describe('updateSettings', () => {
@@ -198,6 +296,25 @@ describe('ProjectRepository', () => {
       // Original setting should be preserved
       expect(updated?.settings.canvasBackground).toBe(DEFAULT_PROJECT_SETTINGS.canvasBackground)
     })
+
+    it('should do nothing when project does not exist', async () => {
+      // Should not throw, just silently do nothing
+      await expect(
+        projectRepository.updateSettings('non-existent', { gridColumns: 10 })
+      ).resolves.not.toThrow()
+    })
+
+    it('should update only specified settings', async () => {
+      const project = await projectRepository.create('Partial Update')
+
+      await projectRepository.updateSettings(project.id, { gridColumns: 8 })
+
+      const updated = await projectRepository.getById(project.id)
+
+      expect(updated?.settings.gridColumns).toBe(8)
+      expect(updated?.settings.defaultView).toBe(DEFAULT_PROJECT_SETTINGS.defaultView)
+      expect(updated?.settings.canvasBackground).toBe(DEFAULT_PROJECT_SETTINGS.canvasBackground)
+    })
   })
 
   describe('delete', () => {
@@ -210,14 +327,55 @@ describe('ProjectRepository', () => {
       expect(deleted).toBeUndefined()
     })
 
-    it('PR-016: should trigger deletion of related characters when project is deleted', async () => {
+    it('PR-016: should cascade delete related characters', async () => {
       const project = await projectRepository.create('Project with Characters')
 
-      // Add a character directly to the database
+      // Add characters directly to the database
       await db.characters.add({
         id: 'char-1',
         projectId: project.id,
-        name: 'Test Character',
+        name: 'Character 1',
+        description: '',
+        tags: [],
+        profile: {},
+        metadata: {},
+        sortOrder: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      await db.characters.add({
+        id: 'char-2',
+        projectId: project.id,
+        name: 'Character 2',
+        description: '',
+        tags: [],
+        profile: {},
+        metadata: {},
+        sortOrder: 1,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      // Verify characters exist
+      const charsBefore = await db.characters.where('projectId').equals(project.id).count()
+      expect(charsBefore).toBe(2)
+
+      // Delete project
+      await projectRepository.delete(project.id)
+
+      // Characters should be deleted
+      const charsAfter = await db.characters.where('projectId').equals(project.id).count()
+      expect(charsAfter).toBe(0)
+    })
+
+    it('should cascade delete sections and canvasItems', async () => {
+      const project = await projectRepository.create('Project with Sections')
+
+      // Add character with section and canvas items
+      await db.characters.add({
+        id: 'char-1',
+        projectId: project.id,
+        name: 'Character',
         description: '',
         tags: [],
         profile: {},
@@ -227,16 +385,42 @@ describe('ProjectRepository', () => {
         updatedAt: new Date(),
       })
 
-      // Verify character exists
-      const charBefore = await db.characters.get('char-1')
-      expect(charBefore).toBeDefined()
+      await db.sections.add({
+        id: 'section-1',
+        characterId: 'char-1',
+        name: 'Test Section',
+        type: 'costume',
+        color: '#8b5cf6',
+        sortOrder: 0,
+        createdAt: new Date(),
+      })
+
+      await db.canvasItems.add({
+        id: 'canvas-item-1',
+        sectionId: 'section-1',
+        type: 'image',
+        content: { imageId: 'img-1' },
+        position: { x: 0, y: 0, width: 100, height: 100, rotation: 0, zIndex: 0 },
+        metadata: {},
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+
+      // Verify they exist
+      expect(await db.sections.get('section-1')).toBeDefined()
+      expect(await db.canvasItems.get('canvas-item-1')).toBeDefined()
 
       // Delete project
       await projectRepository.delete(project.id)
 
-      // Character should be deleted
-      const charAfter = await db.characters.get('char-1')
-      expect(charAfter).toBeUndefined()
+      // All related data should be deleted
+      expect(await db.characters.get('char-1')).toBeUndefined()
+      expect(await db.sections.get('section-1')).toBeUndefined()
+      expect(await db.canvasItems.get('canvas-item-1')).toBeUndefined()
+    })
+
+    it('should not throw when deleting non-existent project', async () => {
+      await expect(projectRepository.delete('non-existent')).resolves.not.toThrow()
     })
   })
 
@@ -266,6 +450,42 @@ describe('ProjectRepository', () => {
 
       expect(duplicated).toBeUndefined()
     })
+
+    it('should copy settings from original', async () => {
+      const original = await projectRepository.create('Original')
+      await projectRepository.updateSettings(original.id, {
+        defaultView: 'canvas',
+        gridColumns: 8,
+        canvasBackground: '#ffffff',
+      })
+
+      const duplicated = await projectRepository.duplicate(original.id, 'Copy')
+
+      expect(duplicated?.settings.defaultView).toBe('canvas')
+      expect(duplicated?.settings.gridColumns).toBe(8)
+      expect(duplicated?.settings.canvasBackground).toBe('#ffffff')
+    })
+
+    it('should create independent copy (modifying original does not affect duplicate)', async () => {
+      const original = await projectRepository.create('Original', 'Description')
+      const duplicated = await projectRepository.duplicate(original.id, 'Copy')
+
+      // Modify original
+      await projectRepository.update(original.id, { description: 'Modified' })
+
+      // Duplicate should be unchanged
+      const duplicatedAfter = await projectRepository.getById(duplicated!.id)
+      expect(duplicatedAfter?.description).toBe('Description')
+    })
+
+    it('should not duplicate archived status', async () => {
+      const original = await projectRepository.create('Original')
+      await projectRepository.archive(original.id)
+
+      const duplicated = await projectRepository.duplicate(original.id, 'Copy')
+
+      expect(duplicated?.isArchived).toBe(false)
+    })
   })
 
   describe('special characters', () => {
@@ -277,6 +497,8 @@ describe('ProjectRepository', () => {
         '🎨 Art Project 🖼️',
         "Project with 'quotes' and \"double quotes\"",
         'Project/with\\slashes',
+        'Project\twith\ttabs',
+        'Project\nwith\nnewlines',
       ]
 
       for (const name of specialNames) {
@@ -285,6 +507,42 @@ describe('ProjectRepository', () => {
 
         expect(retrieved?.name).toBe(name)
       }
+    })
+
+    it('should handle special characters in description', async () => {
+      const project = await projectRepository.create('Test', '描述 with émojis 🎭 and "quotes"')
+      const retrieved = await projectRepository.getById(project.id)
+
+      expect(retrieved?.description).toBe('描述 with émojis 🎭 and "quotes"')
+    })
+  })
+
+  describe('edge cases', () => {
+    it('should handle empty string name', async () => {
+      const project = await projectRepository.create('')
+
+      expect(project.name).toBe('')
+      const retrieved = await projectRepository.getById(project.id)
+      expect(retrieved?.name).toBe('')
+    })
+
+    it('should handle very long name', async () => {
+      const longName = 'A'.repeat(1000)
+      const project = await projectRepository.create(longName)
+
+      const retrieved = await projectRepository.getById(project.id)
+      expect(retrieved?.name).toBe(longName)
+    })
+
+    it('should handle many tags', async () => {
+      const project = await projectRepository.create('Tagged')
+      const manyTags = Array.from({ length: 100 }, (_, i) => `tag-${i}`)
+
+      await projectRepository.update(project.id, { tags: manyTags })
+
+      const retrieved = await projectRepository.getById(project.id)
+      expect(retrieved?.tags).toHaveLength(100)
+      expect(retrieved?.tags).toEqual(manyTags)
     })
   })
 })
