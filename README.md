@@ -113,8 +113,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | Script | Description |
 |--------|-------------|
 | `pnpm dev` | Start development server |
-| `pnpm build` | Build for production (standard Next.js) |
-| `pnpm build:static` | Build static export for hosting on any web server |
+| `pnpm test` | Run unit and integration tests |
+| `pnpm build` | Build for standard Next.js |
+| `pnpm build:dev` | Build for development (static files using .env.dev) |
+| `pnpm build:prod` | Build for production (static files using .env.production) |
+| `pnpm build:static` | Build static export for hosting on any web server (default .env.local) |
 | `pnpm start` | Start production server |
 | `pnpm lint` | Run ESLint |
 | `pnpm generate-icons` | Generate PWA icons from source image |
@@ -275,8 +278,10 @@ Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 | Script | Descrição |
 |--------|-----------|
 | `pnpm dev` | Inicia o servidor de desenvolvimento |
-| `pnpm build` | Compila para produção (Next.js padrão) |
-| `pnpm build:static` | Gera exportação estática para hospedagem |
+| `pnpm build` | Compila para Next.js padrão |
+| `pnpm build:dev` | Compila estáticos de desenvolvimento (usa .env.dev) |
+| `pnpm build:prod` | Compila estáticos de produção (.env.production) |
+| `pnpm build:static` | Gera exportação estática para hospedagem (.env.local padrão)|
 | `pnpm start` | Inicia o servidor de produção |
 | `pnpm lint` | Executa o ESLint |
 | `pnpm generate-icons` | Gera ícones PWA a partir da imagem fonte |
