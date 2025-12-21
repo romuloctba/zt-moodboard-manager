@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import type { Project, Character } from '@/types';
-import { projectRepository, characterRepository } from '@/lib/db/repositories';
+import { projectRepository, characterRepository, editionRepository, scriptPageRepository, panelRepository } from '@/lib/db/repositories';
 import { triggerGlobalSync } from '@/lib/sync/globalSyncTrigger';
+import { syncManifest } from '@/lib/sync/syncManifest';
 
 interface ProjectState {
   // Data
@@ -94,7 +95,28 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   },
 
   deleteProject: async (id: string) => {
+    // Collect all editions and their children for sync recording BEFORE deletion
+    const editions = await editionRepository.getByProject(id);
+    const deletions: Array<{ id: string; type: 'panel' | 'scriptPage' | 'edition' }> = [];
+
+    for (const edition of editions) {
+      const pages = await scriptPageRepository.getByEdition(edition.id);
+      for (const page of pages) {
+        const panels = await panelRepository.getByPage(page.id);
+        deletions.push(...panels.map(p => ({ id: p.id, type: 'panel' as const })));
+        deletions.push({ id: page.id, type: 'scriptPage' as const });
+      }
+      deletions.push({ id: edition.id, type: 'edition' as const });
+    }
+
+    // Delete from database (cascades to characters, editions, pages, panels)
     await projectRepository.delete(id);
+
+    // Record deletions for sync (children first, then parents)
+    for (const deletion of deletions) {
+      await syncManifest.recordDeletion(deletion.id, deletion.type);
+    }
+
     set(state => ({
       projects: state.projects.filter(p => p.id !== id),
       currentProject: state.currentProject?.id === id ? null : state.currentProject,

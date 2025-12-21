@@ -40,9 +40,7 @@ describe('Database Integration - Cross-Repository Consistency', () => {
   // ==========================================================================
 
   describe('Project Cascade Consistency', () => {
-    // TODO: This test documents a BUG - projectRepository.delete() does not cascade to editions.
-    // When this is fixed, change .skip to .only or remove the skip entirely.
-    it.skip('DI-027: Deleting project should also delete all editions (BUG: not implemented)', async () => {
+    it('DI-027: Deleting project should also delete all editions', async () => {
       // Create project with editions
       const project = await projectRepository.create('Test Project')
       const edition1 = await editionRepository.create(project.id, 'Edition 1')
@@ -59,7 +57,7 @@ describe('Database Integration - Cross-Repository Consistency', () => {
       // Delete project
       await projectRepository.delete(project.id)
 
-      // Verify editions are gone (THIS WILL FAIL - documenting the bug)
+      // Verify editions are gone
       const editionsAfter = await editionRepository.getByProject(project.id)
       expect(editionsAfter).toHaveLength(0)
 

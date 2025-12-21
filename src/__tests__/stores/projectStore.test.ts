@@ -29,11 +29,27 @@ vi.mock('@/lib/db/repositories', () => ({
     rename: vi.fn(),
     delete: vi.fn(),
   },
+  editionRepository: {
+    getByProject: vi.fn().mockResolvedValue([]),
+  },
+  scriptPageRepository: {
+    getByEdition: vi.fn().mockResolvedValue([]),
+  },
+  panelRepository: {
+    getByPage: vi.fn().mockResolvedValue([]),
+  },
 }))
 
 // Mock triggerGlobalSync
 vi.mock('@/lib/sync/globalSyncTrigger', () => ({
   triggerGlobalSync: vi.fn(),
+}))
+
+// Mock syncManifest
+vi.mock('@/lib/sync/syncManifest', () => ({
+  syncManifest: {
+    recordDeletion: vi.fn().mockResolvedValue(undefined),
+  },
 }))
 
 // Import mocked modules after mock setup

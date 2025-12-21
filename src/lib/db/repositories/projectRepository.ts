@@ -2,6 +2,7 @@ import { db, generateId } from '../database';
 import type { Project, ProjectSettings } from '@/types';
 import { DEFAULT_PROJECT_SETTINGS } from '@/types';
 import { characterRepository } from './characterRepository';
+import { editionRepository } from './editionRepository';
 
 export const projectRepository = {
   async create(name: string, description?: string): Promise<Project> {
@@ -74,10 +75,11 @@ export const projectRepository = {
       await characterRepository.delete(character.id);
     }
 
-    // TODO: BUG - Missing cascade delete to editions!
-    // Should delete all editions (which cascade to pages and panels).
-    // See test DI-027 in consistency.test.ts for details.
-    // Fix: Import editionRepository and call editionRepository.delete() for each edition.
+    // Delete all editions (cascades to pages and panels)
+    const editions = await db.editions.where('projectId').equals(id).toArray();
+    for (const edition of editions) {
+      await editionRepository.delete(edition.id);
+    }
 
     await db.projects.delete(id);
   },
