@@ -47,45 +47,45 @@ async function createFullProjectHierarchy() {
   const section1: Section = {
     id: crypto.randomUUID(),
     characterId: char1.id,
-    type: 'moodboard',
-    name: 'Moodboard',
+    type: 'costume',
+    name: 'Costumes',
+    color: '#ff5733',
     sortOrder: 0,
+    createdAt: new Date(),
   }
   const section2: Section = {
     id: crypto.randomUUID(),
     characterId: char1.id,
     type: 'references',
     name: 'References',
+    color: '#33ff57',
     sortOrder: 1,
+    createdAt: new Date(),
   }
   await db.sections.bulkAdd([section1, section2])
 
   // Create canvas items for sections
+  const imageId1 = crypto.randomUUID()
   const canvasItem1: CanvasItem = {
     id: crypto.randomUUID(),
     sectionId: section1.id,
     type: 'image',
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-    rotation: 0,
-    zIndex: 0,
-    locked: false,
+    content: { imageId: imageId1 },
+    position: { x: 0, y: 0, width: 100, height: 100, rotation: 0, zIndex: 0 },
+    metadata: {},
     createdAt: new Date(),
+    updatedAt: new Date(),
   }
+  const imageId2 = crypto.randomUUID()
   const canvasItem2: CanvasItem = {
     id: crypto.randomUUID(),
     sectionId: section2.id,
     type: 'image',
-    x: 50,
-    y: 50,
-    width: 100,
-    height: 100,
-    rotation: 0,
-    zIndex: 1,
-    locked: false,
+    content: { imageId: imageId2 },
+    position: { x: 50, y: 50, width: 100, height: 100, rotation: 0, zIndex: 1 },
+    metadata: {},
     createdAt: new Date(),
+    updatedAt: new Date(),
   }
   await db.canvasItems.bulkAdd([canvasItem1, canvasItem2])
 
@@ -160,8 +160,18 @@ async function createFullEditionHierarchy(projectId: string) {
   const panel3 = await panelRepository.create(page2.id)
 
   // Add dialogues to panels
-  await panelRepository.addDialogue(panel1.id, 'char1', 'Character 1', 'Hello!')
-  await panelRepository.addDialogue(panel2.id, 'char2', 'Character 2', 'World!')
+  await panelRepository.addDialogue(panel1.id, {
+    characterId: 'char1',
+    characterName: 'Character 1',
+    type: 'speech',
+    text: 'Hello!',
+  })
+  await panelRepository.addDialogue(panel2.id, {
+    characterId: 'char2',
+    characterName: 'Character 2',
+    type: 'speech',
+    text: 'World!',
+  })
 
   return {
     edition,

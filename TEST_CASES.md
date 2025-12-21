@@ -663,33 +663,41 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 #### Duplicate Operations
 
+> **Note:** Project and Character duplicate operations are "shallow" by design - they only copy
+> the entity's own data, not child entities. Edition duplicate is "deep" - it cascades to pages and panels.
+> TODO: Consider whether project/character duplicate should cascade to children in the future.
+
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-014 | Project duplicate basic | Duplicating project creates new project with same metadata | High |
-| DI-015 | Project duplicate with characters | Duplicating project copies all characters with new IDs | High |
-| DI-016 | Character duplicate basic | Duplicating character copies profile/metadata | High |
-| DI-017 | Character duplicate preserves images | Duplicating character should NOT duplicate images (by design) | High |
-| DI-018 | Edition duplicate basic | Duplicating edition creates new edition with same metadata | High |
-| DI-019 | Edition duplicate with pages | Duplicating edition copies all pages with new IDs | High |
-| DI-020 | Edition duplicate with pages and panels | Duplicating edition cascades through pages to panels | High |
-| DI-021 | ScriptPage duplicate with panels | Duplicating page copies all panels with dialogues | High |
-| DI-022 | Panel duplicate preserves dialogues | Duplicating panel copies all nested dialogues | High |
+| DI-014 | Project duplicate basic | Duplicating project copies metadata (description, genre, theme, tags, settings) | High |
+| DI-015 | Project duplicate non-existent | Should return undefined when duplicating non-existent project | Medium |
+| DI-016 | Project duplicate does NOT cascade | Project duplicate does NOT copy characters (shallow copy by design) | High |
+| DI-017 | Character duplicate basic | Duplicating character copies description, tags, profile, metadata | High |
+| DI-018 | Character duplicate does NOT copy images | Duplicating character should NOT duplicate images (by design) | High |
+| DI-019 | Character duplicate does NOT copy sections | Duplicating character should NOT duplicate sections/canvasItems (by design) | Medium |
+| DI-020 | Edition duplicate basic | Duplicating edition copies metadata, resets status to 'draft' | High |
+| DI-021 | Edition duplicate cascades to pages | Duplicating edition copies all pages with new IDs and editionId | High |
+| DI-022 | Edition duplicate cascades to panels | Duplicating edition cascades through pages to panels with new IDs | High |
+| DI-023 | ScriptPage duplicate cascades to panels | Duplicating page copies all panels (with embedded dialogues) | High |
+| DI-024 | Panel duplicate preserves dialogues | Duplicating panel copies all nested dialogues with new IDs | High |
+| DI-025 | Duplicate assigns correct sortOrder | Duplicated entities get maxOrder + 1 for their collection | Medium |
+| DI-026 | Duplicate resets timestamps | Duplicated entities get new createdAt/updatedAt | Medium |
 
 #### Cross-Repository Consistency
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-023 | Orphan prevention - character | Creating character for non-existent project should work (no FK) | Medium |
-| DI-024 | Orphan cleanup check | After project delete, no orphaned characters should exist | High |
-| DI-025 | sortOrder consistency after delete | Deleting middle item should not break sortOrder queries | Medium |
-| DI-026 | Concurrent reads during write | Reading during bulk delete should return consistent data | Medium |
+| DI-027 | Orphan prevention - character | Creating character for non-existent project should work (no FK) | Medium |
+| DI-028 | Orphan cleanup check | After project delete, no orphaned characters should exist | High |
+| DI-029 | sortOrder consistency after delete | Deleting middle item should not break sortOrder queries | Medium |
+| DI-030 | Concurrent reads during write | Reading during bulk delete should return consistent data | Medium |
 
 #### Database Version Migration (if applicable)
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-027 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
-| DI-028 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
+| DI-031 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
+| DI-032 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
 
 ### 2.2 Storage Layer Integration
 
