@@ -13,7 +13,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Pencil,
-  FileText,
 } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import { PAGE_STATUS_COLORS } from '@/types';

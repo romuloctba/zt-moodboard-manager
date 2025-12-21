@@ -35,7 +35,6 @@ export function EditionList({ editions, onEditionClick }: EditionListProps) {
           key={edition.id}
           edition={edition}
           pageCount={stats[edition.id]?.pages ?? 0}
-          panelCount={stats[edition.id]?.panels ?? 0}
           onClick={() => onEditionClick(edition)}
         />
       ))}

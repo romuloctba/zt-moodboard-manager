@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { useLocaleStore } from '@/store/localeStore';
 import { locales, localeNames, localeFlags, type Locale } from '@/i18n/config';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import {
 import { Languages, Check } from 'lucide-react';
 
 export function LanguageSwitcher() {
-  const t = useTranslations('settings.language');
+  // const t = useTranslations('settings.language');
   const { locale, setLocale } = useLocaleStore();
 
   return (

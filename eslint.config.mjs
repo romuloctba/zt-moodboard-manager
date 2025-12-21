@@ -14,6 +14,10 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // custom static output directory
     "moodboard-manager/**",
+    // custom ignores:
+    "public/**",
+    // ignore test files
+    "src/__tests__/**",
   ]),
 ]);
 

@@ -53,7 +53,7 @@ export function PanelEditor({
 }: PanelEditorProps) {
   const t = useTranslations('editions.panels');
   const tDialogue = useTranslations('editions.dialogue');
-  const { updatePanel, deletePanel, duplicatePanel, addDialogue, updateDialogue, removeDialogue } = useEditionStore();
+  const { updatePanel, deletePanel, duplicatePanel, addDialogue, removeDialogue } = useEditionStore();
 
   // Sortable hook for drag and drop
   const {
@@ -141,18 +141,16 @@ export function PanelEditor({
   const dialogueTypes: DialogueType[] = ['speech', 'thought', 'caption', 'sfx', 'narration', 'whisper'];
 
   // Generate collapsed preview data
-  const getCollapsedPreview = () => {
-    const uniqueCharacters = [...new Set(panel.dialogues.map(d => d.characterName))];
-    return {
-      hasDescription: !!panel.description,
-      hasCamera: !!panel.cameraAngle,
-      hasNotes: !!panel.notes,
-      dialogueCount: panel.dialogues.length,
-      characters: uniqueCharacters,
-    };
-  };
-
-  const preview = !isExpanded ? getCollapsedPreview() : null;
+  // const getCollapsedPreview = () => {
+  //   const uniqueCharacters = [...new Set(panel.dialogues.map(d => d.characterName))];
+  //   return {
+  //     hasDescription: !!panel.description,
+  //     hasCamera: !!panel.cameraAngle,
+  //     hasNotes: !!panel.notes,
+  //     dialogueCount: panel.dialogues.length,
+  //     characters: uniqueCharacters,
+  //   };
+  // };
 
   return (
     <Card 

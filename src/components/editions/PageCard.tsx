@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
-import type { ScriptPage, PageStatus } from '@/types';
+import { useTranslations } from 'next-intl';
+import type { ScriptPage } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Copy, Trash2, FileText, Layers } from 'lucide-react';
+import { MoreHorizontal, Copy, Trash2, Layers } from 'lucide-react';
 import { useEditionStore } from '@/store/editionStore';
 import { toast } from 'sonner';
 import { PAGE_STATUS_COLORS } from '@/types';

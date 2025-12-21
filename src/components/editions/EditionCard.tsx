@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
-import type { Edition, EditionStatus } from '@/types';
+import type { Edition } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Copy, Trash2, BookOpen, FileText } from 'lucide-react';
+import { MoreHorizontal, Copy, Trash2, BookOpen, FileText } from 'lucide-react';
 import { useEditionStore } from '@/store/editionStore';
 import { imageRepository } from '@/lib/db/repositories';
 import { toast } from 'sonner';
@@ -30,7 +30,6 @@ interface EditionCardProps {
 export function EditionCard({ 
   edition, 
   pageCount = 0,
-  panelCount = 0,
   onClick 
 }: EditionCardProps) {
   const t = useTranslations('editions');
@@ -161,6 +160,13 @@ export function EditionCard({
           >
             {t(`status.${edition.status}`)}
           </Badge>
+        </div>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+           <span className="flex items-center gap-1">
+              {formattedDate}
+            </span>
+          </div>
         </div>
       </CardContent>
     </Card>

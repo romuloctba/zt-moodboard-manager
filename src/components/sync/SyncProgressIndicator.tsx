@@ -2,7 +2,7 @@
 
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import type { SyncProgress as SyncProgressType, SyncPhase } from '@/lib/sync/types';
+import type { SyncProgress as SyncProgressType } from '@/lib/sync/types';
 
 export interface SyncProgressLabels {
   connecting: string;
