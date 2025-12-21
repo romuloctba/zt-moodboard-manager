@@ -685,19 +685,26 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 
 #### Cross-Repository Consistency
 
+> **Note:** IndexedDB has no foreign key constraints. Consistency is enforced at the repository layer
+> through cascade delete operations. These tests verify that cross-repository relationships remain consistent.
+
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-027 | Orphan prevention - character | Creating character for non-existent project should work (no FK) | Medium |
-| DI-028 | Orphan cleanup check | After project delete, no orphaned characters should exist | High |
-| DI-029 | sortOrder consistency after delete | Deleting middle item should not break sortOrder queries | Medium |
-| DI-030 | Concurrent reads during write | Reading during bulk delete should return consistent data | Medium |
+| DI-027 | Project → Edition cascade missing | Deleting project should also delete all editions (BUG: currently not implemented) | Critical |
+| DI-028 | No orphaned characters after project delete | After project delete, no characters with that projectId should exist | High |
+| DI-029 | No orphaned images after character delete | After character delete, no images with that characterId should exist | High |
+| DI-030 | No orphaned sections after character delete | After character delete, no sections with that characterId should exist | High |
+| DI-031 | No orphaned pages after edition delete | After edition delete, no pages with that editionId should exist | High |
+| DI-032 | No orphaned panels after page delete | After page delete, no panels with that pageId should exist | High |
+| DI-033 | sortOrder gaps are allowed | Deleting middle item leaves gap in sortOrder (by design, queries still work) | Medium |
+| DI-034 | Bulk delete consistency | Deleting multiple items maintains database consistency | Medium |
 
 #### Database Version Migration (if applicable)
 
 | ID | Test Case | Description | Priority |
 |----|-----------|-------------|----------|
-| DI-031 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
-| DI-032 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
+| DI-035 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
+| DI-036 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
 
 ### 2.2 Storage Layer Integration
 

@@ -8,7 +8,8 @@ This directory contains integration tests that verify cross-repository interacti
 integration/
 ├── database/           # Database layer integration tests
 │   ├── cascadeDelete.test.ts    # Cascade delete operations (DI-001 to DI-013)
-│   └── duplicate.test.ts        # Duplicate operations (DI-014 to DI-026)
+│   ├── duplicate.test.ts        # Duplicate operations (DI-014 to DI-026)
+│   └── consistency.test.ts      # Cross-repository consistency (DI-027 to DI-034)
 ├── storage/            # Storage layer integration tests
 │   └── imageFlow.test.ts        # Image upload/delete flow (SI-001 to SI-005)
 └── sync/               # Sync integration tests

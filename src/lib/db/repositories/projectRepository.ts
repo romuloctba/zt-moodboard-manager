@@ -74,6 +74,11 @@ export const projectRepository = {
       await characterRepository.delete(character.id);
     }
 
+    // TODO: BUG - Missing cascade delete to editions!
+    // Should delete all editions (which cascade to pages and panels).
+    // See test DI-027 in consistency.test.ts for details.
+    // Fix: Import editionRepository and call editionRepository.delete() for each edition.
+
     await db.projects.delete(id);
   },
 
