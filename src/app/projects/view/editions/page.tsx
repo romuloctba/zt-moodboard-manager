@@ -8,7 +8,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
-import { Plus, FileText, Pencil, FileDown } from 'lucide-react';
+import { Plus, FileText, Pencil, FileDown, Settings, Cloud } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import Link from 'next/link';
 
@@ -20,6 +20,7 @@ function EditionViewContent() {
   const t = useTranslations('editions');
   const tPages = useTranslations('editions.pages');
   const tExport = useTranslations('editions.export');
+  const tCommon = useTranslations('common');
 
   const { 
     currentEdition,
@@ -104,7 +105,31 @@ function EditionViewContent() {
       ),
       mobilePriority: 2,
     },
-  ], [t, tPages, tExport, editionId, projectId]);
+    {
+        id: 'sync',
+        element: (
+          <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+            <Link href="/sync" className="flex items-center justify-center gap-2 md:gap-0">
+              <Cloud className="w-5 h-5" />
+              <span className="md:hidden">{tCommon('navigation.sync')}</span>
+            </Link>
+          </Button>
+        ),
+        mobilePriority: 2,
+      },
+      {
+        id: 'settings',
+        element: (
+          <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+            <Link href="/settings" className="flex items-center justify-center gap-2 md:gap-0">
+              <Settings className="w-5 h-5" />
+              <span className="md:hidden">{tCommon('navigation.settings')}</span>
+            </Link>
+          </Button>
+        ),
+        mobilePriority: 3,
+      },
+  ], [t, tPages, tExport, editionId, projectId, tCommon]);
 
   if (isLoading || !currentEdition) {
     return <EditionDetailSkeleton />;
@@ -120,7 +145,7 @@ function EditionViewContent() {
       <Header
         title={currentEdition.title}
         subtitle={subtitle}
-        backHref={`/projects/view?projectId=${projectId}`}
+        backHref={`/projects/view?projectId=${projectId}&tab=editions`}
         actions={headerActions}
       />
 

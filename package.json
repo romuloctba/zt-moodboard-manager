@@ -7,6 +7,8 @@
     "dev": "next dev",
     "build": "pnpm test:run && next build --webpack",
     "build:static": "pnpm test:run && STATIC_EXPORT=true next build --webpack && npm run postbuild:static",
+    "build:dev": "cp -f .env.dev .env.local && pnpm build:static",
+    "build:prod": "cp -f .env.production .env.local && pnpm build:static",
     "postbuild:static": "cp public/.htaccess moodboard-manager/.htaccess",
     "start": "next start",
     "lint": "eslint",
