@@ -10,11 +10,16 @@ integration/
 │   ├── cascadeDelete.test.ts    # Cascade delete operations (DI-001 to DI-013)
 │   ├── duplicate.test.ts        # Duplicate operations (DI-014 to DI-026)
 │   └── consistency.test.ts      # Cross-repository consistency (DI-027 to DI-034)
-├── storage/            # Storage layer integration tests
-│   └── imageFlow.test.ts        # Image upload/delete flow (SI-001 to SI-005)
 └── sync/               # Sync integration tests
-    └── syncFlow.test.ts         # Sync operations (SY-001 to SY-012)
+    └── syncService.test.ts      # Sync operations (SY-001, SY-004)
 ```
+
+### Storage Layer Integration (SI-001 to SI-005)
+
+Storage layer integration tests require browser APIs (Canvas, OPFS) not available in Node.js/vitest:
+- **SI-001, SI-003**: Moved to E2E tests (Playwright) - require real browser
+- **SI-002, SI-005**: Already covered by unit tests (imageRepository.test.ts, fileStorage.test.ts)
+- **SI-004**: Removed - navigator.storage.estimate() doesn't provide file-level granularity
 
 ## Key Differences from Unit Tests
 

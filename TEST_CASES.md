@@ -699,39 +699,51 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 | DI-033 | sortOrder gaps are allowed | Deleting middle item leaves gap in sortOrder (by design, queries still work) | Medium |
 | DI-034 | Bulk delete consistency | Deleting multiple items maintains database consistency | Medium |
 
-#### Database Version Migration (if applicable)
+#### Database Version Migration
 
-| ID | Test Case | Description | Priority |
-|----|-----------|-------------|----------|
-| DI-035 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical |
-| DI-036 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical |
+> **Note:** The v1→v2 migration is purely additive (adding new tables for editions, scriptPages, panels).
+> Dexie.js handles additive schema changes automatically without data loss.
+> These tests are **N/A for the current schema** but would be required if we add data transformations in future versions.
+
+| ID | Test Case | Description | Priority | Status |
+|----|-----------|-------------|----------|--------|
+| DI-035 | v1 to v2 migration | Migrating from v1 to v2 should preserve existing data | Critical | N/A (additive only) |
+| DI-036 | v2 tables exist | After migration, editions/scriptPages/panels tables exist | Critical | N/A (covered by other tests) |
 
 ### 2.2 Storage Layer Integration
 
-| ID | Test Case | Description | Priority |
-|----|-----------|-------------|----------|
-| SI-001 | Image upload end-to-end | Upload → Process → Store → Database record | Critical |
-| SI-002 | Image delete with file cleanup | Delete record → Remove OPFS files | High |
-| SI-003 | Thumbnail generation | Full image and thumbnail stored correctly | High |
-| SI-004 | Storage stats accuracy | Stats match actual stored files | Medium |
-| SI-005 | OPFS to IndexedDB fallback | Should seamlessly fallback on unsupported browsers | High |
+> **Note:** True storage layer integration requires browser APIs (Canvas, OPFS) not available in Node.js/vitest.
+> The imageRepository.create() integration is covered by unit tests with mocks (imageRepository.test.ts).
+> Browser-dependent tests are moved to E2E (Playwright) where real browser APIs are available.
+
+| ID | Test Case | Description | Priority | Status |
+|----|-----------|-------------|----------|--------|
+| SI-001 | Image upload end-to-end | Upload → Process → Store → Database record | Critical | **Move to E2E** (requires Canvas/OPFS) |
+| SI-002 | Image delete with file cleanup | Delete record → Remove OPFS files | High | N/A - covered by imageRepository.test.ts + DI-011 to DI-013 |
+| SI-003 | Thumbnail generation | Full image and thumbnail stored correctly | High | **Move to E2E** (requires Canvas) |
+| SI-004 | Storage stats accuracy | Stats match actual stored files | Medium | **Remove** - navigator.storage.estimate() provides system-level stats only, not file-level granularity |
+| SI-005 | OPFS to IndexedDB fallback | Should seamlessly fallback on unsupported browsers | High | N/A - covered by fileStorage.test.ts (FS-002, FS-003, FS-006, etc.) |
 
 ### 2.3 Sync Integration
 
-| ID | Test Case | Description | Priority |
-|----|-----------|-------------|----------|
-| SY-001 | Full sync cycle | Local changes → Manifest → Upload → Download → Merge | Critical |
-| SY-002 | Multi-device sync simulation | Changes on "Device A" manifest appear in "Device B" delta | Critical |
-| SY-003 | Conflict detection | Simultaneous edits to same entity detected as conflict | High |
-| SY-004 | Conflict resolution flow | Conflicts resolved using chosen strategy (local/remote/merge) | High |
-| SY-005 | Deleted item sync | Deletion recorded in manifest propagates to delta | High |
-| SY-006 | Large image sync | Should handle images up to 10MB (mock file transfer) | Medium |
-| SY-007 | Batch upload | Should batch multiple items efficiently | Medium |
-| SY-008 | Offline queue | Changes queued when offline, sync triggered when online | High |
-| SY-009 | Auth token refresh during sync | Should use retryWithBackoff for token refresh | High |
-| SY-010 | Sync interruption recovery | Partial sync state should be recoverable | Medium |
-| SY-011 | Hash consistency local↔remote | Same content should produce same hash on both sides | Critical |
-| SY-012 | Deleted items retention | Deleted items should be pruned after retention period | Medium |
+> **Note:** Many sync integration scenarios are already covered by unit tests in `syncManifest.test.ts` (SM-001 to SM-051).
+> The syncService orchestrates googleDrive, syncManifest, and fileStorage - true integration requires mocking googleDrive.
+> Some planned features (batch upload, offline queue, interruption recovery) are not yet implemented.
+
+| ID | Test Case | Description | Priority | Status |
+|----|-----------|-------------|----------|--------|
+| SY-001 | Full sync cycle | Local changes → Manifest → Upload → Download → Merge | Critical | **Implement** - test syncService.performSync with mocked googleDrive |
+| SY-002 | Multi-device sync simulation | Changes on "Device A" manifest appear in "Device B" delta | Critical | N/A - covered by SM-027 to SM-030 (compareManifests with different deviceIds) |
+| SY-003 | Conflict detection | Simultaneous edits to same entity detected as conflict | High | N/A - covered by SM-029, SM-030, SM-037 |
+| SY-004 | Conflict resolution strategies | Auto-resolve conflicts using local-wins/remote-wins/newest-wins | High | **Implement** - test autoResolveConflicts and applyConflictResolutions |
+| SY-005 | Deleted item sync | Deletion recorded in manifest propagates to delta | High | N/A - covered by SM-011 to SM-017, SM-031 to SM-033 |
+| SY-006 | Large image sync | Should handle images up to 10MB | Medium | **Move to E2E** - requires real network, browser file handling |
+| SY-007 | Batch upload | Should batch multiple items efficiently | Medium | **Remove** - not implemented, syncService uploads sequentially |
+| SY-008 | Offline queue | Changes queued when offline, sync triggered when online | High | **Remove** - not implemented, no offline queue exists |
+| SY-009 | Auth token refresh during sync | Should use retryWithBackoff for token refresh | High | N/A - covered by googleAuth.test.ts |
+| SY-010 | Sync interruption recovery | Partial sync state should be recoverable | Medium | **Remove** - not implemented, no recovery mechanism |
+| SY-011 | Hash consistency local↔remote | Same content should produce same hash on both sides | Critical | N/A - covered by SM-048 to SM-051 (hash integrity tests) |
+| SY-012 | Deleted items retention | Deleted items should be pruned after retention period | Medium | N/A - covered by SM-014 (30-day retention pruning) |
 
 ---
 
