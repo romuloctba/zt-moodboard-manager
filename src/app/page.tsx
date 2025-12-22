@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useProjectStore } from '@/store/projectStore';
@@ -19,6 +19,7 @@ export default function HomePage() {
   const tCommon = useTranslations('common');
   const { projects, isLoading, loadProjects } = useProjectStore();
   const { isInstalled } = usePWAInstall();
+  const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
 
   useEffect(() => {
     loadProjects();
@@ -39,13 +40,12 @@ export default function HomePage() {
     {
       id: 'new-project',
       element: (
-        <CreateProjectDialog>
-          <Button className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            {t('header.newProject')}
-          </Button>
-        </CreateProjectDialog>
+        <Button className="w-full md:w-auto">
+          <Plus className="w-4 h-4 mr-2" />
+          {t('header.newProject')}
+        </Button>
       ),
+      onClick: () => setShowCreateProjectDialog(true),
       mobilePriority: 2,
     },
     {
@@ -106,6 +106,12 @@ export default function HomePage() {
         )}
 
       </main>
+
+      {/* Controlled dialog rendered outside Header/Sheet for mobile compatibility */}
+      <CreateProjectDialog 
+        open={showCreateProjectDialog} 
+        onOpenChange={setShowCreateProjectDialog} 
+      />
     </div>
   );
 }

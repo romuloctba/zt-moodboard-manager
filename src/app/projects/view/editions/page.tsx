@@ -33,6 +33,7 @@ function EditionViewContent() {
   const { selectProject, currentProject } = useProjectStore();
   const { triggerNotFound } = useNotFound({ entity: 'Edition' });
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showCreatePageDialog, setShowCreatePageDialog] = useState(false);
 
   useEffect(() => {
     if (!editionId || !projectId) {
@@ -81,13 +82,12 @@ function EditionViewContent() {
     {
       id: 'new-page',
       element: (
-        <CreatePageDialog>
-          <Button className="w-full md:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            {tPages('header.newPage')}
-          </Button>
-        </CreatePageDialog>
+        <Button className="w-full md:w-auto">
+          <Plus className="w-4 h-4 mr-2" />
+          {tPages('header.newPage')}
+        </Button>
       ),
+      onClick: () => setShowCreatePageDialog(true),
       mobilePriority: 1,
     },
     {
@@ -97,12 +97,12 @@ function EditionViewContent() {
           variant="ghost" 
           size="icon" 
           className="w-full md:w-auto md:aspect-square"
-          onClick={() => setShowEditDialog(true)}
         >
           <Pencil className="w-5 h-5" />
           <span className="md:hidden ml-2">{t('menu.edit')}</span>
         </Button>
       ),
+      onClick: () => setShowEditDialog(true),
       mobilePriority: 2,
     },
     {
@@ -165,6 +165,12 @@ function EditionViewContent() {
         edition={currentEdition}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
+      />
+
+      {/* Create Page Dialog */}
+      <CreatePageDialog
+        open={showCreatePageDialog}
+        onOpenChange={setShowCreatePageDialog}
       />
     </div>
   );

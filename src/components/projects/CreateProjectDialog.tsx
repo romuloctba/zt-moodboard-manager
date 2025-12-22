@@ -18,13 +18,28 @@ import { useProjectStore } from '@/store/projectStore';
 import { toast } from 'sonner';
 
 interface CreateProjectDialogProps {
-  children: React.ReactNode;
+  /** Optional trigger element. When omitted, dialog must be controlled via open/onOpenChange */
+  children?: React.ReactNode;
+  /** Controlled open state */
+  open?: boolean;
+  /** Callback when open state changes */
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
+export function CreateProjectDialog({ 
+  children,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
+}: CreateProjectDialogProps) {
   const t = useTranslations('projects');
   const tCommon = useTranslations('common');
-  const [open, setOpen] = useState(false);
+  
+  // Support both controlled and uncontrolled modes
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen;
+  
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +70,16 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      {children && (
+        <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+          {children}
+        </DialogTrigger>
+      )}
+      <DialogContent 
+        className="sm:max-w-[425px]"
+        onInteractOutside={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('createDialog.title')}</DialogTitle>

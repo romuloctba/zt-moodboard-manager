@@ -28,6 +28,10 @@ function ProjectViewContent() {
   const tCommon = useTranslations('common');
   
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
+  
+  // Controlled dialog states
+  const [showCreateCharacterDialog, setShowCreateCharacterDialog] = useState(false);
+  const [showCreateEditionDialog, setShowCreateEditionDialog] = useState(false);
 
   const { 
     currentProject, 
@@ -86,26 +90,24 @@ function ProjectViewContent() {
       actions.push({
         id: 'new-character',
         element: (
-          <CreateCharacterDialog>
-            <Button className="w-full md:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              {t('header.newCharacter')}
-            </Button>
-          </CreateCharacterDialog>
+          <Button className="w-full md:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            {t('header.newCharacter')}
+          </Button>
         ),
+        onClick: () => setShowCreateCharacterDialog(true),
         mobilePriority: 1,
       });
     } else {
       actions.push({
         id: 'new-edition',
-        element: projectId ? (
-          <CreateEditionDialog projectId={projectId}>
-            <Button className="w-full md:w-auto">
-              <Plus className="w-4 h-4 mr-2" />
-              {tEditions('header.newEdition')}
-            </Button>
-          </CreateEditionDialog>
-        ) : null,
+        element: (
+          <Button className="w-full md:w-auto">
+            <Plus className="w-4 h-4 mr-2" />
+            {tEditions('header.newEdition')}
+          </Button>
+        ),
+        onClick: () => setShowCreateEditionDialog(true),
         mobilePriority: 1,
       });
     }
@@ -138,7 +140,7 @@ function ProjectViewContent() {
     );
 
     return actions;
-  }, [activeTab, t, tEditions, tCommon, projectId]);
+  }, [activeTab, t, tEditions, tCommon]);
 
   if (isLoading || !currentProject) {
     return <ProjectDetailSkeleton />;
@@ -203,6 +205,19 @@ function ProjectViewContent() {
           )
         )}
       </main>
+
+      {/* Controlled Dialogs - rendered at page level */}
+      <CreateCharacterDialog 
+        open={showCreateCharacterDialog} 
+        onOpenChange={setShowCreateCharacterDialog} 
+      />
+      {projectId && (
+        <CreateEditionDialog 
+          projectId={projectId}
+          open={showCreateEditionDialog} 
+          onOpenChange={setShowCreateEditionDialog} 
+        />
+      )}
     </div>
   );
 }

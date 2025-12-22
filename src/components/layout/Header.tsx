@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 export interface HeaderAction {
   /** Unique identifier for the action */
   id: string;
-  /** The action element to render */
+  /** The action element to render (button/link) */
   element: ReactNode;
   /** Whether to show on mobile (in the sheet menu) - default true */
   showOnMobile?: boolean;
@@ -18,6 +18,8 @@ export interface HeaderAction {
   showOnDesktop?: boolean;
   /** Priority for mobile menu ordering (lower = higher priority) */
   mobilePriority?: number;
+  /** Click handler - when provided, the action triggers this instead of relying on element's internal behavior */
+  onClick?: () => void;
 }
 
 export interface HeaderProps {
@@ -115,7 +117,9 @@ export function Header({
           {/* Desktop actions - hidden on mobile */}
           <div className="hidden md:flex items-center gap-4">
             {desktopActions.map((action) => (
-              <div key={action.id}>{action.element}</div>
+              <div key={action.id} onClick={action.onClick}>
+                {action.element}
+              </div>
             ))}
           </div>
 

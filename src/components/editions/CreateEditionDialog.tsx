@@ -19,13 +19,29 @@ import { toast } from 'sonner';
 
 interface CreateEditionDialogProps {
   projectId: string;
-  children: React.ReactNode;
+  /** Trigger element - optional when using controlled mode */
+  children?: React.ReactNode;
+  /** Controlled open state */
+  open?: boolean;
+  /** Controlled open state handler */
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateEditionDialog({ projectId, children }: CreateEditionDialogProps) {
+export function CreateEditionDialog({ projectId, children, open: controlledOpen, onOpenChange }: CreateEditionDialogProps) {
   const t = useTranslations('editions');
   const tCommon = useTranslations('common');
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  // Support both controlled and uncontrolled modes
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (value: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(value);
+    } else {
+      setInternalOpen(value);
+    }
+  };
   const [title, setTitle] = useState('');
   const [issueNumber, setIssueNumber] = useState('');
   const [volume, setVolume] = useState('');
@@ -71,10 +87,16 @@ export function CreateEditionDialog({ projectId, children }: CreateEditionDialog
       setOpen(isOpen);
       if (!isOpen) resetForm();
     }}>
-      <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      {children && (
+        <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+          {children}
+        </DialogTrigger>
+      )}
+      <DialogContent 
+        className="sm:max-w-[500px]"
+        onInteractOutside={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>{t('createDialog.title')}</DialogTitle>

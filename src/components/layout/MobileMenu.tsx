@@ -25,6 +25,15 @@ export function MobileMenu({ actions, footer }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('common');
 
+  const handleActionClick = (action: HeaderAction) => {
+    // Close the sheet
+    setOpen(false);
+    // Call the onClick handler if provided
+    if (action.onClick) {
+      action.onClick();
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -42,11 +51,7 @@ export function MobileMenu({ actions, footer }: MobileMenuProps) {
             <div 
               key={action.id} 
               className="w-full justify-center flex"
-              onClick={() => {
-                // Close the sheet when an action is clicked
-                // Small delay to allow the action to process first
-                setTimeout(() => setOpen(false), 150);
-              }}
+              onClick={() => handleActionClick(action)}
             >
               {action.element}
             </div>
