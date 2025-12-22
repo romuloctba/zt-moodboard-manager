@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useEditionStore } from '@/store/editionStore';
+import { useControllableState } from '@/hooks';
 import { toast } from 'sonner';
 
 interface CreateEditionDialogProps {
@@ -23,25 +24,15 @@ interface CreateEditionDialogProps {
   children?: React.ReactNode;
   /** Controlled open state */
   open?: boolean;
-  /** Controlled open state handler */
+  /** Callback when open state changes */
   onOpenChange?: (open: boolean) => void;
 }
 
 export function CreateEditionDialog({ projectId, children, open: controlledOpen, onOpenChange }: CreateEditionDialogProps) {
   const t = useTranslations('editions');
   const tCommon = useTranslations('common');
-  const [internalOpen, setInternalOpen] = useState(false);
-  
-  // Support both controlled and uncontrolled modes
-  const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen : internalOpen;
-  const setOpen = (value: boolean) => {
-    if (isControlled) {
-      onOpenChange?.(value);
-    } else {
-      setInternalOpen(value);
-    }
-  };
+  const [open, setOpen] = useControllableState(controlledOpen, false, onOpenChange);
+
   const [title, setTitle] = useState('');
   const [issueNumber, setIssueNumber] = useState('');
   const [volume, setVolume] = useState('');

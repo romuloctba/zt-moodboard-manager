@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useProjectStore } from '@/store/projectStore';
+import { useControllableState } from '@/hooks';
 import { toast } from 'sonner';
 
 interface CreateCharacterDialogProps {
@@ -22,25 +23,14 @@ interface CreateCharacterDialogProps {
   children?: React.ReactNode;
   /** Controlled open state */
   open?: boolean;
-  /** Controlled open state handler */
+  /** Callback when open state changes */
   onOpenChange?: (open: boolean) => void;
 }
 
 export function CreateCharacterDialog({ children, open: controlledOpen, onOpenChange }: CreateCharacterDialogProps) {
   const t = useTranslations('characters');
   const tCommon = useTranslations('common');
-  const [internalOpen, setInternalOpen] = useState(false);
-  
-  // Support both controlled and uncontrolled modes
-  const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen : internalOpen;
-  const setOpen = (value: boolean) => {
-    if (isControlled) {
-      onOpenChange?.(value);
-    } else {
-      setInternalOpen(value);
-    }
-  };
+  const [open, setOpen] = useControllableState(controlledOpen, false, onOpenChange);
   
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);

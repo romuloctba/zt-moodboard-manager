@@ -25,11 +25,13 @@ export function MobileMenu({ actions, footer }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
   const t = useTranslations('common');
 
-  const handleActionClick = (action: HeaderAction) => {
-    // Close the sheet
-    setOpen(false);
-    // Call the onClick handler if provided
+  const handleActionClick = (action: HeaderAction, e: React.MouseEvent) => {
+    // Only handle if onClick is defined - otherwise let the element handle its own clicks
     if (action.onClick) {
+      e.stopPropagation();
+      // Close the sheet
+      setOpen(false);
+      // Call the onClick handler
       action.onClick();
     }
   };
@@ -51,7 +53,7 @@ export function MobileMenu({ actions, footer }: MobileMenuProps) {
             <div 
               key={action.id} 
               className="w-full justify-center flex"
-              onClick={() => handleActionClick(action)}
+              onClick={(e) => handleActionClick(action, e)}
             >
               {action.element}
             </div>

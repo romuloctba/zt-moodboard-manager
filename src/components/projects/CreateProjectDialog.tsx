@@ -15,10 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useProjectStore } from '@/store/projectStore';
+import { useControllableState } from '@/hooks';
 import { toast } from 'sonner';
 
 interface CreateProjectDialogProps {
-  /** Optional trigger element. When omitted, dialog must be controlled via open/onOpenChange */
+  /** Trigger element - optional when using controlled mode */
   children?: React.ReactNode;
   /** Controlled open state */
   open?: boolean;
@@ -29,21 +30,21 @@ interface CreateProjectDialogProps {
 export function CreateProjectDialog({ 
   children,
   open: controlledOpen,
-  onOpenChange: controlledOnOpenChange,
+  onOpenChange,
 }: CreateProjectDialogProps) {
   const t = useTranslations('projects');
   const tCommon = useTranslations('common');
-  
-  // Support both controlled and uncontrolled modes
-  const [internalOpen, setInternalOpen] = useState(false);
-  const isControlled = controlledOpen !== undefined;
-  const open = isControlled ? controlledOpen : internalOpen;
-  const setOpen = isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen;
+  const [open, setOpen] = useControllableState(controlledOpen, false, onOpenChange);
   
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { createProject } = useProjectStore();
+
+  const resetForm = () => {
+    setName('');
+    setDescription('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +59,7 @@ export function CreateProjectDialog({
       await createProject(name.trim(), description.trim() || undefined);
       toast.success(t('toast.created'));
       setOpen(false);
-      setName('');
-      setDescription('');
+      resetForm();
     } catch (error) {
       toast.error(t('toast.createFailed'));
       console.error(error);
@@ -69,7 +69,10 @@ export function CreateProjectDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       {children && (
         <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
           {children}
