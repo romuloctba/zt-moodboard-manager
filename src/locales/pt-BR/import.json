@@ -1,0 +1,40 @@
+{
+  "character": {
+    "title": "Importar Personagem de JSON",
+    "description": "Cole os dados JSON para criar um novo personagem. Imagens podem ser adicionadas depois usando o recurso de upload.",
+    "placeholder": "Cole seu JSON aqui...",
+    "preview": "Pré-visualizar",
+    "import": "Importar Personagem",
+    "validation": {
+      "invalidJson": "Formato JSON inválido. Verifique a sintaxe.",
+      "validJson": "JSON válido"
+    },
+    "success": "Personagem importado com sucesso",
+    "error": "Falha ao importar personagem",
+    "example": "Exemplo de JSON",
+    "exampleHint": "Clique para copiar o exemplo"
+  },
+  "page": {
+    "title": "Importar Página de JSON",
+    "description": "Cole os dados JSON para criar uma nova página com painéis e diálogos.",
+    "placeholder": "Cole seu JSON aqui...",
+    "preview": "Pré-visualizar",
+    "import": "Importar Página",
+    "validation": {
+      "invalidJson": "Formato JSON inválido. Verifique a sintaxe.",
+      "validJson": "JSON válido"
+    },
+    "success": "Página importada com sucesso",
+    "error": "Falha ao importar página",
+    "summary": {
+      "panels": "{count, plural, =0 {Nenhum painel} one {# painel} other {# painéis}}",
+      "dialogues": "{count, plural, =0 {Nenhum diálogo} one {# diálogo} other {# diálogos}}"
+    },
+    "example": "Exemplo de JSON",
+    "exampleHint": "Clique para copiar o exemplo"
+  },
+  "common": {
+    "errors": "Erros de Validação",
+    "copyExample": "Exemplo copiado"
+  }
+}

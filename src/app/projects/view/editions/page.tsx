@@ -7,8 +7,8 @@ import { useEditionStore } from '@/store/editionStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
-import { CreatePageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
-import { Plus, FileText, Pencil, FileDown, Settings, Cloud } from 'lucide-react';
+import { CreatePageDialog, ImportPageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
+import { Plus, FileText, Pencil, FileDown, Settings, Cloud, FileJson } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import Link from 'next/link';
 
@@ -34,6 +34,7 @@ function EditionViewContent() {
   const { triggerNotFound } = useNotFound({ entity: 'Edition' });
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showCreatePageDialog, setShowCreatePageDialog] = useState(false);
+  const [showImportPageDialog, setShowImportPageDialog] = useState(false);
 
   useEffect(() => {
     if (!editionId || !projectId) {
@@ -89,6 +90,17 @@ function EditionViewContent() {
       ),
       onClick: () => setShowCreatePageDialog(true),
       mobilePriority: 1,
+    },
+    {
+      id: 'import-page',
+      element: (
+        <Button variant="outline" className="w-full md:w-auto">
+          <FileJson className="w-4 h-4 mr-2" />
+          {tPages('header.importPage')}
+        </Button>
+      ),
+      onClick: () => setShowImportPageDialog(true),
+      mobilePriority: 2,
     },
     {
       id: 'edit-edition',
@@ -171,6 +183,12 @@ function EditionViewContent() {
       <CreatePageDialog
         open={showCreatePageDialog}
         onOpenChange={setShowCreatePageDialog}
+      />
+
+      {/* Import Page Dialog */}
+      <ImportPageDialog
+        open={showImportPageDialog}
+        onOpenChange={setShowImportPageDialog}
       />
     </div>
   );

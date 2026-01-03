@@ -1,0 +1,40 @@
+{
+  "character": {
+    "title": "Import Character from JSON",
+    "description": "Paste JSON data to create a new character. Images can be added later using the upload feature.",
+    "placeholder": "Paste your JSON here...",
+    "preview": "Preview",
+    "import": "Import Character",
+    "validation": {
+      "invalidJson": "Invalid JSON format. Please check your syntax.",
+      "validJson": "JSON is valid"
+    },
+    "success": "Character imported successfully",
+    "error": "Failed to import character",
+    "example": "Example JSON",
+    "exampleHint": "Click to copy example to clipboard"
+  },
+  "page": {
+    "title": "Import Page from JSON",
+    "description": "Paste JSON data to create a new page with panels and dialogues.",
+    "placeholder": "Paste your JSON here...",
+    "preview": "Preview",
+    "import": "Import Page",
+    "validation": {
+      "invalidJson": "Invalid JSON format. Please check your syntax.",
+      "validJson": "JSON is valid"
+    },
+    "success": "Page imported successfully",
+    "error": "Failed to import page",
+    "summary": {
+      "panels": "{count, plural, =0 {No panels} one {# panel} other {# panels}}",
+      "dialogues": "{count, plural, =0 {No dialogues} one {# dialogue} other {# dialogues}}"
+    },
+    "example": "Example JSON",
+    "exampleHint": "Click to copy example to clipboard"
+  },
+  "common": {
+    "errors": "Validation Errors",
+    "copyExample": "Example copied to clipboard"
+  }
+}

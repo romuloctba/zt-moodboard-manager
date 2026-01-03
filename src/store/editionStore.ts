@@ -3,6 +3,8 @@ import type { Edition, ScriptPage, Panel, PanelDialogue, EditionStatus, PageStat
 import { editionRepository, scriptPageRepository, panelRepository } from '@/lib/db/repositories';
 import { triggerGlobalSync } from '@/lib/sync/globalSyncTrigger';
 import { syncManifest } from '@/lib/sync/syncManifest';
+import { importPage } from '@/lib/import';
+import type { PageImportResult } from '@/lib/import';
 
 interface EditionState {
   // Data
@@ -27,6 +29,7 @@ interface EditionState {
   // Actions - Pages
   loadPages: (editionId: string) => Promise<void>;
   createPage: (options?: { title?: string; goal?: string; setting?: string }) => Promise<ScriptPage | null>;
+  importPageFromJSON: (jsonData: unknown) => Promise<PageImportResult>;
   selectPage: (id: string) => Promise<boolean>;
   updatePage: (id: string, updates: Partial<ScriptPage>) => Promise<void>;
   updatePageStatus: (id: string, status: PageStatus) => Promise<void>;
@@ -171,6 +174,25 @@ export const useEditionStore = create<EditionState>((set, get) => ({
     set(state => ({ pages: [...state.pages, page] }));
     triggerGlobalSync();
     return page;
+  },
+
+  importPageFromJSON: async (jsonData: unknown) => {
+    const { currentEdition } = get();
+    if (!currentEdition) {
+      return {
+        success: false,
+        errors: ['No edition selected'],
+      };
+    }
+
+    const result = await importPage(currentEdition.id, jsonData);
+
+    if (result.success && result.data) {
+      set(state => ({ pages: [...state.pages, result.data!.page] }));
+      triggerGlobalSync();
+    }
+
+    return result;
   },
 
   selectPage: async (id: string) => {

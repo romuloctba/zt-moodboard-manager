@@ -3,6 +3,8 @@ import type { Project, Character } from '@/types';
 import { projectRepository, characterRepository, editionRepository, scriptPageRepository, panelRepository } from '@/lib/db/repositories';
 import { triggerGlobalSync } from '@/lib/sync/globalSyncTrigger';
 import { syncManifest } from '@/lib/sync/syncManifest';
+import { importCharacter } from '@/lib/import';
+import type { CharacterImportResult } from '@/lib/import';
 
 interface ProjectState {
   // Data
@@ -25,6 +27,7 @@ interface ProjectState {
   // Actions - Characters
   loadCharacters: (projectId: string) => Promise<void>;
   createCharacter: (name: string) => Promise<Character | null>;
+  importCharacterFromJSON: (jsonData: unknown) => Promise<CharacterImportResult>;
   selectCharacter: (id: string) => Promise<boolean>;
   renameCharacter: (id: string, name: string) => Promise<void>;
   deleteCharacter: (id: string) => Promise<void>;
@@ -139,6 +142,25 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     set(state => ({ characters: [...state.characters, character] }));
     triggerGlobalSync();
     return character;
+  },
+
+  importCharacterFromJSON: async (jsonData: unknown) => {
+    const { currentProject } = get();
+    if (!currentProject) {
+      return {
+        success: false,
+        errors: ['No project selected'],
+      };
+    }
+
+    const result = await importCharacter(currentProject.id, jsonData);
+
+    if (result.success && result.data) {
+      set(state => ({ characters: [...state.characters, result.data!] }));
+      triggerGlobalSync();
+    }
+
+    return result;
   },
 
   selectCharacter: async (id: string) => {

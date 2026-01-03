@@ -10,6 +10,7 @@ export { CoverCard } from './CoverCard';
 export { PageCard } from './PageCard';
 export { PagesGrid } from './PagesGrid';
 export { CreatePageDialog } from './CreatePageDialog';
+export { ImportPageDialog } from './ImportPageDialog';
 export { EditPageDialog } from './EditPageDialog';
 
 // Panel Components

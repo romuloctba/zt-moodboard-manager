@@ -8,9 +8,10 @@ import { useEditionStore } from '@/store/editionStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDialog';
+import { ImportCharacterDialog } from '@/components/characters/ImportCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
 import { EditionList, CreateEditionDialog } from '@/components/editions';
-import { Plus, Users, Settings, Cloud, BookOpen } from 'lucide-react';
+import { Plus, Users, Settings, Cloud, BookOpen, FileJson } from 'lucide-react';
 import Link from 'next/link';
 import { Header, HeaderAction } from '@/components/layout';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ function ProjectViewContent() {
   
   // Controlled dialog states
   const [showCreateCharacterDialog, setShowCreateCharacterDialog] = useState(false);
+  const [showImportCharacterDialog, setShowImportCharacterDialog] = useState(false);
   const [showCreateEditionDialog, setShowCreateEditionDialog] = useState(false);
 
   const { 
@@ -98,6 +100,17 @@ function ProjectViewContent() {
         onClick: () => setShowCreateCharacterDialog(true),
         mobilePriority: 1,
       });
+      actions.push({
+        id: 'import-character',
+        element: (
+          <Button variant="outline" className="w-full md:w-auto">
+            <FileJson className="w-4 h-4 mr-2" />
+            {t('header.importCharacter')}
+          </Button>
+        ),
+        onClick: () => setShowImportCharacterDialog(true),
+        mobilePriority: 2,
+      });
     } else {
       actions.push({
         id: 'new-edition',
@@ -123,7 +136,7 @@ function ProjectViewContent() {
             </Link>
           </Button>
         ),
-        mobilePriority: 2,
+        mobilePriority: 3,
       },
       {
         id: 'settings',
@@ -210,6 +223,10 @@ function ProjectViewContent() {
       <CreateCharacterDialog 
         open={showCreateCharacterDialog} 
         onOpenChange={setShowCreateCharacterDialog} 
+      />
+      <ImportCharacterDialog
+        open={showImportCharacterDialog}
+        onOpenChange={setShowImportCharacterDialog}
       />
       {projectId && (
         <CreateEditionDialog 
