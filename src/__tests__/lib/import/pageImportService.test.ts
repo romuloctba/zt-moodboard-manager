@@ -29,14 +29,16 @@ describe('Page Import Service', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       isArchived: false,
-      settings: {},
+      tags: [],
+      settings: {
+        defaultView: 'grid',
+        gridColumns: 3,
+        canvasBackground: '#ffffff',
+      },
     });
 
     // Create a test edition
-    const edition = await editionRepository.create(testProjectId, {
-      title: 'Test Edition',
-      description: 'Test edition for import tests',
-    });
+    const edition = await editionRepository.create(testProjectId, 'Test Edition');
     testEditionId = edition.id;
   });
 
@@ -55,7 +57,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.page.title).toBe('Test Page');
         expect(result.data.page.editionId).toBe(testEditionId);
         expect(result.data.page.id).toBeDefined();
@@ -81,7 +83,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.page.title).toBe('Full Page');
         expect(result.data.page.goal).toBe('Test the full import');
         expect(result.data.page.setting).toBe('A test environment');
@@ -105,7 +107,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels).toHaveLength(1);
         expect(result.data.panels[0].description).toBe('Opening shot');
         expect(result.data.panels[0].cameraAngle).toBe('wide');
@@ -130,7 +132,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels).toHaveLength(3);
         expect(result.data.panels[0].description).toBe('Panel 1');
         expect(result.data.panels[1].description).toBe('Panel 2');
@@ -163,7 +165,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         const panel = result.data.panels[0];
         expect(panel.dialogues).toBeDefined();
         expect(panel.dialogues).toHaveLength(2);
@@ -195,7 +197,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         const dialogues = result.data.panels[0].dialogues!;
         expect(dialogues).toHaveLength(6);
         expect(dialogues.map((d) => d.type)).toEqual([
@@ -215,7 +217,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (!result.success && result.errors) {
         expect(result.errors.length).toBeGreaterThan(0);
         expect(result.errors.some((e) => e.toLowerCase().includes('title'))).toBe(true);
       }
@@ -240,7 +242,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (!result.success && result.errors) {
         expect(result.errors.some((e) => e.toLowerCase().includes('type'))).toBe(true);
       }
     });
@@ -262,7 +264,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         const texts = result.data.panels[0].dialogues!.map((d) => d.text);
         expect(texts).toEqual(['First', 'Second', 'Third']);
       }
@@ -281,7 +283,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         const descriptions = result.data.panels.map((p) => p.description);
         expect(descriptions).toEqual(['First panel', 'Second panel', 'Third panel']);
       }
@@ -295,7 +297,7 @@ describe('Page Import Service', () => {
       const result = await importPageFromString(testEditionId, jsonString);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.page.title).toBe('String Page');
       }
     });
@@ -306,7 +308,7 @@ describe('Page Import Service', () => {
       const result = await importPageFromString(testEditionId, invalidJsonString);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (!result.success && result.errors) {
         expect(result.errors.some((e) => e.toLowerCase().includes('json'))).toBe(true);
       }
     });
@@ -333,7 +335,7 @@ describe('Page Import Service', () => {
       const result = await importPageFromString(testEditionId, jsonString);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels[0].dialogues![0].text).toBe(
           'Complex dialogue with "quotes" and <brackets>'
         );
@@ -444,7 +446,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels).toHaveLength(0);
       }
     });
@@ -463,7 +465,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels[0].dialogues).toHaveLength(0);
       }
     });
@@ -488,7 +490,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.page.title).toBe('日本語のページ');
         expect(result.data.panels[0].dialogues![0].characterName).toBe('主人公');
       }
@@ -514,7 +516,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels[0].dialogues![0].direction).toBe(
           'softly, with a hint of sadness'
         );
@@ -541,7 +543,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels[0].dialogues![0].characterId).toBe('char-uuid-123');
       }
     });
@@ -560,7 +562,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.panels[0].characters).toEqual(['char-1', 'char-2', 'char-3']);
       }
     });
@@ -584,7 +586,7 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         const text = result.data.panels[0].dialogues![0].text;
         expect(text).toContain('\n');
         expect(text).toContain('\t');
@@ -664,11 +666,11 @@ describe('Page Import Service', () => {
       const result = await importPage(testEditionId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.page.title).toBe('Chapter 1, Page 5');
         expect(result.data.panels).toHaveLength(4);
 
-        const summary = getPageImportSummary(jsonData);
+        const summary = getPageImportSummary(jsonData as any);
         expect(summary.panelCount).toBe(4);
         expect(summary.dialogueCount).toBe(5);
         expect(summary.hasTitle).toBe(true);

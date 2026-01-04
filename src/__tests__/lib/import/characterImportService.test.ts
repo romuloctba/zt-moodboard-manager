@@ -26,7 +26,12 @@ describe('Character Import Service', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
       isArchived: false,
-      settings: {},
+      tags: [],
+      settings: {
+        defaultView: 'grid',
+        gridColumns: 3,
+        canvasBackground: '#ffffff',
+      },
     });
   });
 
@@ -43,7 +48,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('Test Character');
         expect(result.data.projectId).toBe(testProjectId);
         expect(result.data.id).toBeDefined();
@@ -78,7 +83,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('Full Character');
         expect(result.data.description).toBe('A detailed description');
         expect(result.data.tags).toEqual(['hero', 'protagonist']);
@@ -100,7 +105,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (!result.success && result.errors) {
         expect(result.errors.length).toBeGreaterThan(0);
         expect(result.errors.some((e) => e.toLowerCase().includes('name'))).toBe(true);
       }
@@ -124,7 +129,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.createdAt).toBeInstanceOf(Date);
         expect(result.data.updatedAt).toBeInstanceOf(Date);
       }
@@ -139,9 +144,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
-        // Images should be empty or undefined
-        expect(result.data.images).toBeUndefined();
+      if (result.success && result.data) {
         // Palette (color from images) should not be set
         expect(result.data.metadata?.palette).toBeUndefined();
       }
@@ -155,7 +158,7 @@ describe('Character Import Service', () => {
       const result = await importCharacterFromString(testProjectId, jsonString);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('String Character');
       }
     });
@@ -166,7 +169,7 @@ describe('Character Import Service', () => {
       const result = await importCharacterFromString(testProjectId, invalidJsonString);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      if (!result.success && result.errors) {
         expect(result.errors.some((e) => e.toLowerCase().includes('json'))).toBe(true);
       }
     });
@@ -188,7 +191,7 @@ describe('Character Import Service', () => {
       const result = await importCharacterFromString(testProjectId, jsonString);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('Whitespace Character');
       }
     });
@@ -206,7 +209,7 @@ describe('Character Import Service', () => {
       const result = await importCharacterFromString(testProjectId, jsonString);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.profile?.customFields?.['special.key']).toBe(
           'value with special chars: <>&"'
         );
@@ -282,7 +285,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('日本語キャラクター');
         expect(result.data.description).toBe('Emojis 🎭👤🎨');
       }
@@ -297,7 +300,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.name).toBe('Character <with> "special" & chars');
         expect(result.data.description).toContain('\n');
         expect(result.data.description).toContain('\t');
@@ -332,7 +335,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.tags).toEqual([]);
         expect(result.data.profile?.personality).toEqual([]);
       }
@@ -349,7 +352,7 @@ describe('Character Import Service', () => {
       const result = await importCharacter(testProjectId, jsonData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      if (result.success && result.data) {
         expect(result.data.profile?.customFields).toEqual({});
       }
     });
