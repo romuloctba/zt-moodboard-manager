@@ -11,7 +11,7 @@ import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDi
 import { ImportCharacterDialog } from '@/components/characters/ImportCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
 import { EditionList, CreateEditionDialog } from '@/components/editions';
-import { Plus, Users, Settings, Cloud, BookOpen, FileJson } from 'lucide-react';
+import { Plus, Users, Settings, Cloud, BookOpen, FileUp } from 'lucide-react';
 import Link from 'next/link';
 import { Header, HeaderAction } from '@/components/layout';
 import { cn } from '@/lib/utils';
@@ -104,8 +104,7 @@ function ProjectViewContent() {
         id: 'import-character',
         element: (
           <Button variant="outline" className="w-full md:w-auto">
-            <FileJson className="w-4 h-4 mr-2" />
-            {t('header.importCharacter')}
+            <FileUp className="w-4 h-4" />
           </Button>
         ),
         onClick: () => setShowImportCharacterDialog(true),

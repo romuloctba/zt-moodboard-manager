@@ -8,7 +8,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog, ImportPageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
-import { Plus, FileText, Pencil, FileDown, Settings, Cloud, FileJson } from 'lucide-react';
+import { Plus, FileText, Pencil, FileDown, Settings, Cloud, FileUp } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import Link from 'next/link';
 
@@ -95,8 +95,7 @@ function EditionViewContent() {
       id: 'import-page',
       element: (
         <Button variant="outline" className="w-full md:w-auto">
-          <FileJson className="w-4 h-4 mr-2" />
-          {tPages('header.importPage')}
+          <FileUp className="w-4 h-4" />
         </Button>
       ),
       onClick: () => setShowImportPageDialog(true),

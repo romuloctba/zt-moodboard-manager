@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { FileJson, Copy, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileUp, Copy, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -188,7 +188,7 @@ export function ImportPageDialog({ children, open: controlledOpen, onOpenChange 
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileJson className="h-5 w-5" />
+              <FileUp className="h-5 w-5" />
               {t('page.title')}
             </DialogTitle>
             <DialogDescription>

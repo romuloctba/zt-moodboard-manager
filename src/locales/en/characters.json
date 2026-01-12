@@ -1,7 +1,6 @@
 {
   "header": {
-    "newCharacter": "New Character",
-    "importCharacter": "Import from JSON"
+    "newCharacter": "New Character"
   },
   "emptyState": {
     "title": "No characters yet",

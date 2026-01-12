@@ -92,8 +92,7 @@
   "pages": {
     "header": {
       "title": "Pages",
-      "newPage": "Add Page",
-      "importPage": "Import from JSON"
+      "newPage": "Add Page"
     },
     "emptyState": {
       "title": "No pages yet",
