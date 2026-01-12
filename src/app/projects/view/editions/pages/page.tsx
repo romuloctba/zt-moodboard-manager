@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useEditionStore } from '@/store/editionStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
@@ -13,6 +14,7 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Pencil,
+  HelpCircle,
 } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import { PAGE_STATUS_COLORS } from '@/types';
@@ -104,6 +106,19 @@ function PageEditorContent() {
         </Button>
       ),
       mobilePriority: 1,
+    },
+    {
+      id: 'help',
+      element: (
+        <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+          <Link href="/help" className="flex items-center justify-center gap-2 md:gap-0">
+            <HelpCircle className="w-5 h-5" />
+            <span className="md:hidden">{t('common.help.viewGuide')}</span>
+          </Link>
+        </Button>
+      ),
+      mobilePriority: 2,
+      showOnDesktop: false,
     },
   ], [t]);
 

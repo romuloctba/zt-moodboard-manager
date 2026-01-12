@@ -12,7 +12,7 @@ import { ImportCharacterDialog } from '@/components/characters/ImportCharacterDi
 import { CharacterList } from '@/components/characters/CharacterList';
 import { EditionList, CreateEditionDialog } from '@/components/editions';
 import { EditProjectDialog } from '@/components/projects';
-import { Plus, Users, Settings, Cloud, BookOpen, FileUp, FileEdit } from 'lucide-react';
+import { Plus, Users, Settings, Cloud, BookOpen, FileUp, FileEdit, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Header, HeaderAction } from '@/components/layout';
 import { cn } from '@/lib/utils';
@@ -161,6 +161,19 @@ function ProjectViewContent() {
           </Button>
         ),
         mobilePriority: 3,
+      },
+      {
+        id: 'help',
+        element: (
+          <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+            <Link href="/help" className="flex items-center justify-center gap-2 md:gap-0">
+              <HelpCircle className="w-5 h-5" />
+              <span className="md:hidden">{tCommon('help.viewGuide')}</span>
+            </Link>
+          </Button>
+        ),
+        mobilePriority: 4,
+        showOnDesktop: false,
       }
     );
 

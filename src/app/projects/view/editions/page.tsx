@@ -8,7 +8,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { useNotFound } from '@/hooks/use-not-found';
 import { Button } from '@/components/ui/button';
 import { CreatePageDialog, ImportPageDialog, EditEditionDialog, PagesGrid } from '@/components/editions';
-import { Plus, FileText, Pencil, FileDown, Settings, Cloud, FileUp } from 'lucide-react';
+import { Plus, FileText, Pencil, FileDown, Settings, Cloud, FileUp, HelpCircle } from 'lucide-react';
 import { Header, HeaderAction } from '@/components/layout';
 import Link from 'next/link';
 
@@ -139,6 +139,19 @@ function EditionViewContent() {
           </Button>
         ),
         mobilePriority: 3,
+      },
+      {
+        id: 'help',
+        element: (
+          <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+            <Link href="/help" className="flex items-center justify-center gap-2 md:gap-0">
+              <HelpCircle className="w-5 h-5" />
+              <span className="md:hidden">{tCommon('help.viewGuide')}</span>
+            </Link>
+          </Button>
+        ),
+        mobilePriority: 4,
+        showOnDesktop: false,
       },
   ], [t, tPages, tExport, editionId, projectId, tCommon]);
 

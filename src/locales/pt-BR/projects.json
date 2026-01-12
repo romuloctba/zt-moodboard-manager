@@ -6,7 +6,10 @@
   "emptyState": {
     "title": "Nenhum projeto ainda",
     "description": "Crie seu primeiro projeto para começar a organizar referências visuais para seus personagens.",
-    "action": "Criar Seu Primeiro Projeto"
+    "action": "Criar Seu Primeiro Projeto",
+    "helpTitle": "Novo no Gerenciador de Moodboard?",
+    "helpDescription": "Confira nosso guia abrangente para aprender sobre todos os recursos, fluxos de trabalho e dicas profissionais.",
+    "helpAction": "Ver Guia de Introdução"
   },
   "createDialog": {
     "title": "Criar Novo Projeto",

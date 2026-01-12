@@ -27,7 +27,9 @@
     "confirm": "Confirm",
     "goBack": "Go Back",
     "goHome": "Go Home",
-    "copyToClipboard": "Copied {value} to clipboard"
+    "copyToClipboard": "Copied {value} to clipboard",
+    "dismiss": "Dismiss",
+    "back": "Back"
   },
   "navigation": {
     "settings": "Settings",
@@ -52,5 +54,10 @@
   "install": {
     "button": "Install App",
     "tooltip": "Install for offline access"
+  },
+  "help": {
+    "needHelp": "Need Help?",
+    "viewGuide": "View Help & Guide",
+    "getStarted": "Get Started Guide"
   }
 }

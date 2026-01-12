@@ -25,6 +25,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     media: (await import(`@/locales/${locale}/media.json`)).default,
     errors: (await import(`@/locales/${locale}/errors.json`)).default,
     import: (await import(`@/locales/${locale}/import.json`)).default,
+    help: (await import(`@/locales/${locale}/help.json`)).default,
   };
 
   return {

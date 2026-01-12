@@ -6,7 +6,10 @@
   "emptyState": {
     "title": "No projects yet",
     "description": "Create your first project to start organizing visual references for your characters.",
-    "action": "Create Your First Project"
+    "action": "Create Your First Project",
+    "helpTitle": "New to Moodboard Manager?",
+    "helpDescription": "Check out our comprehensive guide to learn about all features, workflows, and pro tips.",
+    "helpAction": "View Getting Started Guide"
   },
   "createDialog": {
     "title": "Create New Project",

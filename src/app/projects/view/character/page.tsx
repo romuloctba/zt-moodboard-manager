@@ -4,7 +4,8 @@ import { Suspense, useMemo } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Upload, Loader2, Download, LayoutGrid, PenTool, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { Upload, Loader2, Download, LayoutGrid, PenTool, FileText, HelpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StorageIndicator } from '@/components/ui/storage-indicator';
 import { characterRepository, projectRepository } from '@/lib/db/repositories';
@@ -233,6 +234,19 @@ function CharacterViewContent() {
         </Button>
       ),
       mobilePriority: 2,
+    },
+    {
+      id: 'help',
+      element: (
+        <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
+          <Link href="/help" className="flex items-center justify-center gap-2 md:gap-0">
+            <HelpCircle className="w-5 h-5" />
+            <span className="md:hidden">{t('common.help.viewGuide')}</span>
+          </Link>
+        </Button>
+      ),
+      mobilePriority: 5,
+      showOnDesktop: false,
     },
   ], [viewMode, exporting, t, handleExportAll]);
 

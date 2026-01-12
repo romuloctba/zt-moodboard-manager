@@ -1,0 +1,149 @@
+{
+  "title": "Ajuda & Guia",
+  "hero": {
+    "title": "Bem-vindo ao Seu Centro de Comando Criativo",
+    "subtitle": "Moodboard Manager é seu espaço de trabalho visual completo para dar vida a personagens e histórias. Seja criando graphic novels, desenvolvendo conceitos de personagens ou escrevendo roteiros de quadrinhos, tudo que você precisa está aqui—organizado, offline e sincronizado em todos os seus dispositivos.",
+    "feature1": "Organize projetos",
+    "feature2": "Crie moodboards",
+    "feature3": "Sincronize em todos os lugares"
+  },
+  "quickStart": {
+    "title": "Início Rápido",
+    "subtitle": "Comece a criar em 3 passos simples:",
+    "proTip": "💡 Dica Profissional:",
+    "step1": {
+      "title": "Crie Seu Primeiro Projeto",
+      "description": "Clique em 'Novo Projeto' na tela inicial. Você pode adicionar uma ideia com apenas uma descrição, ou fazer uma configuração completa com nome e tags.",
+      "tip": "Acordou com uma ideia? Escreva para não perder. Você pode adicionar um título depois!"
+    },
+    "step2": {
+      "title": "Adicione Personagens",
+      "description": "Personagens são o coração do seu projeto. Adicione nome, idade, papel, traços de personalidade e faça upload de imagens de referência para inspiração visual.",
+      "tip": "Adicione campos personalizados para o que precisar: 'Arma', 'Bordão', 'Planeta Natal'—o que quiser!"
+    },
+    "step3": {
+      "title": "Comece a Criar",
+      "description": "Entre na Visualização em Grade para uma galeria de referências, Modo Canvas para um espaço visual infinito, ou Edições para escrever seu roteiro de quadrinhos.",
+      "tip": "Use o modo Canvas para criar folhas de mood para cenas ou capítulos específicos!"
+    }
+  },
+  "features": {
+    "title": "Recursos Principais",
+    "projects": {
+      "title": "Gerenciamento de Projetos",
+      "description": "Capture ideias rapidamente ou crie projetos completos com metadados. Arquive projetos antigos, exporte como arquivos ZIP e organize com tags e filtros. Edite os detalhes do projeto a qualquer momento conforme suas ideias evoluem."
+    },
+    "characters": {
+      "title": "Perfis de Personagens",
+      "description": "Mergulhe profundamente em cada personagem com perfis, referências visuais, campos personalizados e imagens ilimitadas. Cada personagem tem seu próprio espaço dedicado com traços de personalidade, história e muito mais."
+    },
+    "canvas": {
+      "title": "Canvas de Moodboard Visual",
+      "description": "Espaço de trabalho infinito para narrativa visual. Arraste e solte imagens, organize livremente, amplie e navegue, bloqueie itens e extraia paletas de cores automaticamente. Pense nisso como seu quadro digital."
+    },
+    "scripts": {
+      "title": "Roteiros de Quadrinhos",
+      "description": "Escreva seus quadrinhos quadro a quadro com o recurso Edições. Organize por edições/volumes, divida em páginas e escreva cada quadro com descrições visuais, ângulos de câmera, diálogos de personagens e efeitos sonoros."
+    },
+    "storage": {
+      "title": "Armazenamento & Backup",
+      "description": "Armazenamento local com OPFS para acesso ultrarrápido. Backup/restauração completa via exportação ZIP. Monitor de armazenamento mostra exatamente quanto espaço você está usando. Seus dados ficam seguros offline."
+    },
+    "sync": {
+      "title": "Sincronização Automática Google Drive",
+      "description": "Solução definitiva de backup—sincronize projetos, personagens, roteiros e imagens em todos os dispositivos. Trabalhe offline, sincronize quando estiver online novamente. Resolução de conflitos integrada para mesclagem segura."
+    },
+    "i18n": {
+      "title": "Suporte Multi-idiomas",
+      "description": "Atualmente Inglês e Português (pt-BR)."
+    },
+    "pwa": {
+      "title": "Progressive Web App",
+      "description": "Instale como aplicativo nativo para tempos de carregamento mais rápido, funcionalidade offline completa e janela independente. Funciona em desktop e mobile sem usar loja de aplicativos."
+    }
+  },
+  "workflows": {
+    "title": "Idéias de Fluxos de Trabalho",
+    "characterDesign": {
+      "title": "Design de Personagem",
+      "step1": "Crie novo projeto: 'Meus Quadrinhos - Designs de Personagens'",
+      "step2": "Adicione personagem: 'Nova Starfire'",
+      "step3": "Faça upload de imagens de referência (esboços de figurino, estudos de pose)",
+      "step4": "Mude para o modo Canvas e organize referências de figurino à esquerda, poses à direita",
+      "step5": "Exporte quando estiver pronto para entregar ao artista"
+    },
+    "quickCapture": {
+      "title": "Captura Rápida → Projeto Completo",
+      "step1": "Acorde com uma ideia de história, clique em 'Novo Projeto'",
+      "step2": "Pule o nome, digite a ideia na descrição",
+      "step3": "Nomeado automaticamente 'Nota Rápida - 11 Jan, 6:30'",
+      "step4": "Depois: Edite os detalhes do projeto, adicione um nome apropriado",
+      "step5": "Volte depois para desenvolver o projeto completo com personagens e roteiro"
+    },
+    "comicScript": {
+      "title": "Escrevendo um Roteiro de Quadrinhos",
+      "step1": "Crie projeto: 'Ópera Espacial - Edição 1'",
+      "step2": "Adicione personagens principais com perfis",
+      "step3": "Vá para a aba Edições → Nova Edição, configure 24 páginas",
+      "step4": "Adicione quadros página por página com descrições visuais",
+      "step5": "Escreva diálogos com links de personagens e compartilhe via Exportação"
+    },
+    "crossDevice": {
+      "title": "Colaboração entre Dispositivos",
+      "step1": "Ative a Sincronização Google Drive no Desktop",
+      "step2": "Crie projetos e personagens",
+      "step3": "Abra o app no tablet e faça login na mesma conta Google",
+      "step4": "A sincronização puxa todos os dados automaticamente",
+      "step5": "Faça edições no tablet, veja as atualizações no desktop após sincronizar"
+    }
+  },
+  "proTips": {
+    "title": "Dicas & Melhores Práticas",
+    "quickCapture": {
+      "title": "Fluxo de Captura Rápida",
+      "description": "Ideias surgem a qualquer momento. Acordou com uma idéia? Abra o app, novo projeto, digite descrição para não esquecer! Depois você volta para inserir detalhes do projeto, com calma."
+    },
+    "imageManagement": {
+      "title": "Gerenciamento de Imagens",
+      "description": "Upload em lote de vários arquivos de uma vez. Marque imagens com palavras-chave como 'referência', 'final', 'inspiração'."
+    },
+    "canvasOrganization": {
+      "title": "Organização do Moodboard Canvas",
+      "description": "Use pinça para zoom em dispositivos touch, roda do mouse no desktop. Bloqueie imagens de fundo para não movê-las acidentalmente. Use 'Trazer para Frente' para criar hierarquia visual."
+    },
+    "scriptWriting": {
+      "title": "Escrita de Roteiro",
+      "description": "Defina um objetivo claro para cada página. Vincule diálogos aos perfis de personagens para consistência. Use o campo de notas para direção de arte."
+    }
+  },
+  "troubleshooting": {
+    "title": "Solução de Problemas",
+    "problem": "Problema:",
+    "solution": "Solução:",
+    "sync": {
+      "title": "Problemas de Sincronização",
+      "problem": "Erro 'Falha na sincronização' aparece",
+      "solution": "Verifique a conexão com a internet, autentique novamente o Google Drive em Configurações → Sincronização na Nuvem."
+    },
+    "storage": {
+      "title": "Problemas de Armazenamento",
+      "problem": "Mensagem 'Cota de armazenamento excedida'",
+      "solution": "Exporte o projeto como ZIP, exclua projetos/imagens não utilizados, ou ative a sincronização do Google Drive para descarregar o armazenamento local."
+    },
+    "images": {
+      "title": "Problemas no Upload de Imagens",
+      "problem": "Imagens não fazem upload",
+      "solution": "Verifique o formato do arquivo (JPG, PNG, WEBP suportados), confirme que o tamanho do arquivo está abaixo de ~50MB, e verifique o console do navegador para erros."
+    },
+    "performance": {
+      "title": "Performance do Canvas",
+      "problem": "Canvas está lento com muitas imagens",
+      "solution": "Reduza o número de imagens no canvas, bloqueie itens que você não está movendo ativamente, ou recarregue a página para limpar a memória."
+    }
+  },
+  "cta": {
+    "title": "Você Está Pronto!",
+    "description": "Você agora tem tudo que precisa para organizar referências visuais, criar perfis de personagens, escrever roteiros de quadrinhos e sincronizar em todos os seus dispositivos. Comece a criar!",
+    "button": "Comece a Criar Agora"
+  }
+}

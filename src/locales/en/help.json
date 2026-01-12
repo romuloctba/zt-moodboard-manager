@@ -1,0 +1,149 @@
+{
+  "title": "Help & Guide",
+  "hero": {
+    "title": "Welcome to Your Creative Command Center",
+    "subtitle": "Moodboard Manager is your all-in-one visual workspace for bringing characters and stories to life. Whether you're crafting graphic novels, designing character concepts, or writing comic scripts, everything you need is right here—organized, offline-ready, and synced across your devices.",
+    "feature1": "Organize projects",
+    "feature2": "Build moodboards",
+    "feature3": "Sync everywhere"
+  },
+  "quickStart": {
+    "title": "Quick Start",
+    "subtitle": "Get creating in 3 steps:",
+    "proTip": "💡 Pro Tip:",
+    "step1": {
+      "title": "Create Your First Project",
+      "description": "Click 'New Project' on the home screen. You can quick capture an idea with just a description, or do a full setup with name and tags.",
+      "tip": "Wake up with an idea? Write it down, so you don't lose it. You can add a proper name later!"
+    },
+    "step2": {
+      "title": "Add Characters",
+      "description": "Characters are the heart of your project. Add name, age, role, personality traits, and upload reference images for visual inspiration.",
+      "tip": "Add custom fields for anything you need: 'Weapon', 'Catchphrase', 'Home Planet'—you name it!"
+    },
+    "step3": {
+      "title": "Start Creating",
+      "description": "Jump into Grid View for a gallery of references, Canvas Mode for an infinite visual workspace, or Editions to write your comic script.",
+      "tip": "Use Canvas mode to create mood sheets for specific scenes or chapters!"
+    }
+  },
+  "features": {
+    "title": "Core Features",
+    "projects": {
+      "title": "Project Management",
+      "description": "Quick capture ideas or create full projects with metadata. Archive old projects, export as ZIP files, and organize with tags and filters. Edit project details anytime as your ideas evolve."
+    },
+    "characters": {
+      "title": "Character Profiles",
+      "description": "Deep dive into every character with profiles, visual references, custom fields, and unlimited images. Each character gets their own dedicated space with personality traits, backstory, and more."
+    },
+    "canvas": {
+      "title": "Visual Moodboard Canvas",
+      "description": "Infinite workspace for visual storytelling. Drag & drop images, arrange freely, zoom & pan, lock items, and auto-extract color palettes. Think of it as your digital corkboard—but way better."
+    },
+    "scripts": {
+      "title": "Comic Book Scripts",
+      "description": "Write your comic panel-by-panel with the Editions feature. Organize by issues/volumes, break into pages, and script each panel with visual descriptions, camera angles, character dialogues, and SFX."
+    },
+    "storage": {
+      "title": "Storage & Backup",
+      "description": "Local storage with OPFS for lightning-fast access. Full backup/restore via ZIP export. Storage monitor shows exactly how much space you're using. Your data stays safe offline."
+    },
+    "sync": {
+      "title": "Google Drive Auto-Sync",
+      "description": "Ultimate backup solution—sync projects, characters, scripts, and images across all devices. Work offline, sync when back online. Conflict resolution built-in for safe merging."
+    },
+    "i18n": {
+      "title": "Multi-Language Support",
+      "description": "Switch between English and Portuguese (pt-BR) anytime in Settings. All features fully translated—UI, scripts, errors. Changes apply instantly without reload."
+    },
+    "pwa": {
+      "title": "Progressive Web App",
+      "description": "Install as a native app for faster load times, full offline functionality, and standalone window. Works on desktop and mobile with zero app store hassle."
+    }
+  },
+  "workflows": {
+    "title": "Common Workflows",
+    "characterDesign": {
+      "title": "Character Design Project",
+      "step1": "Create new project: 'My Comic - Character Designs'",
+      "step2": "Add character: 'Nova Starfire'",
+      "step3": "Upload reference images (costume sketches, pose studies)",
+      "step4": "Switch to Canvas mode and arrange costume refs on left, poses on right",
+      "step5": "Export when ready for artist handoff"
+    },
+    "quickCapture": {
+      "title": "Quick Idea Capture → Full Project",
+      "step1": "Wake up with story idea, click 'New Project'",
+      "step2": "Skip name, type idea in description",
+      "step3": "Auto-named 'Quick Note - Jan 11, 6:30 AM'",
+      "step4": "Later: Edit project details, add proper name",
+      "step5": "Develop into full project with characters and script"
+    },
+    "comicScript": {
+      "title": "Writing a Comic Script",
+      "step1": "Create project: 'Space Opera - Issue 1'",
+      "step2": "Add main characters with profiles",
+      "step3": "Go to Editions tab → New Edition, set up 24 pages",
+      "step4": "Add panels page-by-page with visual descriptions",
+      "step5": "Write dialogue with character links and share via Export"
+    },
+    "crossDevice": {
+      "title": "Cross-Device Collaboration",
+      "step1": "Enable Google Drive Sync on Desktop",
+      "step2": "Create projects and characters",
+      "step3": "Open app on tablet and sign in to same Google account",
+      "step4": "Sync automatically pulls all data",
+      "step5": "Make edits on tablet, view updates on desktop after sync"
+    }
+  },
+  "proTips": {
+    "title": "Pro Tips & Best Practices",
+    "quickCapture": {
+      "title": "Quick Capture Workflow",
+      "description": "Ideas strike anytime—open app, new project, type description, done in 10 seconds. No pressure naming! Let ideas mature before committing to a name. All project details are editable later."
+    },
+    "imageManagement": {
+      "title": "Image Management",
+      "description": "Bulk upload multiple files at once—we handle WebP conversion automatically. Tag images with keywords like 'reference', 'final', 'inspiration'. Thumbnails are auto-generated."
+    },
+    "canvasOrganization": {
+      "title": "Canvas Organization",
+      "description": "Use pinch-to-zoom on touch devices, scroll wheel on desktop. Lock background images so you don't accidentally move them. Use 'Bring to Front' to create visual hierarchy."
+    },
+    "scriptWriting": {
+      "title": "Script Writing",
+      "description": "Set a clear goal for each page—keeps your story tight. Link dialogues to character profiles for consistency. Use notes field liberally for artist direction."
+    }
+  },
+  "troubleshooting": {
+    "title": "Troubleshooting",
+    "problem": "Problem:",
+    "solution": "Solution:",
+    "sync": {
+      "title": "Sync Issues",
+      "problem": "'Sync failed' error appears",
+      "solution": "Check internet connection, re-authenticate Google Drive in Settings → Cloud Sync, or check browser console for detailed errors."
+    },
+    "storage": {
+      "title": "Storage Issues",
+      "problem": "'Storage quota exceeded' message",
+      "solution": "Export project as ZIP, delete unused projects/images, or enable Google Drive sync to offload local storage."
+    },
+    "images": {
+      "title": "Image Upload Issues",
+      "problem": "Images won't upload",
+      "solution": "Check file format (JPG, PNG, WEBP supported), verify file size is under ~50MB, and check browser console for errors."
+    },
+    "performance": {
+      "title": "Canvas Performance",
+      "problem": "Canvas is laggy with many images",
+      "solution": "Reduce number of images on canvas, lock items you're not actively moving, or reload page to clear memory."
+    }
+  },
+  "cta": {
+    "title": "You're Ready!",
+    "description": "You now have everything you need to organize visual references, build character profiles, write comic scripts, and sync across all your devices. Start creating—your story is waiting!",
+    "button": "Start Creating Now"
+  }
+}
