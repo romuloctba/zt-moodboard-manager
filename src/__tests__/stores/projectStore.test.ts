@@ -18,6 +18,7 @@ vi.mock('@/lib/db/repositories', () => ({
     getAll: vi.fn(),
     getById: vi.fn(),
     create: vi.fn(),
+    update: vi.fn(),
     rename: vi.fn(),
     archive: vi.fn(),
     delete: vi.fn(),
@@ -162,7 +163,7 @@ describe('ProjectStore', () => {
     })
 
     it('PS-004: should set isLoading=false on error, log error, not throw', async () => {
-      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => { })
       vi.mocked(projectRepository.getAll).mockRejectedValue(new Error('DB Error'))
 
       // Should not throw
@@ -346,6 +347,97 @@ describe('ProjectStore', () => {
       const state = useProjectStore.getState()
       expect(state.currentProject?.name).toBe('Project 1') // Unchanged
       expect(state.projects[1].name).toBe('Renamed')
+    })
+  })
+
+  // ===========================================
+  // updateProject (PS-015a to PS-015f)
+  // ===========================================
+  describe('updateProject', () => {
+    it('PS-015a: should update project fields in projects array', async () => {
+      const project = createMockProject({ id: 'p1', name: 'Old Name', description: 'Old Desc' })
+      useProjectStore.setState({ projects: [project] })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      await useProjectStore.getState().updateProject('p1', {
+        name: 'New Name',
+        description: 'New Desc'
+      })
+
+      const state = useProjectStore.getState()
+      expect(state.projects[0].name).toBe('New Name')
+      expect(state.projects[0].description).toBe('New Desc')
+    })
+
+    it('PS-015b: should update currentProject if updating current project', async () => {
+      const project = createMockProject({ id: 'p1', name: 'Old', description: 'Old Desc' })
+      useProjectStore.setState({
+        projects: [project],
+        currentProject: project,
+      })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      await useProjectStore.getState().updateProject('p1', {
+        name: 'New',
+        description: 'New Desc'
+      })
+
+      const state = useProjectStore.getState()
+      expect(state.currentProject?.name).toBe('New')
+      expect(state.currentProject?.description).toBe('New Desc')
+    })
+
+    it('PS-015c: should not update currentProject if updating different project', async () => {
+      const project1 = createMockProject({ id: 'p1', name: 'Project 1' })
+      const project2 = createMockProject({ id: 'p2', name: 'Project 2' })
+      useProjectStore.setState({
+        projects: [project1, project2],
+        currentProject: project1,
+      })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      await useProjectStore.getState().updateProject('p2', { name: 'Updated P2' })
+
+      const state = useProjectStore.getState()
+      expect(state.currentProject?.name).toBe('Project 1') // Unchanged
+      expect(state.projects[1].name).toBe('Updated P2')
+    })
+
+    it('PS-015d: should update updatedAt timestamp in state', async () => {
+      const oldDate = new Date('2020-01-01')
+      const project = createMockProject({ id: 'p1', updatedAt: oldDate })
+      useProjectStore.setState({ projects: [project] })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      const beforeUpdate = new Date()
+      await useProjectStore.getState().updateProject('p1', { name: 'Updated' })
+      const afterUpdate = new Date()
+
+      const state = useProjectStore.getState()
+      expect(state.projects[0].updatedAt.getTime()).toBeGreaterThanOrEqual(beforeUpdate.getTime())
+      expect(state.projects[0].updatedAt.getTime()).toBeLessThanOrEqual(afterUpdate.getTime())
+    })
+
+    it('PS-015e: should call triggerGlobalSync after update', async () => {
+      const project = createMockProject({ id: 'p1' })
+      useProjectStore.setState({ projects: [project] })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      await useProjectStore.getState().updateProject('p1', { name: 'Updated' })
+
+      expect(triggerGlobalSync).toHaveBeenCalledOnce()
+    })
+
+    it('PS-015f: should handle partial updates (only description)', async () => {
+      const project = createMockProject({ id: 'p1', name: 'Keep Name', description: 'Old' })
+      useProjectStore.setState({ projects: [project] })
+      vi.mocked(projectRepository.update).mockResolvedValue()
+
+      await useProjectStore.getState().updateProject('p1', { description: 'New Desc' })
+
+      const state = useProjectStore.getState()
+      expect(state.projects[0].name).toBe('Keep Name') // Unchanged
+      expect(state.projects[0].description).toBe('New Desc') // Updated
     })
   })
 

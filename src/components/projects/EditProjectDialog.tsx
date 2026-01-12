@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useTranslations, useLocale } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -18,20 +18,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useProjectStore } from '@/store/projectStore';
 import { useControllableState } from '@/hooks';
 import { toast } from 'sonner';
+import type { Project } from '@/types';
 
-// Helper to generate auto-name for quick notes
-function generateAutoName(locale: string, t: (key: string) => string): string {
-  const now = new Date();
-  const formatter = new Intl.DateTimeFormat(locale, {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
-  return `${t('autoName')} - ${formatter.format(now)}`;
-}
-
-interface CreateProjectDialogProps {
+interface EditProjectDialogProps {
+  /** The project to edit */
+  project: Project;
   /** Trigger element - optional when using controlled mode */
   children?: React.ReactNode;
   /** Controlled open state */
@@ -40,45 +31,48 @@ interface CreateProjectDialogProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-export function CreateProjectDialog({ 
+export function EditProjectDialog({ 
+  project,
   children,
   open: controlledOpen,
   onOpenChange,
-}: CreateProjectDialogProps) {
+}: EditProjectDialogProps) {
   const t = useTranslations('projects');
   const tCommon = useTranslations('common');
-  const locale = useLocale();
   const [open, setOpen] = useControllableState(controlledOpen, false, onOpenChange);
   
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState(project.name);
+  const [description, setDescription] = useState(project.description || '');
   const [isLoading, setIsLoading] = useState(false);
-  const { createProject } = useProjectStore();
+  const { updateProject } = useProjectStore();
 
-  const resetForm = () => {
-    setName('');
-    setDescription('');
-  };
+  // Reset form when project changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      setName(project.name);
+      setDescription(project.description || '');
+    }
+  }, [project, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Require at least one field to be filled
-    if (!name.trim() && !description.trim()) {
+    // Name is required when editing (unlike creation)
+    if (!name.trim()) {
       toast.error(t('validation.nameOrDescriptionRequired'));
       return;
     }
 
     setIsLoading(true);
     try {
-      // Auto-generate name if empty
-      const projectName = name.trim() || generateAutoName(locale, t);
-      await createProject(projectName, description.trim() || undefined);
-      toast.success(t('toast.created'));
+      await updateProject(project.id, {
+        name: name.trim(),
+        description: description.trim() || undefined,
+      });
+      toast.success(t('toast.updated'));
       setOpen(false);
-      resetForm();
     } catch (error) {
-      toast.error(t('toast.createFailed'));
+      toast.error(t('toast.updateFailed'));
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -86,10 +80,7 @@ export function CreateProjectDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => {
-      setOpen(isOpen);
-      if (!isOpen) resetForm();
-    }}>
+    <Dialog open={open} onOpenChange={setOpen}>
       {children && (
         <DialogTrigger asChild onClick={(e) => e.stopPropagation()}>
           {children}
@@ -102,27 +93,27 @@ export function CreateProjectDialog({
       >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>{t('createDialog.title')}</DialogTitle>
+            <DialogTitle>{t('editDialog.title')}</DialogTitle>
             <DialogDescription>
-              {t('createDialog.description')}
+              {t('editDialog.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">{t('createDialog.nameLabel')}</Label>
+              <Label htmlFor="edit-name">{t('editDialog.nameLabel')}</Label>
               <Input
-                id="name"
-                placeholder={t('createDialog.namePlaceholder')}
+                id="edit-name"
+                placeholder={t('editDialog.namePlaceholder')}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 autoFocus
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">{t('createDialog.descriptionLabel')}</Label>
+              <Label htmlFor="edit-description">{t('editDialog.descriptionLabel')}</Label>
               <Textarea
-                id="description"
-                placeholder={t('createDialog.descriptionPlaceholder')}
+                id="edit-description"
+                placeholder={t('editDialog.descriptionPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
@@ -134,7 +125,7 @@ export function CreateProjectDialog({
               {tCommon('actions.cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? tCommon('actions.creating') : t('createDialog.submit')}
+              {isLoading ? tCommon('actions.saving') : t('editDialog.submit')}
             </Button>
           </DialogFooter>
         </form>

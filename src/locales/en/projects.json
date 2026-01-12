@@ -11,11 +11,20 @@
   "createDialog": {
     "title": "Create New Project",
     "description": "Create a new project to organize your character references.",
+    "nameLabel": "Project Name (optional)",
+    "namePlaceholder": "e.g., Cyberpunk Story, Fantasy RPG...",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Quick notes, ideas, or project summary...",
+    "submit": "Create Project"
+  },
+  "editDialog": {
+    "title": "Edit Project Details",
+    "description": "Update your project name and description.",
     "nameLabel": "Project Name",
     "namePlaceholder": "e.g., Cyberpunk Story, Fantasy RPG...",
     "descriptionLabel": "Description (optional)",
     "descriptionPlaceholder": "Brief description of your project",
-    "submit": "Create Project"
+    "submit": "Save Changes"
   },
   "renameDialog": {
     "title": "Rename Project"
@@ -25,19 +34,23 @@
     "tags": "{count} tags"
   },
   "menu": {
+    "editDetails": "Edit Details",
     "rename": "Rename",
     "archive": "Archive",
     "delete": "Delete"
   },
   "confirmDelete": "Are you sure you want to delete this project? This cannot be undone.",
   "validation": {
-    "nameRequired": "Please enter a project name"
+    "nameOrDescriptionRequired": "Please enter at least a name or description"
   },
+  "autoName": "Quick Note",
   "toast": {
     "created": "Project created successfully",
+    "updated": "Project updated successfully",
     "renamed": "Project renamed",
     "archived": "Project archived",
     "deleted": "Project deleted",
-    "createFailed": "Failed to create project"
+    "createFailed": "Failed to create project",
+    "updateFailed": "Failed to update project"
   }
 }

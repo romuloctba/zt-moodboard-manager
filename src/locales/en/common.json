@@ -3,6 +3,7 @@
   "actions": {
     "cancel": "Cancel",
     "save": "Save",
+    "edit": "Edit",
     "saving": "Saving...",
     "create": "Create",
     "creating": "Creating...",

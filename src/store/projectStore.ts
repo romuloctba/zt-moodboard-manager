@@ -20,6 +20,7 @@ interface ProjectState {
   loadProjects: () => Promise<void>;
   createProject: (name: string, description?: string) => Promise<Project>;
   selectProject: (id: string) => Promise<boolean>;
+  updateProject: (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => Promise<void>;
   renameProject: (id: string, name: string) => Promise<void>;
   archiveProject: (id: string) => Promise<void>;
   deleteProject: (id: string) => Promise<void>;
@@ -73,6 +74,19 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     }
     set({ isLoading: false });
     return false;
+  },
+
+  updateProject: async (id: string, updates: Partial<Omit<Project, 'id' | 'createdAt'>>) => {
+    await projectRepository.update(id, updates);
+    set(state => ({
+      projects: state.projects.map(p =>
+        p.id === id ? { ...p, ...updates, updatedAt: new Date() } : p
+      ),
+      currentProject: state.currentProject?.id === id
+        ? { ...state.currentProject, ...updates, updatedAt: new Date() }
+        : state.currentProject,
+    }));
+    triggerGlobalSync();
   },
 
   renameProject: async (id: string, name: string) => {

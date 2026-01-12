@@ -12,10 +12,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Archive, Trash2, FolderOpen } from 'lucide-react';
+import { MoreHorizontal, Pencil, Archive, Trash2, FolderOpen, FileEdit } from 'lucide-react';
 import { useProjectStore } from '@/store/projectStore';
 import { toast } from 'sonner';
 import { RenameDialog } from './RenameDialog';
+import { EditProjectDialog } from './EditProjectDialog';
 
 interface ProjectCardProps {
   project: Project;
@@ -26,6 +27,7 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
   const t = useTranslations('projects');
   const locale = useLocale();
   const [showRename, setShowRename] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const { archiveProject, deleteProject, renameProject } = useProjectStore();
 
   const handleArchive = async (e: React.MouseEvent) => {
@@ -77,6 +79,10 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowEdit(true); }}>
+                  <FileEdit className="w-4 h-4 mr-2" />
+                  {t('menu.editDetails')}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setShowRename(true); }}>
                   <Pencil className="w-4 h-4 mr-2" />
                   {t('menu.rename')}
@@ -114,6 +120,12 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
           </div>
         </CardContent>
       </Card>
+
+      <EditProjectDialog
+        project={project}
+        open={showEdit}
+        onOpenChange={setShowEdit}
+      />
 
       <RenameDialog
         open={showRename}

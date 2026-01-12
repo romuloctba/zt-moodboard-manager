@@ -11,7 +11,8 @@ import { CreateCharacterDialog } from '@/components/characters/CreateCharacterDi
 import { ImportCharacterDialog } from '@/components/characters/ImportCharacterDialog';
 import { CharacterList } from '@/components/characters/CharacterList';
 import { EditionList, CreateEditionDialog } from '@/components/editions';
-import { Plus, Users, Settings, Cloud, BookOpen, FileUp } from 'lucide-react';
+import { EditProjectDialog } from '@/components/projects';
+import { Plus, Users, Settings, Cloud, BookOpen, FileUp, FileEdit } from 'lucide-react';
 import Link from 'next/link';
 import { Header, HeaderAction } from '@/components/layout';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ function ProjectViewContent() {
   const [showCreateCharacterDialog, setShowCreateCharacterDialog] = useState(false);
   const [showImportCharacterDialog, setShowImportCharacterDialog] = useState(false);
   const [showCreateEditionDialog, setShowCreateEditionDialog] = useState(false);
+  const [showEditProject, setShowEditProject] = useState(false);
 
   const { 
     currentProject, 
@@ -126,6 +128,17 @@ function ProjectViewContent() {
 
     actions.push(
       {
+        id: 'edit-project',
+        element: (
+          <Button variant="ghost" size="icon" className="w-full md:w-auto md:aspect-square">
+            <FileEdit className="w-5 h-5" />
+            <span className="md:hidden ml-2">{tCommon('actions.edit')}</span>
+          </Button>
+        ),
+        onClick: () => setShowEditProject(true),
+        mobilePriority: 2,
+      },
+      {
         id: 'sync',
         element: (
           <Button variant="ghost" size="icon" asChild className="w-full md:w-auto md:aspect-square">
@@ -152,7 +165,7 @@ function ProjectViewContent() {
     );
 
     return actions;
-  }, [activeTab, t, tEditions, tCommon]);
+  }, [activeTab, t, tEditions, tCommon, setShowEditProject]);
 
   if (isLoading || !currentProject) {
     return <ProjectDetailSkeleton />;
@@ -228,11 +241,20 @@ function ProjectViewContent() {
         onOpenChange={setShowImportCharacterDialog}
       />
       {projectId && (
-        <CreateEditionDialog 
-          projectId={projectId}
-          open={showCreateEditionDialog} 
-          onOpenChange={setShowCreateEditionDialog} 
-        />
+        <>
+          <CreateEditionDialog 
+            projectId={projectId}
+            open={showCreateEditionDialog} 
+            onOpenChange={setShowCreateEditionDialog} 
+          />
+          {currentProject && (
+            <EditProjectDialog
+              project={currentProject}
+              open={showEditProject}
+              onOpenChange={setShowEditProject}
+            />
+          )}
+        </>
       )}
     </div>
   );

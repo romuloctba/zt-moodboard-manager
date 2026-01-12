@@ -11,11 +11,20 @@
   "createDialog": {
     "title": "Criar Novo Projeto",
     "description": "Crie um novo projeto para organizar suas referências de personagens.",
+    "nameLabel": "Nome do Projeto (opcional)",
+    "namePlaceholder": "ex: História Cyberpunk, RPG de Fantasia...",
+    "descriptionLabel": "Descrição",
+    "descriptionPlaceholder": "Notas rápidas, ideias ou resumo do projeto...",
+    "submit": "Criar Projeto"
+  },
+  "editDialog": {
+    "title": "Editar Detalhes do Projeto",
+    "description": "Atualize o nome e a descrição do seu projeto.",
     "nameLabel": "Nome do Projeto",
-    "namePlaceholder": "ex.: História Cyberpunk, RPG de Fantasia...",
+    "namePlaceholder": "ex: História Cyberpunk, RPG de Fantasia...",
     "descriptionLabel": "Descrição (opcional)",
     "descriptionPlaceholder": "Breve descrição do seu projeto",
-    "submit": "Criar Projeto"
+    "submit": "Salvar Alterações"
   },
   "renameDialog": {
     "title": "Renomear Projeto"
@@ -25,19 +34,23 @@
     "tags": "{count} tags"
   },
   "menu": {
+    "editDetails": "Editar Detalhes",
     "rename": "Renomear",
     "archive": "Arquivar",
     "delete": "Excluir"
   },
   "confirmDelete": "Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.",
   "validation": {
-    "nameRequired": "Por favor, insira um nome para o projeto"
+    "nameOrDescriptionRequired": "Por favor, insira pelo menos um nome ou descrição"
   },
+  "autoName": "Nota Rápida",
   "toast": {
     "created": "Projeto criado com sucesso",
+    "updated": "Projeto atualizado com sucesso",
     "renamed": "Projeto renomeado",
     "archived": "Projeto arquivado",
     "deleted": "Projeto excluído",
-    "createFailed": "Falha ao criar projeto"
+    "createFailed": "Falha ao criar projeto",
+    "updateFailed": "Falha ao atualizar projeto"
   }
 }

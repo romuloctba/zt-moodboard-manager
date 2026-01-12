@@ -159,6 +159,13 @@ This document outlines comprehensive test cases for the Moodboard Manager applic
 | PS-013 | renameProject updates currentProject | Should update currentProject if renaming current project | High |
 | PS-014 | renameProject updates updatedAt | Should update updatedAt timestamp in state | Medium |
 | PS-015 | renameProject triggers sync | Should call triggerGlobalSync after rename | Medium |
+| **updateProject** |
+| PS-015a | updateProject updates fields in array | Should update project fields (name, description, etc.) in projects array | High |
+| PS-015b | updateProject updates currentProject | Should update currentProject if updating current project | High |
+| PS-015c | updateProject isolation | Should not update currentProject if updating different project | High |
+| PS-015d | updateProject updates updatedAt | Should update updatedAt timestamp in state | Medium |
+| PS-015e | updateProject triggers sync | Should call triggerGlobalSync after update | Medium |
+| PS-015f | updateProject partial updates | Should handle partial updates (e.g., only description) without affecting other fields | High |
 | **archiveProject** |
 | PS-016 | archiveProject removes from list | Should remove project from projects array | High |
 | PS-017 | archiveProject clears current | Should set currentProject to null if archiving current | High |
